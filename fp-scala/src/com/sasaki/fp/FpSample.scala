@@ -30,19 +30,20 @@ class Cafe {
   }
 
   // 改造2， 函数式
-  case class Charge(coffee: Coffee, amount: Double) {
+  case class Charge(card: CreditCard, amount: Double) {
+    // 根据card合并计算金额，即同一张信用卡消费的总金额
     def combine(charge_ : Charge) = {
-      if (coffee == charge_.coffee)
-        Charge(coffee, amount + charge_.amount)
+      if (card == charge_.card)
+        Charge(card, amount + charge_.amount)
       else
-        throw new Exception("Can't combint charges to different cards.")
+        throw new Exception("Can't combine charges to different cards.")
     }
   }
 
   // 把费用的创建过程与执行分离
   def buyCoffee_(card: CreditCard): (Coffee, Charge) = {
     val cup = new Coffee()
-    (cup, Charge(cup, cup.price))
+    (cup, Charge(card, cup.price))
   }
 
   // 购买多杯咖啡的情况
@@ -54,7 +55,7 @@ class Cafe {
   }
 
   // 把同一张信用卡的费用合并为一个List[Charge]
-  def coalesce(charges: List[Charge]): List[Charge] = charges.groupBy(_.coffee).values.map(_.reduce(_ combine _)).toList
+  def coalesce(charges: List[Charge]): List[Charge] = charges.groupBy(_.card).values.map(_.reduce(_ combine _)).toList
 }
 
 // -------------------- P.11 Scala程序  ------------------------
