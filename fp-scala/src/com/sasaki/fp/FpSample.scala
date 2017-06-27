@@ -106,7 +106,7 @@ object Module {
   // 在数组中查找字符串的多态函数
   def findFirst[T](array: Array[T], p: T => Boolean): Int = {
     @annotation.tailrec
-    def loop(n: Int): Int = if (n >= array.length) -1 else if (p(array(n)) /*使用函数匹配当前元素*/ ) n else loop(n + 1)
+    def loop(n: Int): Int = if (n >= array.length)/*跳出*/ -1 else if (p(array(n)) /*使用函数匹配当前元素*/ ) n else loop(n + 1)
 
     loop(0)
   }
@@ -133,6 +133,9 @@ object Module {
     //    def ordered(x: Int, x_ : Int) = x < x_
     //    println(isSorted(Array(9, 1, 3, 4), ordered))
     //    println(isSorted(Array(1, 2, 3, 0), (x: Int, x_ : Int) => x < x_))
+    println(findFirst(Array(1, 4, 4, 5), (__ : Int) => __ == 5/*传入匿名函数*/))
+    
+    
   }
 
 }
