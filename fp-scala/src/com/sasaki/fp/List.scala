@@ -28,7 +28,9 @@ object List { // 伴生对象，包含List操作函数
   val list2: List[Int] = Cons(1, Nil)
   val list3: List[String] = Cons("a", Cons("b", Nil))
  
-  // 模式匹配
-//  println(List(1, 2, 4, 5) match { case _ => 4  })
- // ???? println(List(1, 2, 4, 5) match { case Cons(h, _) => h  })
+  
+      // 模式匹配
+//  List(1, 2, 4, 5) match { case _ => 4  }
+//  List(1, 2, 4, 5) match { case Nil => 0  }
+    
 }

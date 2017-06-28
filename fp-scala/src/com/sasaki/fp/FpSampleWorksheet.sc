@@ -61,11 +61,35 @@ object FpSample {
                                                   //> uncurry: [A, B, C](f: A => (B => C))(A, B) => C
 	  
 	/*
-		* P.22/练习25
+		* P.22/练习2.5
 		* 实现一个高阶函数,可以组合两个函数为一个函数。
 		*/
 	def compose[A, B, C](f: B => C, g: A => B): A => C = (a: A) => f(g(a))
                                                   //> compose: [A, B, C](f: B => C, g: A => B)A => C
-                                                  
+  
+  
+  /**
+	 * 测试List.scala 模式匹配
+	 */
+	// 匹配任意表达式，结果为4
+	List(1, 2, 4, 5) match { case _ => 4  }   //> res2: Int = 4
+	// 匹配Head，使用了构造器模式结合变量模式
+	List(1, 2, 4, 5) match { case Cons(h, _) => h  }
+                                                  //> res3: Int = 1
+  // 匹配Tail
+  List(1, 2, 4, 5) match { case Cons(_, t) => t  }//> res4: com.sasaki.fp.List[Int] = Cons(2,Cons(4,Cons(5,Nil)))
+	// 匹配Nil，没有表达式与目标匹配，报错
+	// List(1, 2, 4, 5) match { case Nil => -1  }
 	
+	/*
+	* P.28/练习3.1
+	* 匹配表达式的结果是？
+	*/
+	val o = List(1, 2, 3, 4, 5) match {
+		// case Cons(x, Cons(2, Cons(4, _))) => x // ex
+		// case Nil => 42 //ex
+		// case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y // 3
+		// case Cons(h, t) => h + List.sum(t) // 15
+		 case _ => 101 // 101
+	}                                         //> o  : Int = 101
 }
