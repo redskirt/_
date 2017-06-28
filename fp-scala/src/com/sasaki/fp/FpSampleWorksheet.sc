@@ -92,4 +92,25 @@ object FpSample {
 		// case Cons(h, t) => h + List.sum(t) // 15
 		 case _ => 101 // 101
 	}                                         //> o  : Int = 101
+	
+	/**
+   * P.30/练习3.2 测试
+   * 实现tail函数，删除一个List的第一个元素。
+   */
+	// List.tail(List())
+	val tail = List.tail(List("a", "b", "c")) //> tail  : com.sasaki.fp.List[String] = Cons(b,Cons(c,Nil))
+	
+  /**
+   * P.30/练习3.3 测试
+   * 实现函数setHead用一个不同的值替代列表中的第一个元素。
+   */
+   List.setHead(List(), "head")                   //> res5: com.sasaki.fp.List[String] = Cons(head,Nil)
+   List.setHead(List("head", "tail"), "head_")    //> res6: com.sasaki.fp.List[String] = Cons(head_,Cons(tail,Nil))
+   List.setHead(List(1, 2, 3), 10)                //> res7: com.sasaki.fp.List[Int] = Cons(10,Cons(2,Cons(3,Nil)))
+    
+   List.drop(List(1, 2, 3, 4), 3)                 //> res8: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
+
+   List.dropWhile(List(1, 2, 3, 4), (x : Int) => x>=3)
+                                                  //> res9: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Nil))
+   
 }

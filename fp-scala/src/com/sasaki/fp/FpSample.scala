@@ -47,15 +47,15 @@ class Cafe {
   }
 
   // 购买多杯咖啡的情况
-  def buyCoffees(card: CreditCard, n: Int): (List[Coffee], Charge) = {
+  def buyCoffees(card: CreditCard, n: Int): (scala.List[Coffee], Charge) = {
     // List.fill(n)(x) 创建一个对x复制n份的列表
-    val purchases: List[(Coffee, Charge)] = List.fill(n)(buyCoffee_(card))
+    val purchases: scala.List[(Coffee, Charge)] = scala.List.fill(n)(buyCoffee_(card))
     val (coffees, charges) = purchases.unzip
     (coffees, charges.reduce((c, c_) => c.combine(c_)))
   }
 
   // 把同一张信用卡的费用合并为一个List[Charge]
-  def coalesce(charges: List[Charge]): List[Charge] = charges.groupBy(_.card).values.map(_.reduce(_ combine _)).toList
+  def coalesce(charges: scala.List[Charge]): scala.List[Charge] = charges.groupBy(_.card).values.map(_.reduce(_ combine _)).toList
 }
 
 // --------------------  P.11 Scala程序   ------------------------
