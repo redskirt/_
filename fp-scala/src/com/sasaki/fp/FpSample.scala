@@ -47,15 +47,15 @@ class Cafe {
   }
 
   // 购买多杯咖啡的情况
-  def buyCoffees(card: CreditCard, n: Int): (List[Coffee], Charge) = {
+  def buyCoffees(card: CreditCard, n: Int): (scala.List[Coffee], Charge) = {
     // List.fill(n)(x) 创建一个对x复制n份的列表
-    val purchases: List[(Coffee, Charge)] = List.fill(n)(buyCoffee_(card))
+    val purchases: scala.List[(Coffee, Charge)] = scala.List.fill(n)(buyCoffee_(card))
     val (coffees, charges) = purchases.unzip
     (coffees, charges.reduce((c, c_) => c.combine(c_)))
   }
 
   // 把同一张信用卡的费用合并为一个List[Charge]
-  def coalesce(charges: List[Charge]): List[Charge] = charges.groupBy(_.card).values.map(_.reduce(_ combine _)).toList
+  def coalesce(charges: scala.List[Charge]): scala.List[Charge] = charges.groupBy(_.card).values.map(_.reduce(_ combine _)).toList
 }
 
 // --------------------  P.11 Scala程序   ------------------------
@@ -72,60 +72,70 @@ object Module {
   }
 
   // ------------------------ P.17/练习2.1 斐波那契数  --------------------------
-  // 递归
+  // 递归实现
   def fib(n: Int): Int = if (n <= 2) n - 1 else fib(n - 1) + fib(n - 2)
 
-  // 尾递归 ???
-  //  def tfib(n: Int): Int = {
-  //    def local(n: Int, acc : Int, acc_ : Int): Int = if(n <= 2) n - 1 else local(n - 1, acc_, acc + acc_)
-  //    local(n, 0, 1)
-  //  }
-  
+  // 尾递归实现
+  def tfib(n: Int): Int = {
+    @annotation.tailrec
+    def loop(n: Int, acc: Int, acc_ : Int): Int =
+      if (n <= 0) -1
+      else if (n == 1) acc
+      else if (n == 2) acc_
+      else loop(n - 1, acc_, acc + acc_)
+
+    loop(n, 0, 1)
+  }
+
   // ----------------------------  P.17 高阶函数  ------------------------------
   private def formatAbs(x: Int) = "The absolute value of %d is %d".format(x, abs(x))
-  
+
   private def formatFactorial(n: Int) = "The factorial of %d is %d".format(n, factorial(n))
-  
+
   // 将formatAbs和formatFactorial泛化
-  def formapResult(name: String, n: Int, f: Int => Int/*接收函数参数*/) = "Thr %s of %d is %d".format(name, n, f(n))
-  
+  def formapResult(name: String, n: Int, f: Int => Int /*接收函数参数*/ ) = "Thr %s of %d is %d".format(name, n, f(n))
+
   // 在数组中查找字符串的单态函数
-  def findFirst(array: Array[String], key: String) : Int = {
+  def findFirst(array: Array[String], key: String): Int = {
     @annotation.tailrec
-    def loop(n: Int): Int = if(n >= array.length) -1 else if(array(n) == key) n else loop(n + 1)
-    
+    def loop(n: Int): Int = if (n >= array.length) -1 else if (array(n) == key) n else loop(n + 1)
+
     loop(0)
   }
-  
+
   // 在数组中查找字符串的多态函数
-  def findFirst[T](array: Array[T], p: T => Boolean) : Int = {
-		  @annotation.tailrec
-		  def loop(n: Int): Int = if(n >= array.length) -1 else if(p(array(n))/*使用函数匹配当前元素*/) n else loop(n + 1)
-		  
-		  loop(0)
+  def findFirst[T](array: Array[T], p: T => Boolean): Int = {
+    @annotation.tailrec
+    def loop(n: Int): Int = if (n >= array.length)/*跳出*/ -1 else if (p(array(n)) /*使用函数匹配当前元素*/ ) n else loop(n + 1)
+
+    loop(0)
   }
-  
+
   // -------  P.20/练习2.2 实现isSorted方法，检测Array[A]是否按照给定的比较函数排序  --------
-  def isSorted[A](array: Array[A], ordered: (A, A) => Boolean) : Boolean = {
-    def loop(n: Int) : Boolean = {
-      if(array.length <= n + 1) 
-        true 
+  def isSorted[A](array: Array[A], ordered: (A, A) => Boolean): Boolean = {
+    def loop(n: Int): Boolean = {
+      if (array.length <= n + 1)
+        true
+      else if (ordered(array(n), array(n + 1))) 
+        loop(n + 1) 
       else 
-        if(ordered(array(n), array(n + 1))) loop(n + 1) else false
+        false
     }
-    
+
     loop(0)
   }
 
   def main(args: Array[String]): Unit = {
     //    println(formatAbs(-5))
     //    println(factorial(366))
-    //    println(tfib(6))
-    //     def ordered(x: Int, x_ : Int) = x < x_
+    //    println(fib(50))
+    //    println(tfib(45))
+    //    def ordered(x: Int, x_ : Int) = x < x_
     //    println(isSorted(Array(9, 1, 3, 4), ordered))
+    //    println(isSorted(Array(1, 2, 3, 0), (x: Int, x_ : Int) => x < x_))
+    println(findFirst(Array(1, 4, 4, 5), (__ : Int) => __ == 5/*传入匿名函数*/))
     
     
-    println(isSorted(Array(1, 2, 3, 0), (x: Int, x_ : Int) => x < x_))
   }
 
 }
