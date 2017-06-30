@@ -1,3 +1,5 @@
+
+
 package com.sasaki.fp
 
 /**
@@ -140,41 +142,63 @@ object Main {
      * P.30/练习3.2 测试
      * 实现tail函数，删除一个List的第一个元素。
      */
-    // List.tail(List())
-    println(tail(List("a", "b", "c")))
-    // Cons(b,Cons(c,Nil))
-
-    println(setHead(List(), "head"))
-    // Cons(head,Nil)
+//    // List.tail(List())
+//    println(tail(List("a", "b", "c")))
+//    // Cons(b,Cons(c,Nil))
+//
+//    println(setHead(List(), "head"))
+//    // Cons(head,Nil)
+//    
+//    println(setHead(List("head", "tail"), "head_"))
+//    // Cons(head_,Cons(tail,Nil))
+//    
+//    println(setHead(List(1, 2, 3), 10))
+//    // Cons(10,Cons(2,Cons(3,Nil)))
+//
+//    println(drop(List(1, 2, 3, 4), 3))
+//    // Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
+//
+//    println(dropWhile(List(1, 2, 3), (x: Int) => x == 2))
+//    // Cons(1,Cons(3,Nil))
+//    
+//    // 参数分组后Scala推导参数类型
+//    println(dropWhile2(List(1, 2, 3))(_ <= 2))
+//    // Cons(3,Nil)
+//
+//    // 改进高阶函数类型推导
+//    println(dropWhile_(List(1, 2, 3))(x => x == 2))
+//    // Cons(1,Cons(2,Cons(3,Nil)))
+//    
+//    println(dropWhile_(List(1, 2, 3))(_ == 2))
+//    // Cons(1,Cons(2,Cons(3,Nil)))
+//
+//    println(dropWhile_(List(1, 2, 4))(_ <= 2))
+//    // Cons(4,Nil)
+//
+//    println(dropWhile_(List(1, 2, 3, 4, 9, 4, 8, 10))(_ < 8))
+//    // Cons(9,Cons(4,Cons(8,Cons(10,Nil))))
     
-    println(setHead(List("head", "tail"), "head_"))
-    // Cons(head_,Cons(tail,Nil))
     
-    println(setHead(List(1, 2, 3), 10))
-    // Cons(10,Cons(2,Cons(3,Nil)))
-
-    println(drop(List(1, 2, 3, 4), 3))
-    // Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
-
-    println(dropWhile(List(1, 2, 3), (x: Int) => x == 2))
-    // Cons(1,Cons(3,Nil))
+    /**
+     * P.34/练习3.8 对foldRight传入Nil和Cons时，看看会发生什么？
+     */
+    // println(foldRight(List(1, 2, 3, 4), Nil: List[Int])(Cons(_, _)))
+    // 栈溢出！
     
-    // 参数分组后Scala推导参数类型
-    println(dropWhile2(List(1, 2, 3))(_ <= 2))
-    // Cons(3,Nil)
-
-    // 改进高阶函数类型推导
-    println(dropWhile_(List(1, 2, 3))(x => x == 2))
-    // Cons(1,Cons(2,Cons(3,Nil)))
+    /**
+     * P.34/练习3.9 使用foldRight计算List的长度。
+     */
+    def length[T](list: List[T]): Int = ???
     
-    println(dropWhile_(List(1, 2, 3))(_ == 2))
-    // Cons(1,Cons(2,Cons(3,Nil)))
-
-    println(dropWhile_(List(1, 2, 4))(_ <= 2))
-    // Cons(4,Nil)
-
-    println(dropWhile_(List(1, 2, 3, 4, 9, 4, 8, 10))(_ < 8))
-    // Cons(9,Cons(4,Cons(8,Cons(10,Nil))))
+    /**
+     * P.34/练习3.10 foldRigth不是尾递归。
+     * 用尾递归方式写另一个通用的列递归函数foldLeft。
+     */
+    def foldLeft[A, B](list: List[A], b: B)(f: (B, A) => B): B = ???
+    
+    /**
+     * P.34/练习3.11 写一下sum、product函数，和一个用foldLeft计算列表长度的函数。
+     */
     
   }
 
