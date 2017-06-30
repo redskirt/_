@@ -6,12 +6,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="target/scala-2.11/classes" path="scala-2.11/src/main/scala">
-		<attributes>
-			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="src" output="target/scala-2.11/classes" path="src/main/scala">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -19,12 +13,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" output="target/scala-2.11/test-classes" path="src/test/java">
-		<attributes>
-			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="src" output="target/scala-2.11/test-classes" path="scala-2.11/src/test/scala">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>

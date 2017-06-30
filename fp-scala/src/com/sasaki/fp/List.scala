@@ -68,8 +68,16 @@ object List { // 伴生对象，包含List操作函数
    */
   def dropWhile[T](list: List[T], f: T => Boolean): List[T] = {
     list match {
-      case Nil => list
       case Cons(h, t) => if(f(h)) dropWhile(t, f) else Cons(h, dropWhile(t, f))
+      case Nil => list
+    }
+  }
+  
+  // 参数分组，使得Scala能推导参数2与参数1类型相同，调用时可简写
+  def dropWhile2[T](list: List[T])(f: T => Boolean): List[T] = {
+    list match {
+      case Cons(h, t) => if(f(h)) dropWhile2(t)(f) else Cons(h, dropWhile2(t)(f))
+      case Nil => list
     }
   }
   
@@ -85,7 +93,8 @@ object List { // 伴生对象，包含List操作函数
   /**
    * 改进高阶函数的类型推导  
    * dropWhile -> dropWhile_
-   * ??? 柯里化
+   * 记：此处程序仅对List元素有序自增时有效，且f 为 _ == ? 的判断无效
+	 * 通过分析这里应该是仅对柯里化的演示
    */
   def dropWhile_[T](list: List[T])(f: T => Boolean): List[T] = {
     list match {
@@ -93,6 +102,7 @@ object List { // 伴生对象，包含List操作函数
       case _ => list
     }
   }
+  
   
   /**
    * 基于list的递归并泛化为高阶函数
@@ -120,6 +130,52 @@ object List { // 伴生对象，包含List操作函数
   
   def product2(list: List[Double]) = foldRight(list, 1.0)(_ * _) // _ * _ 即 (x, y) => x * y 的简写
   
-  
-  
+}
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    import com.sasaki.fp.List._
+
+    /**
+     * P.30/练习3.2 测试
+     * 实现tail函数，删除一个List的第一个元素。
+     */
+    // List.tail(List())
+    println(tail(List("a", "b", "c")))
+    // Cons(b,Cons(c,Nil))
+
+    println(setHead(List(), "head"))
+    // Cons(head,Nil)
+    
+    println(setHead(List("head", "tail"), "head_"))
+    // Cons(head_,Cons(tail,Nil))
+    
+    println(setHead(List(1, 2, 3), 10))
+    // Cons(10,Cons(2,Cons(3,Nil)))
+
+    println(drop(List(1, 2, 3, 4), 3))
+    // Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
+
+    println(dropWhile(List(1, 2, 3), (x: Int) => x == 2))
+    // Cons(1,Cons(3,Nil))
+    
+    // 参数分组后Scala推导参数类型
+    println(dropWhile2(List(1, 2, 3))(_ <= 2))
+    // Cons(3,Nil)
+
+    // 改进高阶函数类型推导
+    println(dropWhile_(List(1, 2, 3))(x => x == 2))
+    // Cons(1,Cons(2,Cons(3,Nil)))
+    
+    println(dropWhile_(List(1, 2, 3))(_ == 2))
+    // Cons(1,Cons(2,Cons(3,Nil)))
+
+    println(dropWhile_(List(1, 2, 4))(_ <= 2))
+    // Cons(4,Nil)
+
+    println(dropWhile_(List(1, 2, 3, 4, 9, 4, 8, 10))(_ < 8))
+    // Cons(9,Cons(4,Cons(8,Cons(10,Nil))))
+    
+  }
+
 }
