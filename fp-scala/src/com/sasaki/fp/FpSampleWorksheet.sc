@@ -104,13 +104,16 @@ object FpSample {
    * P.30/练习3.3 测试
    * 实现函数setHead用一个不同的值替代列表中的第一个元素。
    */
-   List.setHead(List(), "head")                   //> res5: com.sasaki.fp.List[String] = Cons(head,Nil)
-   List.setHead(List("head", "tail"), "head_")    //> res6: com.sasaki.fp.List[String] = Cons(head_,Cons(tail,Nil))
-   List.setHead(List(1, 2, 3), 10)                //> res7: com.sasaki.fp.List[Int] = Cons(10,Cons(2,Cons(3,Nil)))
+   import com.sasaki.fp.List._
+   setHead(List(), "head")                        //> res5: com.sasaki.fp.List[String] = Cons(head,Nil)
+   setHead(List("head", "tail"), "head_")         //> res6: com.sasaki.fp.List[String] = Cons(head_,Cons(tail,Nil))
+   setHead(List(1, 2, 3), 10)                     //> res7: com.sasaki.fp.List[Int] = Cons(10,Cons(2,Cons(3,Nil)))
     
-   List.drop(List(1, 2, 3, 4), 3)                 //> res8: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
+   drop(List(1, 2, 3, 4), 3)                      //> res8: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Cons(3,Cons(4,Nil))))
 
-   List.dropWhile(List(1, 2, 3, 4), (x : Int) => x>=3)
-                                                  //> res9: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Nil))
+   dropWhile(List(1, 2, 3), (x : Int) => x == 2)  //> res9: com.sasaki.fp.List[Int] = Cons(1,Cons(3,Nil))
    
+   // 改进高阶函数类型推导
+   dropWhile_(List(1, 2, 3))(x => x == 2)         //> res10: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Cons(3,Nil)))
+   dropWhile_(List(1, 2, 3))(_ == 2)              //> res11: com.sasaki.fp.List[Int] = Cons(1,Cons(2,Cons(3,Nil)))
 }

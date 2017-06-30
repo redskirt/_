@@ -10,16 +10,16 @@ case object Nil extends List[Nothing] // 空List构造
 case class Cons[+T](head: T, tail: List[T]) extends List[T] // 非空List构造
 
 object List { // 伴生对象，包含List操作函数
-  def sum(list: List[Int]): Int = list match {
-    case Nil => 0
-    case Cons(__, __s) => __ + sum(__s)
-  }
+//  def sum(list: List[Int]): Int = list match {
+//    case Nil => 0
+//    case Cons(__, __s) => __ + sum(__s)
+//  }
   
-  def product(list: List[Double]): Double = list match {
-    case Nil => 1.0
-    case Cons(0.0, _) => 0.0
-    case Cons(__, __s) => __ * product(__s)
-  }
+//  def product(list: List[Double]): Double = list match {
+//    case Nil => 1.0
+//    case Cons(0.0, _) => 0.0
+//    case Cons(__, __s) => __ * product(__s)
+//  }
   
   def apply[T](list: T*): List[T] = if(list.isEmpty) Nil else Cons(list.head, apply(list.tail: _*))
   
@@ -82,5 +82,44 @@ object List { // 伴生对象，包含List操作函数
   }
   
   
-    
+  /**
+   * 改进高阶函数的类型推导  
+   * dropWhile -> dropWhile_
+   * ??? 柯里化
+   */
+  def dropWhile_[T](list: List[T])(f: T => Boolean): List[T] = {
+    list match {
+      case Cons(h, t) if f(h) => dropWhile_(t)(f)
+      case _ => list
+    }
+  }
+  
+  /**
+   * 基于list的递归并泛化为高阶函数
+   */
+  def sum(list: List[Int]): Int = list match {
+    case Nil => 0
+    case Cons(__, __s) => __ + sum(__s)
+  }
+  
+  def product(list: List[Double]): Double = list match {
+    case Nil => 1.0
+    case Cons(__, __s) => __ * product(__s)
+  }
+  
+  /**
+   * 右折叠的简单运用
+   * 将sum和product进行泛化
+   */
+  def foldRight[A, B](list: List[A], b : B)(f: (A, B) => B): B = list match {
+    case Nil => b
+    case Cons(h, t) => f(h, foldRight(list, b)(f))
+  }
+  
+  def sum2(list: List[Int]) = foldRight(list, 0)((x, y) => x + y)
+  
+  def product2(list: List[Double]) = foldRight(list, 1.0)(_ * _) // _ * _ 即 (x, y) => x * y 的简写
+  
+  
+  
 }
