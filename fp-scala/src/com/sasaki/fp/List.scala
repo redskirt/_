@@ -125,13 +125,28 @@ object List { // 伴生对象，包含List操作函数
    */
   def foldRight[A, B](list: List[A], b : B)(f: (A, B) => B): B = list match {
     case Nil => b
-    case Cons(h, t) => f(h, foldRight(list, b)(f))
+    case Cons(h, t) => f(h, foldRight(t, b)(f))
   }
   
   def sum2(list: List[Int]) = foldRight(list, 0)((x, y) => x + y)
   
   def product2(list: List[Double]) = foldRight(list, 1.0)(_ * _) // _ * _ 即 (x, y) => x * y 的简写
   
+  /**
+   * P.34/练习3.9 使用foldRight计算List的长度。
+   */
+  def length[T](list: List[T]): Int = foldRight(list, 0)((_, x) => x + 1)
+  
+  /**
+   * P.34/练习3.10 foldRigth不是尾递归。
+   * 用尾递归方式写另一个通用的列递归函数foldLeft。
+   */
+  def foldLeft[A, B](list: List[A], b: B)(f: (B, A) => B): B = ???
+  
+  /**
+   * P.34/练习3.11 写一下sum、product函数，和一个用foldLeft计算列表长度的函数。
+   */
+    
 }
 
 object Main {
@@ -178,27 +193,16 @@ object Main {
 //    println(dropWhile_(List(1, 2, 3, 4, 9, 4, 8, 10))(_ < 8))
 //    // Cons(9,Cons(4,Cons(8,Cons(10,Nil))))
     
-    
+
     /**
      * P.34/练习3.8 对foldRight传入Nil和Cons时，看看会发生什么？
      */
     // println(foldRight(List(1, 2, 3, 4), Nil: List[Int])(Cons(_, _)))
     // 栈溢出！
     
-    /**
-     * P.34/练习3.9 使用foldRight计算List的长度。
-     */
-    def length[T](list: List[T]): Int = ???
-    
-    /**
-     * P.34/练习3.10 foldRigth不是尾递归。
-     * 用尾递归方式写另一个通用的列递归函数foldLeft。
-     */
-    def foldLeft[A, B](list: List[A], b: B)(f: (B, A) => B): B = ???
-    
-    /**
-     * P.34/练习3.11 写一下sum、product函数，和一个用foldLeft计算列表长度的函数。
-     */
+//    println(sum2(List(1, 2, 3)))
+    println(length(List("a", "b", "c")))
+
     
   }
 
