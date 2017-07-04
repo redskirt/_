@@ -140,13 +140,30 @@ object List { // 伴生对象，包含List操作函数
   /**
    * P.34/练习3.10 foldRigth不是尾递归。
    * 用尾递归方式写另一个通用的列递归函数foldLeft。
+   * ???
    */
-  def foldLeft[A, B](list: List[A], b: B)(f: (B, A) => B): B = ???
+  @annotation.tailrec
+  def foldLeft[A, B](list: List[A], b: B)(f: (B, A) => B): B = list match {
+      case Nil => b
+      case Cons(h, t) => foldLeft(t, f(b, h))(f)
+  }
   
   /**
    * P.34/练习3.11 写一下sum、product函数，和一个用foldLeft计算列表长度的函数。
    */
-    
+  def sum3(list: List[Int]): Int = foldLeft(list, 0)(_ + _)
+  def product3(list: List[Double]): Double = foldLeft(list, 1.0)(_ * _)
+  def length2[T](list: List[T]): Int = foldLeft(list, 0)((x, _) => x + 1)
+
+  /**
+   * P.34/练习3.12 写一个对原列表元素颠倒顺序的函数。
+   * ???
+   */
+  def reverse[T](list: List[T]): List[T] = list match {
+    case Nil => Nil
+    case Cons(h, t) => reverse(Cons(foldLeft(t, h)((t, h) => t), Nil))
+  }
+  
 }
 
 object Main {
@@ -201,8 +218,13 @@ object Main {
     // 栈溢出！
     
 //    println(sum2(List(1, 2, 3)))
-    println(length(List("a", "b", "c")))
-
+//    println(length(List("a", "b", "c")))
+//    println(foldLeft(List(1, 2, 3, 4), 0)(_ + _))
+//    println(sum3(List(1, 2, 3)))
+//    println(product3(List(1, 2, 3)))
+//    println(length2(List(1, 2, 3)))
+    
+      println(reverse(List(1, 2, 3)))
     
   }
 
