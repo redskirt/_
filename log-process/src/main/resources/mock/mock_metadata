@@ -1,0 +1,28 @@
+user_visit_action: 2017-07-05|83|3c0dc2b5c9364e4fb5171a24b3a54db9|9|2017-07-05 6:26:18|null|31|72|null|null|null|null|0
+0	date
+1	user_id
+2	session_id
+3	page_id
+4	action_time
+5	search_keyword
+6	click_category_id
+7	click_product_id
+8	order_category_ids
+9	order_product_ids
+10	pay_category_ids
+11	pay_product_ids
+12	city_id
+
+user_info: 999|user999|name999|23|professional25|city61|female|
+0	user_id
+1	username
+2	name
+3	age
+4	professional
+5	city
+6	sex
+
+product_info: 99|product99|{"product_status": 0}|
+0	product_id
+1	product_name
+2	extend_info

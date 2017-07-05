@@ -159,11 +159,16 @@ object List { // 伴生对象，包含List操作函数
    * P.34/练习3.12 写一个对原列表元素颠倒顺序的函数。
    * ???
    */
-  def reverse[T](list: List[T]): List[T] = list match {
-    case Nil => Nil
-    case Cons(h, t) => reverse(Cons(foldLeft(t, h)((t, h) => t), Nil))
-  }
+  def reverse[T](list: List[T]): List[T] = foldLeft(list, List[T]())((acc, h) => Cons(h, acc))
   
+  /**
+   * P.34/练习3.14 根据foldLeft或foldRigth实现append函数。
+   * ???
+   */
+//  def append2[T](list: List[T], list_ : List[T]): List[T] = foldRight(list, list_)(Cons((t: T) => t, )
+//  def append2[T](list: List[T], list_ : List[T]): List[T] = foldRight(list, list_)(Cons(_, _))
+
+
 }
 
 object Main {
@@ -224,7 +229,7 @@ object Main {
 //    println(product3(List(1, 2, 3)))
 //    println(length2(List(1, 2, 3)))
     
-      println(reverse(List(1, 2, 3)))
+    //println(reverse(List(1, 2, 3)))
     
   }
 
