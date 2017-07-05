@@ -30,7 +30,7 @@ public class MockData {
 		JavaSparkContext sc = new JavaSparkContext(new SparkConf().setAppName("MockData").setMaster("local[1]"));
 		SQLContext sqlContext = new SQLContext(sc);
 		mock(sc, sqlContext);
-		
+		sc.stop();
 	}
 	
 	
@@ -49,7 +49,7 @@ public class MockData {
 		String[] actions = new String[]{"search", "click", "order", "pay"};
 		Random random = new Random();
 		
-		for(int i = 0; i < 100; i++) {
+		for(int i = 0; i < 1000; i++) {
 			long userid = random.nextInt(100);    
 			
 			for(int j = 0; j < 10; j++) {
@@ -96,36 +96,53 @@ public class MockData {
 		}
 		
 		JavaRDD<Row> rowsRDD = sc.parallelize(rows);
+		JavaRDD<String> strRDD = rowsRDD.map(__ -> 
+		__.getString(0) + "|" + 
+		__.getLong(1) + "|" + 
+		__.getString(2) + "|" + 
+		__.getLong(3) + "|" + 
+		__.getString(4) + "|" + 
+		__.getString(5) + "|" + 
+		__.getLong(6) + "|" + 
+		__.getLong(7) + "|" + 
+		__.getString(8) + "|" + 
+		__.getString(9) + "|" + 
+		__.getString(10) + "|" + 
+		__.getString(11) + "|" + 
+		__.getLong(12) 
+		);
+//		System.out.println(strRDD.count());
+		strRDD.saveAsTextFile("hdfs://node01:8020/tmp/user_visit_action");
 		
-		StructType schema = DataTypes.createStructType(Arrays.asList(
-				DataTypes.createStructField("date", DataTypes.StringType, true),
-				DataTypes.createStructField("user_id", DataTypes.LongType, true),
-				DataTypes.createStructField("session_id", DataTypes.StringType, true),
-				DataTypes.createStructField("page_id", DataTypes.LongType, true),
-				DataTypes.createStructField("action_time", DataTypes.StringType, true),
-				DataTypes.createStructField("search_keyword", DataTypes.StringType, true),
-				DataTypes.createStructField("click_category_id", DataTypes.LongType, true),
-				DataTypes.createStructField("click_product_id", DataTypes.LongType, true),
-				DataTypes.createStructField("order_category_ids", DataTypes.StringType, true),
-				DataTypes.createStructField("order_product_ids", DataTypes.StringType, true),
-				DataTypes.createStructField("pay_category_ids", DataTypes.StringType, true),
-				DataTypes.createStructField("pay_product_ids", DataTypes.StringType, true),
-				DataTypes.createStructField("city_id", DataTypes.LongType, true)));
-		
-		DataFrame df = sqlContext.createDataFrame(rowsRDD, schema);
-		
-		df.registerTempTable("user_visit_action");  
-		for(Row _row : df.take(1)) {
-			System.out.println(_row);  
-		}
-		
-		/**
-		 * ==================================================================
-		 */
-		
+//		StructType schema = DataTypes.createStructType(Arrays.asList(
+//				DataTypes.createStructField("date", DataTypes.StringType, true),
+//				DataTypes.createStructField("user_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("session_id", DataTypes.StringType, true),
+//				DataTypes.createStructField("page_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("action_time", DataTypes.StringType, true),
+//				DataTypes.createStructField("search_keyword", DataTypes.StringType, true),
+//				DataTypes.createStructField("click_category_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("click_product_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("order_category_ids", DataTypes.StringType, true),
+//				DataTypes.createStructField("order_product_ids", DataTypes.StringType, true),
+//				DataTypes.createStructField("pay_category_ids", DataTypes.StringType, true),
+//				DataTypes.createStructField("pay_product_ids", DataTypes.StringType, true),
+//				DataTypes.createStructField("city_id", DataTypes.LongType, true)));
+//		
+//		DataFrame df = sqlContext.createDataFrame(rowsRDD, schema);
+//		
+//		df.registerTempTable("user_visit_action");  
+//		for(Row _row : df.take(1)) {
+//			System.out.println(_row);  
+//		}
+//		
+//		/**
+//		 * ==================================================================
+//		 */
+//		
 		rows.clear();
 		String[] sexes = new String[]{"male", "female"};
-		for(int i = 0; i < 100; i ++) {
+		for(int i = 0; i < 1000; i ++) {
 			long userid = i;
 			String username = "user" + i;
 			String name = "name" + i;
@@ -141,21 +158,33 @@ public class MockData {
 		
 		rowsRDD = sc.parallelize(rows);
 		
-		StructType schema2 = DataTypes.createStructType(Arrays.asList(
-				DataTypes.createStructField("user_id", DataTypes.LongType, true),
-				DataTypes.createStructField("username", DataTypes.StringType, true),
-				DataTypes.createStructField("name", DataTypes.StringType, true),
-				DataTypes.createStructField("age", DataTypes.IntegerType, true),
-				DataTypes.createStructField("professional", DataTypes.StringType, true),
-				DataTypes.createStructField("city", DataTypes.StringType, true),
-				DataTypes.createStructField("sex", DataTypes.StringType, true)));
+		JavaRDD<String> userRDD = rowsRDD.map(__ -> 
+		__.getLong(0) + "|" + 
+		__.getString(1) + "|" + 
+		__.getString(2) + "|" + 
+		__.getInt(3) + "|" + 
+		__.getString(4) + "|" + 
+		__.getString(5) + "|" + 
+		__.getString(6) + "|"  
+		);
+		userRDD.saveAsTextFile("hdfs://node01:8020/tmp/user_info");
 		
-		DataFrame df2 = sqlContext.createDataFrame(rowsRDD, schema2);
-		for(Row _row : df2.take(1)) {
-			System.out.println(_row);  
-		}
+//		StructType schema2 = DataTypes.createStructType(Arrays.asList(
+//				DataTypes.createStructField("user_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("username", DataTypes.StringType, true),
+//				DataTypes.createStructField("name", DataTypes.StringType, true),
+//				DataTypes.createStructField("age", DataTypes.IntegerType, true),
+//				DataTypes.createStructField("professional", DataTypes.StringType, true),
+//				DataTypes.createStructField("city", DataTypes.StringType, true),
+//				DataTypes.createStructField("sex", DataTypes.StringType, true)));
+//		
+//		DataFrame df2 = sqlContext.createDataFrame(rowsRDD, schema2);
+//		for(Row _row : df2.take(1)) {
+//			System.out.println(_row);  
+//		}
+//		df2.registerTempTable("user_info");  
 		
-		df2.registerTempTable("user_info");  
+		
 		
 		/**
 		 * ==================================================================
@@ -175,17 +204,25 @@ public class MockData {
 		
 		rowsRDD = sc.parallelize(rows);
 		
-		StructType schema3 = DataTypes.createStructType(Arrays.asList(
-				DataTypes.createStructField("product_id", DataTypes.LongType, true),
-				DataTypes.createStructField("product_name", DataTypes.StringType, true),
-				DataTypes.createStructField("extend_info", DataTypes.StringType, true)));
+		JavaRDD<String> productRDD = rowsRDD.map(__ -> 
+		__.getLong(0) + "|" + 
+		__.getString(1) + "|" + 
+		__.getString(2) + "|" 
+		);
+		productRDD.saveAsTextFile("hdfs://node01:8020/tmp/product_info");
+//		
+//		StructType schema3 = DataTypes.createStructType(Arrays.asList(
+//				DataTypes.createStructField("product_id", DataTypes.LongType, true),
+//				DataTypes.createStructField("product_name", DataTypes.StringType, true),
+//				DataTypes.createStructField("extend_info", DataTypes.StringType, true)));
+//		
+//		DataFrame df3 = sqlContext.createDataFrame(rowsRDD, schema3);
+//		for(Row _row : df3.take(1)) {
+//			System.out.println(_row);  
+//		}
+//		
+//		df3.registerTempTable("product_info"); 
 		
-		DataFrame df3 = sqlContext.createDataFrame(rowsRDD, schema3);
-		for(Row _row : df3.take(1)) {
-			System.out.println(_row);  
-		}
-		
-		df3.registerTempTable("product_info"); 
 	}
 	
 }
