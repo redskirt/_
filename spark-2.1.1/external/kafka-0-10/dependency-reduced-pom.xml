@@ -7,8 +7,8 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>spark-streaming-kafka-0-8_2.11</artifactId>
-  <name>Spark Integration for Kafka 0.8</name>
+  <artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
+  <name>Spark Integration for Kafka 0.10</name>
   <url>http://spark.apache.org/</url>
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
@@ -199,7 +199,7 @@
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka_2.11</artifactId>
-      <version>0.8.2.1</version>
+      <version>0.10.0.1</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -265,6 +265,10 @@
           <artifactId>scala-reflect</artifactId>
           <groupId>org.scala-lang</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>scala-xml_2.11</artifactId>
+          <groupId>org.scala-lang.modules</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -293,7 +297,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <sbt.project.name>streaming-kafka-0-8</sbt.project.name>
+    <sbt.project.name>streaming-kafka-0-10</sbt.project.name>
   </properties>
 </project>
 

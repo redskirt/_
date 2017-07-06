@@ -6,13 +6,26 @@
     <version>2.1.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>spark-graphx_2.11</artifactId>
-  <name>Spark Project GraphX</name>
+  <artifactId>spark-mllib_2.11</artifactId>
+  <name>Spark Project ML Library</name>
   <url>http://spark.apache.org/</url>
   <build>
     <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
     <testOutputDirectory>target/scala-${scala.binary.version}/test-classes</testOutputDirectory>
   </build>
+  <profiles>
+    <profile>
+      <id>netlib-lgpl</id>
+      <dependencies>
+        <dependency>
+          <groupId>com.github.fommil.netlib</groupId>
+          <artifactId>all</artifactId>
+          <version>${netlib.java.version}</version>
+          <type>pom</type>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
   <dependencies>
     <dependency>
       <groupId>org.apache.spark</groupId>
@@ -113,32 +126,55 @@
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_2.11</artifactId>
+      <version>2.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_2.11</artifactId>
+      <version>2.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-graphx_2.11</artifactId>
+      <version>2.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
       <artifactId>spark-mllib-local_2.11</artifactId>
       <version>2.1.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.xbean</groupId>
-      <artifactId>xbean-asm5-shaded</artifactId>
-      <version>4.4</version>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-mllib-local_2.11</artifactId>
+      <version>2.1.1</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.scalanlp</groupId>
+      <artifactId>breeze_2.11</artifactId>
+      <version>0.12</version>
       <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>junit</artifactId>
+          <groupId>junit</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-math3</artifactId>
+          <groupId>org.apache.commons</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>14.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.fommil.netlib</groupId>
-      <artifactId>core</artifactId>
-      <version>1.1.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.f2j</groupId>
-      <artifactId>arpack_combined_all</artifactId>
-      <version>0.1</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.4.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -150,6 +186,37 @@
         <exclusion>
           <artifactId>test-interface</artifactId>
           <groupId>org.scala-sbt</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.10.19</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>hamcrest-core</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_2.11</artifactId>
+      <version>2.1.1</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jpmml</groupId>
+      <artifactId>pmml-model</artifactId>
+      <version>1.2.15</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>pmml-agent</artifactId>
+          <groupId>org.jpmml</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -198,7 +265,7 @@
     </dependency>
   </dependencies>
   <properties>
-    <sbt.project.name>graphx</sbt.project.name>
+    <sbt.project.name>mllib</sbt.project.name>
   </properties>
 </project>
 
