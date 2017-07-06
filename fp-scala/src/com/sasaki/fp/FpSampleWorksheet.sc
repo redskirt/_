@@ -91,4 +91,6 @@ object FpSample {
     case _ => 101 // 101
   }                                               //> o  : Int = 101
 
+	// println(List.length(List("a", "b", "c")))
+
 }
