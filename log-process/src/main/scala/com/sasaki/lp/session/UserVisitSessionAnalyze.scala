@@ -5,9 +5,11 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.Row
+import org.apache.spark.storage.StorageLevel
 
 class UserVisitSessionAnalyze {
   
+   
 }
 
 object UserVisitSessionAnalyze {
@@ -76,7 +78,6 @@ object UserVisitSessionAnalyze {
     
     val dfUserVisitAction = sqlContext.createDataFrame(rowUserVisitAction, schemaUserVisitAction)
     dfUserVisitAction.createOrReplaceTempView("user_visit_action")
-    
     //    sqlContext.sql("select count(0) from user_visit_action").show()
     
     val date = "2017-07-05"
@@ -86,10 +87,31 @@ object UserVisitSessionAnalyze {
     assert(0 != sqlContext.sql(sqlCount).collect()(0).get(0).toString.toInt, "--> Have no dataset from this query.")    
     
     val sql = s"""select * from user_visit_action where date>='$date' and date<='$date_'"""
-    // 作为公共RDD
-    val rddAction = sqlContext.sql(sql).rdd.repartition(50)
+    sqlContext.sql(s"""select count(0) from user_visit_action where date>='$date' and date<='$date_'""").show()
     
-//    val rddSessionID___Action = rddAction.mapPartitions(__ => { }, true)
+    // 作为公共RDD
+    val rddAction = sqlContext.sql(sql).rdd.repartition(5)
+    
+    val rddSessionID___Action = rddAction.mapPartitions(__ => {
+      val list = List[(String, Row)]()
+      
+      while (__.hasNext) {
+        val o = __.next
+        (o.getString(2)/*session_id*/, o) :: list
+      }
+//      println(list.size)
+      
+      list.toIterator
+    }, true)
+    
+//    val rddSessionID___Action = rddAction.map(__ => (__.getString(2), __))
+    
+    // 持久化RDD
+    // val rddSessionID___Action_ = rddSessionID___Action.persist(StorageLevel.MEMORY_ONLY/**纯内存方式等同于cache*/)
+    // val rddSessionID___Action_ = rddSessionID___Action.cache()
+    
+    println(rddSessionID___Action.count())
+//    rddSessionID___Action.take(2).foreach(__ => println(__ + "__"))
     
     sc.stop()
   }
