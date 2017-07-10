@@ -368,23 +368,32 @@ public class UserVisitSessionAnalyzeSpark {
 //			
 //		});
 		
-		return actionRDD.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Row>, String, Row>() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public Iterable<Tuple2<String, Row>> call(Iterator<Row> iterator)
-					throws Exception {
-				List<Tuple2<String, Row>> list = new ArrayList<Tuple2<String, Row>>();
-				
-				while(iterator.hasNext()) {
-					Row row = iterator.next();
-					list.add(new Tuple2<String, Row>(row.getString(2), row));  
-				}
-				
-				return list;
+//		return actionRDD.mapPartitionsToPair(new PairFlatMapFunction<Iterator<Row>, String, Row>() {
+//
+//			private static final long serialVersionUID = 1L;
+//
+//			@Override
+//			public Iterable<Tuple2<String, Row>> call(Iterator<Row> iterator)
+//					throws Exception {
+//				List<Tuple2<String, Row>> list = new ArrayList<Tuple2<String, Row>>();
+//				
+//				while(iterator.hasNext()) {
+//					Row row = iterator.next();
+//					list.add(new Tuple2<String, Row>(row.getString(2), row));  
+//				}
+//				
+//				return list;
+//			}
+//			
+//		});
+		
+		return actionRDD.mapPartitionsToPair(__ -> {
+			List<Tuple2<String, Row>> list = new ArrayList<Tuple2<String, Row>>();
+			while(__.hasNext()) {
+				Row row = __.next();
+				list.add(new Tuple2<String, Row>(row.getString(2), row));  
 			}
-			
+			return list;
 		});
 	}
 	
