@@ -71,3 +71,10 @@ object E extends Enumeration {
 	val $PARAM_CATEGORY_IDS 			= Value("categoryIds")
 	val $PARAM_TARGET_PAGE_FLOW 	= Value("targetPageFlow")  
 }
+
+object Main {
+  import com.sasaki.lp.enums.E._
+  def main(args: Array[String]): Unit = {
+    println(|)
+  }
+}
