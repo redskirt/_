@@ -1,0 +1,144 @@
+项目数据源表结构及内容
+
+user_visit_action
++----------+-------+--------------------+-------+-------------------+--------------+-----------------+----------------+------------------+-----------------+----------------+---------------+-------+
+|      date|user_id|          session_id|page_id|        action_time|search_keyword|click_category_id|click_product_id|order_category_ids|order_product_ids|pay_category_ids|pay_product_ids|city_id|
++----------+-------+--------------------+-------+-------------------+--------------+-----------------+----------------+------------------+-----------------+----------------+---------------+-------+
+|2016-10-11|     58|accc4da2a7434a978...|      4|2016-10-11 10:48:10|          null|             null|            null|                52|               58|            null|           null|      8|
+|2016-10-11|     58|accc4da2a7434a978...|      8|2016-10-11 10:19:17|          null|             null|            null|                 8|               37|            null|           null|      3|
+|2016-10-11|     58|accc4da2a7434a978...|      9|2016-10-11 10:09:11|          null|             null|            null|                12|               78|            null|           null|      5|
+|2016-10-11|     58|accc4da2a7434a978...|      8|2016-10-11 10:27:10|          呷哺呷哺|             null|            null|              null|             null|            null|           null|      6|
+|2016-10-11|     58|accc4da2a7434a978...|      7|2016-10-11 10:32:37|          null|             null|            null|              null|             null|              76|             81|      4|
++----------+-------+--------------------+-------+-------------------+--------------+-----------------+----------------+------------------+-----------------+----------------+---------------+-------+
+
+user_info
++-------+--------+-----+---+--------------+------+------+
+|user_id|username| name|age|  professional|  city|   sex|
++-------+--------+-----+---+--------------+------+------+
+|      0|   user0|name0| 51|professional10|city71|  male|
+|      1|   user1|name1| 45|professional53|city83|  male|
+|      2|   user2|name2| 19|professional60| city6|female|
+|      3|   user3|name3| 12|professional84|city80|  male|
+|      4|   user4|name4| 25|professional97|city46|  male|
++-------+--------+-----+---+--------------+------+------+
+
+
+product_info
++----------+------------+--------------------+
+|product_id|product_name|         extend_info|
++----------+------------+--------------------+
+|         0|    product0|{"product_status"...|
+|         1|    product1|{"product_status"...|
+|         2|    product2|{"product_status"...|
+|         3|    product3|{"product_status"...|
+|         4|    product4|{"product_status"...|
++----------+------------+--------------------+
+
+
+
+模块一：Session访问离线分析
+	准备：Session粒度聚合，按筛选条件进行过滤
+	1) Session聚合统计：统计出访问时长和访问步长，各个区间范围的Session数量，占总Session数量的比例
+	2) Session随机抽取：按时间比例，随机抽取出100个Session
+	3) top10热门品类：获取通过筛选条件的Session，点击、下单和支付次数最多的10个Session
+	4) top10活跃Session：获取top10热门品类中，每个品类点击次数最多的10个Session
+	
+模块二：页面单跳转化率模块
+	基于Spark的页面切片和页面流匹配算法
+	1) J2EE平台传入参数 (日期范围, 多个页面的id)，即从Mysql中查询出任务参数
+	2) 针对华宇范围日期内的用户访问行为数据，去判断和计算，页面流id中，每两个页面组成的页面切片，它的访问量是多少
+	3) 根据指定页面流中各个页面切片的访问量，计算出来各个页面切片的转化率
+	4) 出来的转化率，写入Mysql数据库
+	
+	技术方案：
+	1) 获取任务的日期范围参数
+	2) 查询指定日期范围内的用户访问行为数据
+	3) 获取用户访问行为中，每个Session，计算出各个在指定页面流中的页面的访问量，实现页面单跳切片生成 以及页面流匹配的算法
+	4) 计算出符合页面流的各个切片的pv（访问量）
+	5) 针对用户指定 ，去计算各个页面单跳切片的转化率
+	6) 将计算结果持久化到数据库中
+	
+模块三:各区域热门商品统计
+	根据用户指定的日期范围，统计各个区域下的最热门top3商品
+	Spark作业接收taskid，查询对应Mysql中的task，获取用户指定的筛选参数；统计出指定日期范围内的各个区域的top3热门商品，最后将结果写入Mysql表。
+	
+	技术方案：
+	1) 查询task，获取日期范围，SparkSQL查询user_visit_action表中指定日期范围内的数据，过滤出商品点击行为，click_product_id is not null; click_product_id is not null; city_id, click_product_id
+	2) SparkSQL从Mysql中查询出城市信息(city_id, city_name, area)，用户访问行为数据要跟城市信息进行join, city_id, city_name, area, product_id, RDD转换DataFrame，注册临时表
+	3) SparkSQL内置函数(case when)，对area打标记，area_level
+	4) 计算出每个区域下每个商品的点击次数，group by area, product_id，保留每个截获的城市名称列表，自定义UDAF，group_concat_distinct()函数聚合出来一个city_names字段，area, product_id, city_names, disk_count
+	5) join商品明细表，hive(product_id, product_name, extend_info)，extend_info是json，自定义UDF，get_json_object()函数，取出其中的product_status字段,if()函数判断（0-自营，1-第三方），
+	6) 开窗函数，根据area聚合，获取每个area下，click_count排名前3名的product信息，
+	7) 写入Mysql
+	8) SparkSQL数据倾斜解决方案：双重group by、随机key以及扩容表（自定义UDF函数，random_key()），内置reduce join转换为map join、shuffle并行度
+	
+	基础数据：
+	1) Mysql表：city_info, city_id, city_name, area
+	2) Hive表：product_info表，product_id, product_name, extend_info
+	3) Mysql结果表：task_id, area, area_level, product_id, city_names, click_count, product_name, product_status
+	
+	
+
+高级技术点：自定义Accumulator、按时间比例随机抽取算法、二次排序、分组取TopN算法
+
+
+需求：
+1. 根据使用者指定的某些条件，筛选出指定的一些用户（有特定年龄、职业、城市）
+一个用户对应多个Session，一个Session对应多个行为（即日志数据）
+user_id  1<-->n  session_id  1<-->n visit_action
+	1) 先对session_id groupByKey，得到Session粒度数据
+		<session_id, (user_id/visit_action)(user_id/visit_action)(user_id/visit_action)...>
+		每个session_id，必然只是一个用户产生的，即session_id只对应一个user_id
+		<session_id, user_id/(visit_action)(visit_action)(visit_action)(visit_action)...>
+		经while循环，统计session中各项内容，最后拼接字符串将得到key=value|key=value形式
+		例：session_id=1|search_keywords=1,2,3,4|click_category_ids=1,2,3,4|step_lentgh=3|start_time=...
+		最终得到Tuple2
+		<userid, session_id=1|search_keywords=1,2,3,4|click_category_ids=1,2,3,4|step_lentgh=3|start_time=...>
+	
+	2) 处理得到两个PairRDD，
+		<user_id, session_id/visit_action...>
+		<user_id, user_info...>
+		join得
+		<user_id, user_info/session_id/visit_action...>即
+		JavaPairRDD<Long, Tuple2<String, Row>> : 
+		<user_id, <session_id=1|search_keywords=1,2,3,4|click_category_ids=1,2,3,4|step_lentgh=3|start_time=..., userInfoRow>>
+	
+	3) 把上步得到的Rows数据也拆分出来，继续拼接进fullAggrInfo字符串，得到一个大的字符串，包含用户所有信息和访问Session信息，返回为
+		<session_id, <visit_action + userinfo>>
+		例：sessionid=c0d53581db684dd7a1dade293e8ee350|searchKeywords=新辣道鱼火锅|clickCategoryIds=63|visitLength=0|stepLength=8|startTime=2015-10-31|age=58|professional=professional30|city=city45|sex=female
+
+2. 对这些用户在指定日期范围内和某些筛选条件发起的Session，进行聚合统计，比如，统计出访问时长在0~3s的Session占总Session数量的比例
+
+
+3. 按时间比例，随机抽取Session.
+	按每天每小时的session数量，占当天session总数的比例，乘以每天要抽取的session数量，计算出每个小时要抽取的session数量；然后在每天每小时session中，随机抽取出之前计算出来的数量的session。
+	
+4. top10热门品类需求 热门品类、每个品类的点击、下单和支付次数
+	1) 拿到通过筛选条件的那批Session，访问过的所有品类
+	2) 计算出Session过的所有品类的点击、下单和支付次数，和第一步的品类join
+	3) 开发二次排序Key
+	需要根据多个字段进行多次排序，点击、下单和支付次数进行排序。
+	4) 映射，将品类的点击、下单和支付次数，封装到二次排序Key中，作为PariRDD的Key
+	5) 使用sortByKey(false)，按照自定义Key进行降序二次排序
+	6) 使用take(10)获取
+	7) 写入Mysql
+
+5. top10活跃Session
+	获取每个品类点击次数最多的10个Session，以及其对应的访问明细
+	1) 拿到符合筛选条件的Session明细数据
+	2) 按照Session粒度进行聚合，获取到Session对每个品类的点击次数，用flatMap算子函数返回<categoryid, (sessionid, clickCount)>
+	3) 按照品类Id分组取top10，获取top10活跃Session；groupByKey；写算法获取点击次数最多的前10个Session，写入Mysql，返回Sessionid
+	4) 获取top10各品类活跃Session的访问明细数据写入Mysql
+	
+	重构：
+	1) 将通过筛选条件的Session访问的明细数据RDD，提取成公共RDD
+	2) 将之前计算出来的top10热门品类的id，生成一个pairRDD,访问后面join
+		
+		
+		
+调优点：
+	1) 在实际过程中分配更多资源
+	2) 在实际项目中调节并行度
+	并行度指，Spark作业中各个Stage的数量，也就代表了Spark作业在各个阶段Stage的并行度。
+	3) 在项目中重构RDD以及RDD持久化
+	
