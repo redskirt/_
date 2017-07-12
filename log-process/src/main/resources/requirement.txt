@@ -13,7 +13,7 @@ user_visit_action
 
 user_info
 +-------+--------+-----+---+--------------+------+------+
-|user_id|username| name|age|  professional|  city|   sex|
+|user_id|username| name|age|  professional|  city|   gender|
 +-------+--------+-----+---+--------------+------+------+
 |      0|   user0|name0| 51|professional10|city71|  male|
 |      1|   user1|name1| 45|professional53|city83|  male|

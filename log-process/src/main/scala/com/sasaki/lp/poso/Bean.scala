@@ -36,9 +36,9 @@ class SessionAggregationStatus(_taskId: Long) extends T(_taskId) {
 }
 
 class SessionDetail(_taskId: Long) extends T(_taskId) {
-  var userid: Long = _
-  var sessionid: String = _
-  var pageid: Long = _
+  var userId: Long = _
+  var sessionId: String = _
+  var pageId: Long = _
   var actionTime: String = _
   var searchKeyword: String = _
   var clickCategoryId: Long = _
@@ -50,7 +50,7 @@ class SessionDetail(_taskId: Long) extends T(_taskId) {
 }
 
 class SessionRandomExtract(_taskId: Long) extends T(_taskId) {
-  var sessionid: String = _
+  var sessionId: String = _
   var startTime: String = _
   var searchKeywords: String = _
   var clickCategoryIds: String = _
@@ -67,14 +67,14 @@ class Task(_taskId: Long) extends T(_taskId) {
 }
 
 class Top10Category(_taskId: Long) extends T(_taskId) {
-  var categoryid: String = _
+  var categoryId: String = _
   var clickCount: String = _
   var payCount: String = _
   var orderCount: String = _
 }
 
 class Top10Session {
-  var categoryid: String = _
-  var sessionid: String = _
+  var categoryId: String = _
+  var sessionId: String = _
   var clickCount: String = _
 }
