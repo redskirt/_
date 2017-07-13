@@ -12,14 +12,14 @@ object QueryHelper {
   
   def getSession(): Option[() => Session] = {
     import org.squeryl.SessionFactory
-    if (SessionFactory.concreteFactory.isEmpty && Util.hasConstants("jdbc.url", "jdbc.username", "jdbc.password")) {
-      Class.forName("oracle.jdbc.OracleDriver")
+    if (SessionFactory.concreteFactory.isEmpty && Util.hasConstants("db.url", "db.username", "db.password")) {
+      Class.forName(Util.prop("db.driverClassName"))
 
       Some(() => {
         val connector = DriverManager.getConnection(
-          Util.prop("jdbc.url"),
-          Util.prop("jdbc.username"),
-          Util.prop("jdbc.password"))
+          Util.prop("db.url"),
+          Util.prop("db.username"),
+          Util.prop("db.password"))
         connector.setAutoCommit(true)
         Session.create(connector, new MySQLAdapter)
       })
@@ -27,20 +27,21 @@ object QueryHelper {
   }
  
   def list(t: Table[_<: Base]) = t.seq
-  def queryById(id: Long, t: Table[_<: Base]) = from(t)(__ => where(__.taskId === id) select(__)).single
+  def queryById[T <: Base](id: Long, t: Table[T]) = from(t)(__ => where(__.taskId === id) select(__)).single
   
 }
 
 object LppSchema extends Schema {
   import com.sasaki.lp.poso._
   
-  val area_top3_product = table[AreaTop3Product]("area_top3_product") 
-  val page_split_convert_rate = table[PageSplitConvertRate]("page_split_convert_rate") 
-  val session_aggregation_status = table[SessionAggregationStatus]("session_aggregation_status") 
-  val session_detail = table[SessionDetail]("session_detail") 
-  val session_random_extract = table[SessionRandomExtract]("session_random_extract") 
-  val task = table[Task]("task") 
-  val top10_category = table[Top10Category]("top10_category") 
-  val top10_sessio = table[Top10Session]("top10_session")
+  val $area_top3_product = table[AreaTop3Product]("area_top3_product") 
+  val $page_split_convert_rate = table[PageSplitConvertRate]("page_split_convert_rate") 
+  val $session_aggregation_status = table[SessionAggregationStatus]("session_aggregation_status") 
+  val $session_detail = table[SessionDetail]("session_detail") 
+  val $session_random_extract = table[SessionRandomExtract]("session_random_extract") 
+  val $task = table[Task]("task") 
+  val $top10_category = table[Top10Category]("top10_category") 
+  val $top10_sessio = table[Top10Session]("top10_session")
   
 }
+

@@ -8,6 +8,9 @@ import org.apache.spark.sql.Row
 import org.apache.spark.storage.StorageLevel
 import com.sasaki.lp.enums.E._
 import org.apache.spark.rdd.RDD
+import com.sasaki.lp.persistence.QueryHelper._
+import com.sasaki.lp.persistence.LppSchema._
+import com.sasaki.lp.poso._
 
 class UserVisitSessionAnalyze {
   
@@ -95,8 +98,10 @@ object UserVisitSessionAnalyze {
     	)
     })
 
+//    val tark: Task = queryById(1, $task)
     val date = "2017-07-05"
     val date_ = "2017-07-05"
+    
 
     // 映射RDD sessionId___userAction
     val rddSessionId___UserAction = rddUserAction(sc, sqlContext, date, date_).mapPartitions(__ => {

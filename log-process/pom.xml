@@ -133,6 +133,18 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.json4s</groupId>
+			<artifactId>json4s-native_${scala.version}</artifactId>
+			<version>3.2.11</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
 		    <groupId>org.squeryl</groupId>
 		    <artifactId>squeryl_2.11</artifactId>
 		    <version>0.9.5-7</version>

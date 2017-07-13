@@ -2,9 +2,12 @@ package com.sasaki.lp.poso
 
 import org.squeryl.annotations.{Column, ColumnBase, Transient}
 
-class Base(var taskId: Long) {}
+class Base {
+  @Column("task_id")
+  var taskId: Long = _
+}
 
-class AreaTop3Product(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class AreaTop3Product extends Base {
   var area: String = _
   @Column("area_level")
   var areaLevel: String = _
@@ -20,12 +23,12 @@ class AreaTop3Product(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId
   var productStatus: String = _
 }
 
-class PageSplitConvertRate(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class PageSplitConvertRate extends Base {
   @Column("convert_rate")
   var convertRate: String = _
 }
 
-class SessionAggregationStatus(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class SessionAggregationStatus extends Base {
   @Column("session_count")
   var sessionCount: Long = _
   var visit_length_1s_3s_ratio: String = _
@@ -45,7 +48,7 @@ class SessionAggregationStatus(@ColumnBase("task_id") _taskId: Long) extends Bas
   var step_length_60_ratio: String = _
 }
 
-class SessionDetail(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class SessionDetail extends Base {
   @Column("user_id")
   var userId: Long = _
   @Column("session_id")
@@ -71,7 +74,7 @@ class SessionDetail(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) 
 
 }
 
-class SessionRandomExtract(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class SessionRandomExtract extends Base {
   @Column("session_id")
   var sessionId: String = _
   @Column("start_time")
@@ -82,7 +85,7 @@ class SessionRandomExtract(@ColumnBase("task_id") _taskId: Long) extends Base(_t
   var clickCategoryIds: String = _
 }
 
-class Task(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class Task extends Base {
   @Column("task_name")
   var taskName: String = _
   @Column("create_time")
@@ -99,7 +102,7 @@ class Task(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
   var taskParam: String = _
 }
 
-class Top10Category(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+class Top10Category extends Base {
   @Column("category_id")
   var categoryId: String = _
   @Column("click_count")
@@ -110,7 +113,7 @@ class Top10Category(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) 
   var orderCount: String = _
 }
 
-class Top10Session(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId)  {
+class Top10Session extends Base {
   @Column("category_id")
   var categoryId: String = _
   @Column("session_id")
