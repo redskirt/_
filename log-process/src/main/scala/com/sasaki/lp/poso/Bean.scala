@@ -1,23 +1,33 @@
 package com.sasaki.lp.poso
 
-class T(taskId: Long) {}
+import org.squeryl.annotations.{Column, ColumnBase, Transient}
 
-class AreaTop3Product(_taskId: Long) extends T(_taskId) {
+class Base(var taskId: Long) {}
+
+class AreaTop3Product(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
   var area: String = _
+  @Column("area_level")
   var areaLevel: String = _
+  @Column("product_id")
   var productId: Int = _
+  @Column("city_info")
   var cityInfo: String = _
+  @Column("click_count")
   var clickCount: Int = _
+  @Column("product_name")
   var productName: String = _
+  @Column("product_status")
   var productStatus: String = _
 }
 
-class PageSplitConvertRate(_taskId: Long) extends T(_taskId) {
+class PageSplitConvertRate(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("convert_rate")
   var convertRate: String = _
 }
 
-class SessionAggregationStatus(_taskId: Long) extends T(_taskId) {
-  var session_count: Long = _
+class SessionAggregationStatus(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("session_count")
+  var sessionCount: Long = _
   var visit_length_1s_3s_ratio: String = _
   var visit_length_4s_6s_ratio: String = _
   var visit_length_7s_9s_ratio: String = _
@@ -35,46 +45,77 @@ class SessionAggregationStatus(_taskId: Long) extends T(_taskId) {
   var step_length_60_ratio: String = _
 }
 
-class SessionDetail(_taskId: Long) extends T(_taskId) {
+class SessionDetail(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("user_id")
   var userId: Long = _
+  @Column("session_id")
   var sessionId: String = _
+  @Column("page_id")
   var pageId: Long = _
+  @Column("action_time")
   var actionTime: String = _
+  @Column("search_keyword")
   var searchKeyword: String = _
+  @Column("click_category_id")
   var clickCategoryId: Long = _
+  @Column("click_product_id")
   var clickProductId: Long = _
+  @Column("order_category_ids")
   var orderCategoryIds: String = _
+  @Column("order_product_ds")
   var orderProductIds: String = _
+  @Column("pay_category_ids")
   var payCategoryIds: String = _
-  var payProductIds: String = _
+  @Column("pay_product_ids")
+  var payProductIds: String = _  
+
 }
 
-class SessionRandomExtract(_taskId: Long) extends T(_taskId) {
+class SessionRandomExtract(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("session_id")
   var sessionId: String = _
+  @Column("start_time")
   var startTime: String = _
+  @Column("search_keywords")
   var searchKeywords: String = _
+  @Column("click_category_ids")
   var clickCategoryIds: String = _
 }
 
-class Task(_taskId: Long) extends T(_taskId) {
+class Task(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("task_name")
   var taskName: String = _
+  @Column("create_time")
   var createTime: String = _
+  @Column("start_time")
   var startTime: String = _
+  @Column("finish_time")
   var finishTime: String = _
+  @Column("task_type")
   var taskType: String = _
+  @Column("task_status")
   var taskStatus: String = _
-  var taskParam: String = _  
+  @Column("task_param")
+  var taskParam: String = _
 }
 
-class Top10Category(_taskId: Long) extends T(_taskId) {
+class Top10Category(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId) {
+  @Column("category_id")
   var categoryId: String = _
+  @Column("click_count")
   var clickCount: String = _
+  @Column("pay_count")
   var payCount: String = _
+  @Column("order_count")
   var orderCount: String = _
 }
 
-class Top10Session {
+class Top10Session(@ColumnBase("task_id") _taskId: Long) extends Base(_taskId)  {
+  @Column("category_id")
   var categoryId: String = _
+  @Column("session_id")
   var sessionId: String = _
+  @Column("click_count")
   var clickCount: String = _
+  
 }
