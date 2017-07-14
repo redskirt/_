@@ -6,75 +6,77 @@ object E extends Enumeration {
   val ||  = "|"
   val /   = ","
   val ->  = "->"
+  val ___ = "___"
 	  
-	// 配置
-	val $JDBC_DRIVER 					        = Value("jdbc.driver")
-	val $JDBC_DATASOURCE_SIZE 			  = Value("jdbc.datasource.size")
-	val $JDBC_URL 						        = Value("jdbc.url")
-	val $JDBC_USER 						        = Value("jdbc.user")
-	val $JDBC_PASSWORD 					      = Value("jdbc.password")
-	val $JDBC_URL_PROD 					      = Value("jdbc.url.prod")
-	val $JDBC_USER_PROD 				      = Value("jdbc.user.prod")
-	val $JDBC_PASSWORD_PROD 			    = Value("jdbc.password.prod")
-	val $SPARK_LOCAL 					        = Value("spark.local")
-	val $SPARK_LOCAL_TASKID_SESSION 	= Value("spark.local.taskid.session")
-	val $SPARK_LOCAL_TASKID_PAGE 		  = Value("spark.local.taskid.page")
-	val $SPARK_LOCAL_TASKID_PRODUCT 	= Value("spark.local.taskid.product")
-	val $KAFKA_METADATA_BROKER_LIST 	= Value("kafka.metadata.broker.list")
-	val $KAFKA_TOPICS 					      = Value("kafka.topics")
+// 配置
+	val $JDBC_DRIVER 					        = "jdbc.driver"
+	val $JDBC_DATASOURCE_SIZE 			  = "jdbc.datasource.size"
+	val $JDBC_URL 						        = "jdbc.url"
+	val $JDBC_USER 						        = "jdbc.user"
+	val $JDBC_PASSWORD 					      = "jdbc.password"
+	val $JDBC_URL_PROD 					      = "jdbc.url.prod"
+	val $JDBC_USER_PROD 				      = "jdbc.user.prod"
+	val $JDBC_PASSWORD_PROD 			    = "jdbc.password.prod"
+	val $SPARK_LOCAL 					        = "spark.local"
+	val $SPARK_LOCAL_TASKID_SESSION 	= "spark.local.taskid.session"
+	val $SPARK_LOCAL_TASKID_PAGE 		  = "spark.local.taskid.page"
+	val $SPARK_LOCAL_TASKID_PRODUCT 	= "spark.local.taskid.product"
+	val $KAFKA_METADATA_BROKER_LIST 	= "kafka.metadata.broker.list"
+	val $KAFKA_TOPICS 					      = "kafka.topics"
 	
 	//Spark作业
-	val $SPARK_APP_NAME_SESSION 	= Value("UserVisitSessionAnalyzeSpark")
-	val $SPARK_APP_NAME_PAGE 			= Value("PageOneStepConvertRateSpark")
-	val $FIELD_SESSION_ID 				= Value("sessionid")
-	val $FIELD_SEARCH_KEYWORDS 		= Value("searchKeywords")
-	val $FIELD_CLICK_CATEGORY_IDS = Value("clickCategoryIds")
-	val $FIELD_AGE 						    = Value("age")
-	val $FIELD_PROFESSIONAL 			= Value("professional")
-	val $FIELD_CITY 					    = Value("city")
-	val $FIELD_SEX 						    = Value("sex")
-	val $FIELD_VISIT_LENGTH 			= Value("visitLength")
-	val $FIELD_STEP_LENGTH 				= Value("stepLength")
-	val $FIELD_START_TIME 				= Value("startTime")
-	val $FIELD_CLICK_COUNT 				= Value("clickCount")
-	val $FIELD_ORDER_COUNT 				= Value("orderCount")
-	val $FIELD_PAY_COUNT 				  = Value("payCount")
-	val $FIELD_CATEGORY_ID 				= Value("categoryid")
-	val $SESSION_COUNT 					  = Value("session_count")
+	val $SPARK_APP_NAME_SESSION 	= "UserVisitSessionAnalyzeSpark"
+	val $SPARK_APP_NAME_PAGE 			= "PageOneStepConvertRateSpark"
+	val $FIELD_SESSION_ID 				= "sessionId"
+	val $FIELD_SEARCH_KEYWORDS 		= "searchKeywords"
+	val $FIELD_CLICK_CATEGORY_IDS = "clickCategoryIds"
+	val $FIELD_AGE 						    = "age"
+	val $FIELD_PROFESSIONAL 			= "professional"
+	val $FIELD_CITY 					    = "city"
+	val $FIELD_GENDER					    = "gender"
+	val $FIELD_VISIT_LENGTH 			= "visitLength"
+	val $FIELD_STEP_LENGTH 				= "stepLength"
+	val $FIELD_START_TIME 				= "startTime"
+	val $FIELD_CLICK_COUNT 				= "clickCount"
+	val $FIELD_ORDER_COUNT 				= "orderCount"
+	val $FIELD_PAY_COUNT 				  = "payCount"
+	val $FIELD_CATEGORY_ID 				= "categoryId"
+	val $SESSION_COUNT 					  = "sessionCount"
 
-	val $TIME_PERIOD_1s_3s 				= Value("1s_3s")
-	val $TIME_PERIOD_4s_6s 				= Value("4s_6s")
-	val $TIME_PERIOD_7s_9s 				= Value("7s_9s")
-	val $TIME_PERIOD_10s_30s 			= Value("10s_30s")
-	val $TIME_PERIOD_30s_60s 			= Value("30s_60s")
-	val $TIME_PERIOD_1m_3m 				= Value("1m_3m")
-	val $TIME_PERIOD_3m_10m 			= Value("3m_10m")
-	val $TIME_PERIOD_10m_30m 			= Value("10m_30m")
-	val $TIME_PERIOD_30m 				  = Value("30m")
+	val $TIME_PERIOD_1s_3s 				= "1s_3s"
+	val $TIME_PERIOD_4s_6s 				= "4s_6s"
+	val $TIME_PERIOD_7s_9s 				= "7s_9s"
+	val $TIME_PERIOD_10s_30s 			= "10s_30s"
+	val $TIME_PERIOD_30s_60s 			= "30s_60s"
+	val $TIME_PERIOD_1m_3m 				= "1m_3m"
+	val $TIME_PERIOD_3m_10m 			= "3m_10m"
+	val $TIME_PERIOD_10m_30m 			= "10m_30m"
+	val $TIME_PERIOD_30m 				  = "30m"
 
-	val $STEP_PERIOD_1_3 				  = Value("1_3")
-	val $STEP_PERIOD_4_6 				  = Value("4_6")
-	val $STEP_PERIOD_7_9 				  = Value("7_9")
-	val $STEP_PERIOD_10_30 				= Value("10_30")
-	val $STEP_PERIOD_30_60 				= Value("30_60")
-	val $STEP_PERIOD_60 				  = Value("60")
+	val $STEP_PERIOD_1_3 				  = "1_3"
+	val $STEP_PERIOD_4_6 				  = "4_6"
+	val $STEP_PERIOD_7_9 				  = "7_9"
+	val $STEP_PERIOD_10_30 				= "10_30"
+	val $STEP_PERIOD_30_60 				= "30_60"
+	val $STEP_PERIOD_60 				  = "60"
 	
 	// 任务参数
-	val $PARAM_START_DATE 				= Value("startDate")
-	val $PARAM_END_DATE 				  = Value("endDate")
-	val $PARAM_START_AGE 				  = Value("startAge")
-	val $PARAM_END_AGE 					  = Value("endAge")
-	val $PARAM_PROFESSIONALS 			= Value("professionals")
-	val $PARAM_CITIES 					  = Value("cities")
-	val $PARAM_SEX 						    = Value("sex")
-	val $PARAM_KEYWORDS 				  = Value("keywords")
-	val $PARAM_CATEGORY_IDS 			= Value("categoryIds")
-	val $PARAM_TARGET_PAGE_FLOW 	= Value("targetPageFlow")  
+	val $PARAM_START_DATE 				= "startDate"
+	val $PARAM_END_DATE 				  = "endDate"
+	val $PARAM_START_AGE 				  = "startAge"
+	val $PARAM_END_AGE 					  = "endAge"
+	val $PARAM_PROFESSIONALS 			= "professionals"
+	val $PARAM_CITIES 					  = "cities"
+	val $PARAM_GENDER 						= "gender"
+	val $PARAM_KEYWORDS 				  = "keywords"
+	val $PARAM_CATEGORY_IDS 			= "categoryIds"
+	val $PARAM_TARGET_PAGE_FLOW 	= "targetPageFlow"	 
 }
 
 object Main {
   import com.sasaki.lp.enums.E._
   def main(args: Array[String]): Unit = {
     println(|)
+    println(||)
   }
 }

@@ -20,7 +20,7 @@ user_info: 999|user999|name999|23|professional25|city61|female|
 3	age
 4	professional
 5	city
-6	sex
+6	gender
 
 product_info: 99|product99|{"product_status": 0}|
 0	product_id
