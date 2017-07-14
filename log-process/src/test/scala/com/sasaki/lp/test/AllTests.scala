@@ -52,7 +52,7 @@ class AllTests extends Assert {
     
     JField("name", JString("name"))
     
-    println((jsonObj \ "id").intern + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
+    println((jsonObj \ "id").values + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
     
   }
 }
