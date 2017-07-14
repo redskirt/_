@@ -11,6 +11,9 @@ import org.apache.spark.rdd.RDD
 import com.sasaki.lp.persistence.QueryHelper._
 import com.sasaki.lp.persistence.LppSchema._
 import com.sasaki.lp.poso._
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods._
 
 class UserVisitSessionAnalyze {
   
@@ -98,7 +101,8 @@ object UserVisitSessionAnalyze {
     	)
     })
 
-//    val tark: Task = queryById(1, $task)
+    val task: Task = queryById(1, $task)
+    val param = parse(task.taskParam, true)
     val date = "2017-07-05"
     val date_ = "2017-07-05"
     

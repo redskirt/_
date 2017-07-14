@@ -39,7 +39,20 @@ class AllTests extends Assert {
 //    }
     
     transaction(sessionFactory)(println(queryById(1, $task).createTime))
+  }
+  
+  @Test
+  def testJSON = {
+    import org.json4s._
+    import org.json4s.JsonDSL._
+    import org.json4s.native.JsonMethods._
     
+    val json = "{\"id\": 1, \"name\": \"sasaki\", \"seq\": [1, 2, 3, 4]}"
+    val jsonObj = parse(json, true)
+    
+    JField("name", JString("name"))
+    
+    println((jsonObj \ "id").intern + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
     
   }
 }
