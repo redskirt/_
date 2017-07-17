@@ -1,13 +1,15 @@
 package com.sasaki.lp.test
 
-import org.junit.{Assert, Test}
-import com.sasaki.lp.poso.Task
+import org.junit.Assert
+import org.junit.Test
 import org.squeryl.KeyedEntity
 import org.squeryl.PrimitiveTypeMode._
-import org.squeryl.SessionFactory
-import com.sasaki.lp.persistence.QueryHelper._
-import com.sasaki.lp.persistence.LppSchema._
 import org.squeryl.Session
+import org.squeryl.SessionFactory
+
+import com.sasaki.lp.persistence.LppSchema._
+import com.sasaki.lp.persistence.QueryHelper._
+import com.sasaki.lp.poso.Task
 
 @Test
 class AllTests extends Assert {
@@ -44,15 +46,16 @@ class AllTests extends Assert {
   @Test
   def testJSON = {
     import org.json4s._
-    import org.json4s.JsonDSL._
-    import org.json4s.native.JsonMethods._
-    
-    val json = "{\"id\": 1, \"name\": \"sasaki\", \"seq\": [1, 2, 3, 4]}"
+    import org.json4s.jackson.JsonMethods._
+    val json = """
+    {"id": 1, "name": "sasaki", "seq": [1, 2, 3, 4]}
+    """
     val jsonObj = parse(json, true)
+    case class P(`id`: Int, `name`: String)    
     
-    JField("name", JString("name"))
-    
-    println((jsonObj \ "id").values + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
-    
+   // println((jsonObj \ "id").values + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
+    implicit val formats = DefaultFormats 
+  //    val p: P = jsonObj.extract[P]
+    println(jsonObj.\("name").extract[String])
   }
 }

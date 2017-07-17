@@ -13,7 +13,7 @@ import com.sasaki.lp.persistence.LppSchema._
 import com.sasaki.lp.poso._
 import org.json4s._
 import org.json4s.JsonDSL._
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson.JsonMethods._
 
 class UserVisitSessionAnalyze {
   
@@ -27,7 +27,7 @@ object UserVisitSessionAnalyze {
   /**
    * 查询用户提交时间范围的访问记录作为公共RDD
    */
-  def rddUserAction(sc: SparkContext, sqlContext: SQLContext, date: String, date_ : String): RDD[Row] = {
+  def rddUserAction(sc: SparkContext, sqlContext: SQLContext, startDate: String, finishDate : String): RDD[Row] = {
     val strUserVisitAction = "date|user_id|session_id|page_id|action_time|search_keyword|click_category_id|click_product_id|order_category_ids|order_product_ids|pay_category_ids|pay_product_ids|city_id|"
 	  
 	  val schemaUserVisitAction = StructType({
@@ -59,12 +59,12 @@ object UserVisitSessionAnalyze {
     dfUserVisitAction.createOrReplaceTempView("user_visit_action")
     //    sqlContext.sql("select count(0) from user_visit_action").show()  
     
-    val sqlCount = s"""select count(0) from user_visit_action where date>='$date' and date<='$date_'"""
+    val sqlCount = s"""select count(0) from user_visit_action where date>='$startDate' and date<='$finishDate'"""
     sqlContext.sql(sqlCount).show()
     assert(0 != sqlContext.sql(sqlCount).collect()(0).get(0).toString.toInt, "--> Have no dataset from this query.")    
     
     // 公共RDD
-    val rddUserAction = sqlContext.sql(s"""select * from user_visit_action where date>='$date' and date<='$date_'""").rdd.repartition(10)
+    val rddUserAction = sqlContext.sql(s"""select * from user_visit_action where date>='$startDate' and date<='$finishDate'""").rdd.repartition(10)
     
     rddUserAction
   }
@@ -103,12 +103,10 @@ object UserVisitSessionAnalyze {
 
     val task: Task = queryById(1, $task)
     val param = parse(task.taskParam, true)
-    val date = "2017-07-05"
-    val date_ = "2017-07-05"
-    
 
     // 映射RDD sessionId___userAction
-    val rddSessionId___UserAction = rddUserAction(sc, sqlContext, date, date_).mapPartitions(__ => {
+    implicit val formats = DefaultFormats
+    val rddSessionId___UserAction = rddUserAction(sc, sqlContext, (param \ "startDate").extract[String], param.\("finishDate").extract[String]).mapPartitions(__ => {
       var list = List[(String, Row)]()
       while (__.hasNext) {
         val o = __.next
@@ -119,16 +117,18 @@ object UserVisitSessionAnalyze {
     
     // 持久化RDD rddSessionId___UserAction
     // val rddSessionId___UserAction = rddSessionId___UserAction.persist(StorageLevel.MEMORY_ONLY/**纯内存方式等同于cache*/)
-    val rddSessionId___UserAction_ = rddSessionId___UserAction.cache()
-//    println(rddSessionId___UserAction.count())
+    val rddSessionId___UserAction_ = rddSessionId___UserAction.cache
+    // println(rddSessionId___UserAction.count())
     
     /**
      * rddSessionID___Action 按session_id进行分组聚合；
      * Action中，仅得到商品的搜索词和种类信息；
      * 将rddSessionID___Action 与 user_info 按user_id关联。
      */
+    // 构造 RDD[UserId, UserInfo]
     val rddUserId___UserInfo = sqlContext.sql("select * from user_info").rdd.map(__ => (__.getLong(0)/*user_id*/, __))
     
+    // 将RDD[SessionId, UserAction_]重新映射，构造 RDD[UserId, UserAction]
     val rddUserId___UserAction = rddSessionId___UserAction_
       .groupByKey()// session_id 分组
       .map(__ => {

@@ -27,7 +27,7 @@ object QueryHelper {
   }
  
   def list(t: Table[_<: Base]) = t.seq
-  def queryById[T <: Base](id: Long, t: Table[T]) = from(t)(__ => where(__.taskId === id) select(__)).single
+  def queryById[T <: Base](id: Long, t: Table[T]): T = from(t)(__ => where(__.taskId === id) select(__)).single
   
 }
 
