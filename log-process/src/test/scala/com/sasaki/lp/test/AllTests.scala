@@ -58,4 +58,16 @@ class AllTests extends Assert {
   //    val p: P = jsonObj.extract[P]
     println(jsonObj.\("name").extract[String])
   }
+  
+  import com.sasaki.lp.enums.E._
+  def key(k: String, s: String): String = 
+    s.split(|).map(__ => (__.split(->)(0), __.split(->)(1))).takeWhile(_._1.equals(k))(0)._2
+    
+ 
+  @Test
+  def testUtil {
+    val str = "k1->v1|k2->v2|k3->v3"
+    println(str.split(|).map(__ => (__.split(->)(0), __.split(->)(1))).takeWhile(__ => __._1 =="k2").size)
+//    println(key("k2", str))      
+  }
 }

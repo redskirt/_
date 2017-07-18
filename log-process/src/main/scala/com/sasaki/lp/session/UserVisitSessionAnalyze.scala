@@ -10,14 +10,16 @@ import org.json4s._
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods._
 
-import com.sasaki.lp.enums.E._
 import com.sasaki.lp.persistence.LppSchema._
 import com.sasaki.lp.persistence.QueryHelper._
 import com.sasaki.lp.poso._
+import com.sasaki.lp.enums.E._
 
 class UserVisitSessionAnalyze {
   
 }
+
+
 
 object UserVisitSessionAnalyze {
   val conf = new SparkConf()
@@ -125,10 +127,8 @@ object UserVisitSessionAnalyze {
      * Action中，仅得到商品的搜索词和种类信息；
      * 将rddSessionID___Action 与 user_info 按user_id关联。
      */
-    // 构造 RDD[UserId, UserInfo]
-    val rddUserId___UserInfo = sqlContext.sql("select * from user_info").rdd.map(__ => (__.getLong(0)/*user_id*/, __))
     
-    // 将RDD[SessionId, UserAction_]重新映射，构造 RDD[UserId, UserAction]
+    // 将RDD[SessionId, UserAction_]重新映射，构造 RDD[UserId -> sessionid,searchKeywords,clickCategoryIds]
     val rddUserId___UserAction = rddSessionId___UserAction
       .groupByKey()// session_id 分组
       .map(__ => {
@@ -156,14 +156,28 @@ object UserVisitSessionAnalyze {
         val clickCategoryIds = clickCategoryId.substring(0, clickCategoryId.lastIndexOf(/))
         
         (user_id, 
-          // 拼接格式 k1->v1|key2->v2  
+          // 拼接格式 k1->v1|k2->v2  
           $FIELD_SESSION_ID + -> + session_id + | +
           $FIELD_SEARCH_KEYWORDS + -> + searchKeywords + | +
           $FIELD_CLICK_CATEGORY_IDS + -> + clickCategoryIds 
         )
       })
     
-    val rddUserInfo_UserAction = rddUserId___UserInfo.join(rddUserId___UserAction)
+    // 查询用户信息RDD[UserId, UserInfo]
+    val rddUserId___UserInfo = sqlContext.sql("select * from user_info")
+      .rdd 
+      .map(__ => (__.getLong(0), __))
+      
+   val rddSessionId___UserAction_UserInfo = rddUserId___UserAction
+     .join(rddUserId___UserInfo) // 将session粒度聚合数据，与用户信息进行join
+     .map {__ =>
+       val userAction: String = __._2._1
+       val userInfo: Row = __._2._2
+       val sessionId = userAction.split(|)(0).split(->)(0)
+
+    }
+   
+   
     
     sc.stop()
   }
