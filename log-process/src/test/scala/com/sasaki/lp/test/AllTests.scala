@@ -60,14 +60,25 @@ class AllTests extends Assert {
   }
   
   import com.sasaki.lp.enums.E._
-  def key(k: String, s: String): String = 
-    s.split(|).map(__ => (__.split(->)(0), __.split(->)(1))).takeWhile(_._1.equals(k))(0)._2
+  def keyFrom(k: String/*key pattern*/, s: String/*source string*/): String = {
+    val pairs: Array[(String, String)] = s.split(|).map(__ => (__.split(->)(0), __.split(->)(1)))
+    
+    @annotation.tailrec
+    def loop(n: Int, k: String): String = 
+      if(n >= pairs.length) null
+      else if(pairs(n)._1 == k) pairs(n)._2
+      else loop(n + 1, k)
+    
+    loop(0, k)
+  }
+    
     
  
   @Test
   def testUtil {
     val str = "k1->v1|k2->v2|k3->v3"
-    println(str.split(|).map(__ => (__.split(->)(0), __.split(->)(1))).takeWhile(__ => __._1 =="k2").size)
-//    println(key("k2", str))      
+//    println(str.split(|).map(__ => (__.split(->)(0), __.split(->)(1))).take(2)(0))
+//    str.split(|).map(__ => (__.split(->)(0), __.split(->)(1)))
+    println(keyFrom("k3", str))      
   }
 }

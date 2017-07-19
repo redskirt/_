@@ -14,6 +14,7 @@ import com.sasaki.lp.persistence.LppSchema._
 import com.sasaki.lp.persistence.QueryHelper._
 import com.sasaki.lp.poso._
 import com.sasaki.lp.enums.E._
+import com.sasaki.lp.util.Util
 
 class UserVisitSessionAnalyze {
   
@@ -168,13 +169,17 @@ object UserVisitSessionAnalyze {
       .rdd 
       .map(__ => (__.getLong(0), __))
       
-   val rddSessionId___UserAction_UserInfo = rddUserId___UserAction
+   val rddSessionId___userAction_userInfo = rddUserId___UserAction
      .join(rddUserId___UserInfo) // 将session粒度聚合数据，与用户信息进行join
      .map {__ =>
        val userAction: String = __._2._1
        val userInfo: Row = __._2._2
-       val sessionId = userAction.split(|)(0).split(->)(0)
+       val sessionId = Util.keyFrom($FIELD_SESSION_ID, userAction)
 
+       (userAction, 
+           userAction 
+             
+       )
     }
    
    

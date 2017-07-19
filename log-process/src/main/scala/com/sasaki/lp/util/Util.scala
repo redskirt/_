@@ -4,7 +4,9 @@ package com.sasaki.lp.util
  *
  */
 object Util {
-  
+  /**
+   * Prop 及相关方法待改造，不捕获外部变量，改造函数式
+   */
   private val _prop_ = new java.util.Properties()
   try {
 	  _prop_.load(this.getClass.getClassLoader.getResourceAsStream("runtime.properties"))
@@ -18,6 +20,19 @@ object Util {
     var f = true
     keys.foreach(__ => if(!_prop_.containsKey(__)) f = false)
     f
+  }
+ 
+  import com.sasaki.lp.enums.E._
+  def keyFrom(k: String/*key pattern*/, s: String/*source string*/): String = {
+    val pairs: Array[(String, String)] = s.split(|).map(__ => (__.split(->)(0), __.split(->)(1)))
+    
+    @annotation.tailrec
+    def loop(n: Int, k: String): String = 
+      if(n >= pairs.length) null
+      else if(pairs(n)._1 == k) pairs(n)._2
+      else loop(n + 1, k)
+    
+    loop(0, k)
   }
   
   def main(args: Array[String]): Unit = {

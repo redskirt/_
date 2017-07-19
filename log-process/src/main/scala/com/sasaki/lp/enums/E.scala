@@ -7,8 +7,8 @@ object E extends Enumeration {
   val /   = ","
   val ->  = "->"
   val ___ = "___"
-	  
-// 配置
+	
+  // 配置
 	val $JDBC_DRIVER 					        = "jdbc.driver"
 	val $JDBC_DATASOURCE_SIZE 			  = "jdbc.datasource.size"
 	val $JDBC_URL 						        = "jdbc.url"
@@ -71,12 +71,14 @@ object E extends Enumeration {
 	val $PARAM_KEYWORDS 				  = "keywords"
 	val $PARAM_CATEGORY_IDS 			= "categoryIds"
 	val $PARAM_TARGET_PAGE_FLOW 	= "targetPageFlow"	 
+	
 }
 
 object Main {
   import com.sasaki.lp.enums.E._
   def main(args: Array[String]): Unit = {
     println(|)
-    println(||)
+    
+    
   }
 }
