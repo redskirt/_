@@ -10,6 +10,7 @@ import org.squeryl.SessionFactory
 import com.sasaki.lp.persistence.LppSchema._
 import com.sasaki.lp.persistence.QueryHelper._
 import com.sasaki.lp.poso.Task
+import com.sasaki.lp.util.Util
 
 @Test
 class AllTests extends Assert {
@@ -48,7 +49,7 @@ class AllTests extends Assert {
     import org.json4s._
     import org.json4s.jackson.JsonMethods._
     val json = """
-    {"id": 1, "name": "sasaki", "seq": [1, 2, 3, 4]}
+    {"id": 1, "salary": 234.22, "flag": true, "name": "sasaki", "seq": [1, 2, 3, 4]}
     """
     val jsonObj = parse(json, true)
     case class P(`id`: Int, `name`: String)    
@@ -56,19 +57,30 @@ class AllTests extends Assert {
    // println((jsonObj \ "id").values + " " + (jsonObj \ "name").values+ " " + (jsonObj \ "seq").values)
     implicit val formats = DefaultFormats 
   //    val p: P = jsonObj.extract[P]
-    println(jsonObj.\("name").extract[String])
+  //    println(jsonObj.\("name2"))
+  
+  //    val p = jsonObj \ "name2"  match {
+  //      case JNothing => ""
+  //      case JString(_) => jsonObj.\("name2").extract[String]
+  //    }
+//    println((jsonObj \ "flag").extract[Boolean])
+    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
+    
+    val e: Int = Util.extractFrom("id", json)
+    println(1)
+    
   }
   
   import com.sasaki.lp.enums.E._
   def keyFrom(k: String/*key pattern*/, s: String/*source string*/): String = {
-    val pairs: Array[(String, String)] = s.split(|).map(__ => (__.split(->)(0), __.split(->)(1)))
+    val pairs: Array[(String, String)] = s.split($).map(__ => (__.split(->)(0), __.split(->)(1)))
     
     @annotation.tailrec
     def loop(n: Int, k: String): String = 
       if(n >= pairs.length) null
       else if(pairs(n)._1 == k) pairs(n)._2
       else loop(n + 1, k)
-    
+
     loop(0, k)
   }
     

@@ -1,5 +1,6 @@
 package com.sasaki.lp.util
 
+
 /**
  *
  */
@@ -23,8 +24,8 @@ object Util {
   }
  
   import com.sasaki.lp.enums.E._
-  def keyFrom(k: String/*key pattern*/, s: String/*source string*/): String = {
-    val pairs: Array[(String, String)] = s.split(|).map(__ => (__.split(->)(0), __.split(->)(1)))
+  def keyFrom(k: String/*<-- key pattern*/, s: String/*<-- source string*/): String = {
+    val pairs: Array[(String, String)] = s.split($).map(__ => (__.split(->)(0), __.split(->)(1)))
     
     @annotation.tailrec
     def loop(n: Int, k: String): String = 
@@ -34,6 +35,37 @@ object Util {
     
     loop(0, k)
   }
+  
+  import org.json4s._
+  import org.json4s.JsonAST.JValue
+  import org.json4s.JsonAST.JString
+  import org.json4s.jackson.JsonMethods._
+  implicit val formats = org.json4s.DefaultFormats
+  /**
+   * @param k 		key Pattern
+   * @param json	json String
+   */
+  def extractFrom(k: String/*<-- key pattern*/, json: String/*<-- json String*/): Any = {
+    val o = parse(json, true) \ k
+    o match {
+      case JString(_)   => o.extract[String]
+      case JBool(_)     => o.extract[Boolean]
+      case JDecimal(_) | JInt(_)  => o.extract[Integer]
+      case JDouble(_)   => o.extract[Double]
+      case JArray(_)    => o.extract[Array[Any]]
+      case JObject(_)   => o.extract[Object]
+      case JNothing | JNull => ""
+    }
+  }
+  
+  def between() = {
+    
+  }
+  
+  def has() = {
+    
+  }
+
   
   def main(args: Array[String]): Unit = {
 //    println(Util.prop("kafka.metadata.broker.list"))

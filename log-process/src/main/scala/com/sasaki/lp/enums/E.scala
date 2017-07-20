@@ -2,12 +2,22 @@ package com.sasaki.lp.enums
 
 object E extends Enumeration {
   
-	val |   = '|'
-  val ||  = "|"
+	val $   = "$"
   val /   = ","
   val ->  = "->"
   val ___ = "___"
-	
+  
+  // ----------- 表列下标  -------------------
+  // user_info
+  val $user_id = 0
+  val $user_name = 1
+  val $name = 2
+  val $age = 3
+	val $professional = 4
+	val $city = 5
+	val $gender = 6
+  
+  
   // 配置
 	val $JDBC_DRIVER 					        = "jdbc.driver"
 	val $JDBC_DATASOURCE_SIZE 			  = "jdbc.datasource.size"
@@ -62,9 +72,9 @@ object E extends Enumeration {
 	
 	// 任务参数
 	val $PARAM_START_DATE 				= "startDate"
-	val $PARAM_END_DATE 				  = "endDate"
-	val $PARAM_START_AGE 				  = "startAge"
-	val $PARAM_END_AGE 					  = "endAge"
+	val $PARAM_FINISH_DATE 				= "finishDate"
+	val $PARAM_FROM_AGE 				  = "fromAge"
+	val $PARAM_TO_AGE 					  = "toAge"
 	val $PARAM_PROFESSIONALS 			= "professionals"
 	val $PARAM_CITIES 					  = "cities"
 	val $PARAM_GENDER 						= "gender"
@@ -77,8 +87,7 @@ object E extends Enumeration {
 object Main {
   import com.sasaki.lp.enums.E._
   def main(args: Array[String]): Unit = {
-    println(|)
-    
+    println($)
     
   }
 }
