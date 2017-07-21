@@ -63,11 +63,11 @@ class AllTests extends Assert {
   //      case JNothing => ""
   //      case JString(_) => jsonObj.\("name2").extract[String]
   //    }
-//    println((jsonObj \ "flag").extract[Boolean])
-    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
+  //    println((jsonObj \ "flag").extract[Boolean])
+  //    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
     
-    val e: Int = Util.extractFrom("id", json)
-    println(1)
+    val e = Util.extractFrom("name", json)
+    println(e)
     
   }
   

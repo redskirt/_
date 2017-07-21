@@ -45,7 +45,8 @@ object Util {
    * @param k 		key Pattern
    * @param json	json String
    */
-  def extractFrom(k: String/*<-- key pattern*/, json: String/*<-- json String*/): Any = {
+  import scala.reflect.runtime.universe._
+  def extractFrom[T <: Any](k: String/*<-- key pattern*/, json: String/*<-- json String*/) = {
     val o = parse(json, true) \ k
     o match {
       case JString(_)   => o.extract[String]
@@ -62,15 +63,46 @@ object Util {
     
   }
   
-  def has() = {
+  def has(data: String, dKey: String, param: String, pKey: String): Boolean = {
+    val pValue = keyFrom(pKey, param)
+    if(pValue == null) 
+      return true // <-- ???
     
+    val pValues = pValue.split(->)
+    
+    val dValue = keyFrom(dKey, data)
+    if(dValue.nonEmpty) {
+      val dValues = dValue.split(->)
+      pValues.foreach(__ => /*dValues.foreach(___ => if(___.equals(__)) return true)*/ println(__))
+    }
+    
+    false
   }
 
+  class GenericClass[T](value:T)
+  
+  import scala.reflect.runtime.universe._
+  def checkType[T](generic: GenericClass[T])(implicit t: TypeTag[T]):Unit = t.tpe match {
+    case tpe if tpe =:= typeOf[Int] =>
+      println("a int generic class")
+    case tpe if tpe =:= typeOf[String] =>
+      println("a string generic class")
+    case _ =>
+      println("a unknown generic class")
+  }
   
   def main(args: Array[String]): Unit = {
 //    println(Util.prop("kafka.metadata.broker.list"))
-    println(hasConstants("jdbc.url", "" ))
+//    println(hasConstants("jdbc.url", "" ))
 //    println(_prop_.containsKey("jdbc.url"))
+    	val data = "name->sasaki$age->20";
+		  val parameter = "name->sasaki$age->20$a->1,2,3,4$b->43,55,32,20";
+
+//		  println(keyFrom("b", parameter))
+//		  println(has(data, "age", parameter, "b"))
+//		  println("1$23".split('$')(1))
+		  println(checkType(new GenericClass(1))) 
+		  
   }
   
   

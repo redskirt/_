@@ -172,9 +172,10 @@ object UserVisitSessionAnalyze {
     
     // 映射RDD sessionId___userAction，并分组
     implicit val formats = DefaultFormats
-    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
+//    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
+//    val startDate: String = Util.extractFrom($PARAM_START_DATE, params)(Predef.String)
     
-    val rddUserAction = rddUserActionFunc(sc, sqlContext, Util.extractFrom($PARAM_START_DATE, params), Util.extractFrom($PARAM_FINISH_DATE, params))
+    val rddUserAction = rddUserActionFunc(sc, sqlContext, "???" , "???" /*startDate, Util.extractFrom($PARAM_FINISH_DATE, params)*/)
     // 持久化公用RDD rddUserAction
     // val rddUserAction_ = rddUserAction.persist(StorageLevel.MEMORY_ONLY/**纯内存方式等同于cache*/)
     val rddUserAction_ = rddUserAction.cache
@@ -213,7 +214,9 @@ object UserVisitSessionAnalyze {
       val userAction_UserInfo = __._2
       
       // ------- TODO
+      false
     }  
+      
     val rddFilteredSessionId___UserAction_UserInfo_ = rddFilteredSessionId___UserAction_UserInfo.cache()
       
 //    val p = rddSessionId___UserAction_UserInfo.join(rddSessionId___UserAction)  

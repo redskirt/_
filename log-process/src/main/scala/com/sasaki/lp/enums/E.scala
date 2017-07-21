@@ -2,7 +2,7 @@ package com.sasaki.lp.enums
 
 object E extends Enumeration {
   
-	val $   = "$"
+	val $   = '$'
   val /   = ","
   val ->  = "->"
   val ___ = "___"
