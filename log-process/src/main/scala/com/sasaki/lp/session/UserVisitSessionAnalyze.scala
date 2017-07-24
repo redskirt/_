@@ -117,13 +117,14 @@ object UserVisitSessionAnalyze {
     val rddUserId___UserInfo = sqlContext.sql("select * from user_info")
       .rdd 
       .map(__ => (__.getLong(0), __))
-      
-   val rddSessionId___userAction_userInfo = rddUserId___UserAction
+   
+    implicit val formats = org.json4s.DefaultFormats
+    val rddSessionId___userAction_userInfo = rddUserId___UserAction
      .join(rddUserId___UserInfo) // 将session粒度聚合数据，与用户信息进行join
      .map {__ =>
        val userAction: String = __._2._1
        val userInfo: Row = __._2._2
-       val sessionId = Util.keyFrom($FIELD_SESSION_ID, userAction)
+       val sessionId = (parse(userAction) \ $FIELD_SESSION_ID).extract[String]
 
        (sessionId, 
            userAction + $ +
@@ -166,16 +167,13 @@ object UserVisitSessionAnalyze {
         StructField(o(2), StringType, true)   
     	)
     })
-
+  
     val task: Task = queryById(1, $task)
-    val params = task.taskParam
+    val params = parse(task.taskParam)
     
     // 映射RDD sessionId___userAction，并分组
-    implicit val formats = DefaultFormats
-//    implicit def anyToT[T <: Any](a: Any): T = a.asInstanceOf[T]
-//    val startDate: String = Util.extractFrom($PARAM_START_DATE, params)(Predef.String)
-    
-    val rddUserAction = rddUserActionFunc(sc, sqlContext, "???" , "???" /*startDate, Util.extractFrom($PARAM_FINISH_DATE, params)*/)
+    implicit val formats = org.json4s.DefaultFormats
+    val rddUserAction = rddUserActionFunc(sc, sqlContext, (params \ $PARAM_START_DATE).extract[String], (params \ $PARAM_FINISH_DATE).extract[String])
     // 持久化公用RDD rddUserAction
     // val rddUserAction_ = rddUserAction.persist(StorageLevel.MEMORY_ONLY/**纯内存方式等同于cache*/)
     val rddUserAction_ = rddUserAction.cache
@@ -192,14 +190,13 @@ object UserVisitSessionAnalyze {
     val rddSessionId___UserAction_UserInfo: RDD[(String, String)] = rddSessionId___UserAction_UserInfoFunc(sqlContext, rddSessionId___UserAction)
    
     // 根据params 过滤 rddSessionId___UserAction_UserInfo
-    
-    val _fromAge_ = Util.extractFrom($PARAM_FROM_AGE, params)
-    val _toAge_ =  Util.extractFrom($PARAM_TO_AGE, params)
-    val _professionals_ =  Util.extractFrom($PARAM_PROFESSIONALS, params)
-    val _cities_ =  Util.extractFrom($PARAM_CITIES, params)
-    val _gender_ =  Util.extractFrom($PARAM_GENDER, params)
-    val _keywords_ =  Util.extractFrom($PARAM_KEYWORDS, params)
-    val _categoryIds_ =  Util.extractFrom($PARAM_CATEGORY_IDS, params)
+    val _fromAge_ = (params \ $PARAM_FROM_AGE).extract[Int]
+    val _toAge_ =  (params \ $PARAM_TO_AGE).extract[Int]
+    val _professionals_ =  (params \ $PARAM_PROFESSIONALS).extract[String]
+    val _cities_ =  (params \ $PARAM_CITIES).extract[String]
+    val _gender_ =  (params \ $PARAM_GENDER).extract[String]
+    val _keywords_ =  (params \ $PARAM_KEYWORDS).extract[String]
+    val _categoryIds_ =  (params \ $PARAM_CATEGORY_IDS).extract[String]
     
     val _param_ = 
       $PARAM_FROM_AGE + -> + _fromAge_ + $ +
@@ -212,8 +209,14 @@ object UserVisitSessionAnalyze {
       
     val rddFilteredSessionId___UserAction_UserInfo = rddSessionId___UserAction_UserInfo.filter{__ => 
       val userAction_UserInfo = __._2
+
+      // 年龄：age 在 [fromAge, toAge] 范围
+      Util.between(userAction_UserInfo, $FIELD_AGE, _param_, $PARAM_FROM_AGE, $PARAM_TO_AGE)
       
-      // ------- TODO
+      // 职业：professional 属于 professionals
+      Util.include(userAction_UserInfo, $FIELD_PROFESSIONAL, _param_, $PARAM_PROFESSIONALS)
+      
+      
       false
     }  
       

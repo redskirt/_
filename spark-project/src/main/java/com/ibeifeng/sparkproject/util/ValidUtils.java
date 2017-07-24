@@ -106,10 +106,11 @@ public class ValidUtils {
 	}
 	
 	public static void main(String[] args) {
-		String data = "name=sasaki|age=20";
+		String data = "name=sasaki|age=203";
 		String parameter = "name=sasaki|age=20|a=1,2,3,4|b=43,55,32,20";
 		
-		System.out.println(in(data, "age", parameter, "c"));
+//		System.out.println(in(data, "age", parameter, "c"));
+		System.out.println(equal(data, "age", parameter, "age"));
 				
 	}
 }
