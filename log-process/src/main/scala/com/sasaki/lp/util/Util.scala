@@ -154,8 +154,8 @@ object Util {
       
       def compare(x: Int, y: Int): Boolean = x > y 
       println(List(1, 2, 3, 4, 5).filter { x =>  
-          compare(x, 3)
-          compare(x, 2)
+//          compare(x, 2) && compare(x, 3)
+            x>2 && x>3 && false && false     
     	}
       )
   }

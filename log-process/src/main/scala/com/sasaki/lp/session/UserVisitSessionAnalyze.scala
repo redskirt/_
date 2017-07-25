@@ -15,6 +15,8 @@ import com.sasaki.lp.persistence.QueryHelper._
 import com.sasaki.lp.poso._
 import com.sasaki.lp.enums.E._
 import com.sasaki.lp.util.Util
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class UserVisitSessionAnalyze {
   
@@ -207,23 +209,42 @@ object UserVisitSessionAnalyze {
       $PARAM_KEYWORDS + -> + _keywords_ + $ +
       $PARAM_CATEGORY_IDS + -> + _categoryIds_
       
-    val rddFilteredSessionId___UserAction_UserInfo = rddSessionId___UserAction_UserInfo.filter{__ => 
+    val rddFilteredSessionId___UserAction_UserInfo = rddSessionId___UserAction_UserInfo.filter {__ => 
       val userAction_UserInfo = __._2
-
-      // 年龄：age 在 [fromAge, toAge] 范围
-      Util.between(userAction_UserInfo, $FIELD_AGE, _param_, $PARAM_FROM_AGE, $PARAM_TO_AGE)
-      
-      // 职业：professional 属于 professionals
-      Util.include(userAction_UserInfo, $FIELD_PROFESSIONAL, _param_, $PARAM_PROFESSIONALS)
-      
-      
-      false
+      /**
+       * 必须满足所有条件，列入统计
+       */
+      // 年龄：age 不在 [fromAge, toAge] 范围
+      Util.between(userAction_UserInfo, $FIELD_AGE, _param_, $PARAM_FROM_AGE, $PARAM_TO_AGE) &&
+      // 职业：professional 不属于 professionals
+      Util.include(userAction_UserInfo, $FIELD_PROFESSIONAL, _param_, $PARAM_PROFESSIONALS) &&
+      // 城市：city 不属于 cities
+      Util.include(userAction_UserInfo, $FIELD_CITY, _param_, $PARAM_CITIES) &&
+      // 性别：gender 不等于 gender
+      Util.equal(userAction_UserInfo, $FIELD_GENDER, _param_, $PARAM_GENDER) &&
+      // 搜索词：searchKeywords 没有任意一个属于 keywords
+      Util.include(userAction_UserInfo, $FIELD_SEARCH_KEYWORDS, _param_, $PARAM_KEYWORDS) &&
+      // 种类ID：clickCategoryIds 没有任意一个属于 categoryIds
+      Util.include(userAction_UserInfo, $FIELD_CLICK_CATEGORY_IDS, _param_, $PARAM_CATEGORY_IDS)
     }  
       
     val rddFilteredSessionId___UserAction_UserInfo_ = rddFilteredSessionId___UserAction_UserInfo.cache()
       
-//    val p = rddSessionId___UserAction_UserInfo.join(rddSessionId___UserAction)  
+    val rddFilteredSessionId___UserAction = rddFilteredSessionId___UserAction_UserInfo_
+      .join(rddSessionId___UserAction)  
+      .map(__ => (__._1/*<-- SessionId*/, __._2._2/*<-- UserAction*/))
     
+    /**
+     * 随机抽取Session
+     */
+    //
+    val time___sessionId = rddFilteredSessionId___UserAction_UserInfo_
+      .map{__ => 
+        val userAction_UserInfo = __._2
+        val startTime = (parse(userAction_UserInfo) \ $FIELD_START_TIME).extract[String]
+    
+    }
+      
     sc.stop()
   }
 }

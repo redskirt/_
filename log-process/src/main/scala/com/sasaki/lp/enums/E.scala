@@ -9,13 +9,13 @@ object E extends Enumeration {
   
   // ----------- 表列下标  -------------------
   // user_info
-  val $user_id = 0
-  val $user_name = 1
-  val $name = 2
-  val $age = 3
-	val $professional = 4
-	val $city = 5
-	val $gender = 6
+  val $user_id       = 0
+  val $user_name     = 1
+  val $name          = 2
+  val $age           = 3
+	val $professional  = 4
+	val $city          = 5
+	val $gender        = 6
   
   
   // 配置

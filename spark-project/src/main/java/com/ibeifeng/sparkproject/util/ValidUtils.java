@@ -1,5 +1,9 @@
 package com.ibeifeng.sparkproject.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
  * 校验工具类
  * @author Administrator
@@ -110,7 +114,21 @@ public class ValidUtils {
 		String parameter = "name=sasaki|age=20|a=1,2,3,4|b=43,55,32,20";
 		
 //		System.out.println(in(data, "age", parameter, "c"));
-		System.out.println(equal(data, "age", parameter, "age"));
+//		System.out.println(equal(data, "age", parameter, "age"));
 				
+		List<Integer> list = new ArrayList<>();
+		list.add(1);
+		list.add(2);
+		list.add(3);
+		list.add(4);
+		list.add(5);
+		Stream<Integer> stream = list.parallelStream();
+		stream.filter(__ -> {
+			if(!(__ > 2)) return false;
+			if(!(__ > 3)) return false;
+			
+			return true;
+		}).forEach(System.out::println);
+		
 	}
 }
