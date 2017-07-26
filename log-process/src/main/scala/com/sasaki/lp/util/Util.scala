@@ -158,6 +158,9 @@ object Util {
             x>2 && x>3 && false && false     
     	}
       )
+      
+    println("yyyy-MM-dd hh:mm:ss".split(' ')(0) + $__ + "yyyy-MM-dd hh:mm:ss".split(' ')(1).split(':')(0))  
+//      println("aa__bb".split("__")(1))
   }
   
   

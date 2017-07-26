@@ -237,14 +237,24 @@ object UserVisitSessionAnalyze {
     /**
      * 随机抽取Session
      */
-    //
-    val time___sessionId = rddFilteredSessionId___UserAction_UserInfo_
+    // 1. 计算出每天每小时（格式为[yyyy-MM-dd__hh]）的session数量
+    val rddTime___SessionId = rddFilteredSessionId___UserAction_UserInfo_
       .map{__ => 
         val userAction_UserInfo = __._2
         val startTime = (parse(userAction_UserInfo) \ $FIELD_START_TIME).extract[String]
-    
+        val date__hour = startTime.split(' ')(0) + $__ + startTime.split(' ')(1).split(':')(0)
+        (date__hour, userAction_UserInfo)
     }
       
+    // 每天每小时的session数量
+    val mapSessionId_Count: scala.collection.Map[String, Long] = rddTime___SessionId.countByKey()
+    
+    // 2. 使用按时间比例随机抽取算法，计算出每天每小时要抽取session的索引
+    // (yyyy-MM-dd__hh, count) -> (yyyy-MM-dd, (hh, count))
+    val mapDate___Hour__Count: scala.collection.Map[String, (String, Long)] = mapSessionId_Count.map(__ => 
+      (__._1.split($__)(0)/*<-- date*/, (__._1.split($__)(1)/*<-- hour*/, __._2/*<-- count*/))
+    )
+    
     sc.stop()
   }
 }

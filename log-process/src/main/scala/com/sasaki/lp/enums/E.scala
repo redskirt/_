@@ -3,9 +3,11 @@ package com.sasaki.lp.enums
 object E extends Enumeration {
   
 	val $   = '$'
-  val /   = ","
+	val $_  = '_'
+	val $__ = "__"
+	val $___ = "___"
+	val /   = ","
   val ->  = "->"
-  val ___ = "___"
   
   // ----------- 表列下标  -------------------
   // user_info
