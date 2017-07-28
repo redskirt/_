@@ -15,7 +15,7 @@ class RedisSparkSQLStandaloneSuite extends FunSuite with ENV with BeforeAndAfter
       .setMaster("local").setAppName(getClass.getName)
       .set("redis.host", "127.0.0.1")
       .set("redis.port", "6379")
-      .set("redis.auth", "passwd")
+      .set("redis.auth", null)
     )
     redisConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 6379, "passwd"))
 

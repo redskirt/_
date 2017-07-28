@@ -3,11 +3,14 @@ package com.redislabs.provider.redis.rdd
 import com.redislabs.provider.redis._
 import org.scalatest.{FunSuite, ShouldMatchers}
 import redis.clients.util.JedisClusterCRC16
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 
+@RunWith(classOf[JUnitRunner])
 class RedisConfigSuite extends FunSuite with ShouldMatchers {
 
-  val redisStandaloneConfig = new RedisConfig(new RedisEndpoint("188.188.42.134", 6379, null))
-  val redisClusterConfig = new RedisConfig(new RedisEndpoint("188.188.42.134", 6379))
+  val redisStandaloneConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 6379, null))
+  val redisClusterConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 6379))
 
   test("getNodesBySlots") {
     assert(redisStandaloneConfig.getNodesBySlots(0, 16383).size == 1)
@@ -32,7 +35,7 @@ class RedisConfigSuite extends FunSuite with ShouldMatchers {
   }
 
   test("getNodes") {
-    assert(redisStandaloneConfig.getNodes(new RedisEndpoint("127.0.0.1", 6379, "passwd")).size == 1)
+    assert(redisStandaloneConfig.getNodes(new RedisEndpoint("127.0.0.1", 6379, null)).size == 1)
     assert(redisClusterConfig.getNodes(new RedisEndpoint("127.0.0.1", 7379)).size == 7)
   }
 }
