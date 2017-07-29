@@ -1,31 +1,27 @@
-package com.redislabs.provider.redis.rdd
+package com.sasaki.s2r.test
 
-import com.redislabs.provider.redis._
-import org.scalatest.{FunSuite, ShouldMatchers}
-import redis.clients.util.JedisClusterCRC16
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.FunSuite
+import com.redislabs.provider.redis.RedisConfig
+import com.redislabs.provider.redis.RedisEndpoint
+import redis.clients.util.JedisClusterCRC16
 
 @RunWith(classOf[JUnitRunner])
-class RedisConfigSuite extends FunSuite with ShouldMatchers {
-
-  val redisStandaloneConfig = new RedisConfig(new RedisEndpoint("127.0.0.10", 6379, null))
+class RedisTest extends FunSuite {
+  test("t") {
+    println("ttt")
+  }
+  
+    val redisStandaloneConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 6379, null))
 //  val redisClusterConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 6379))
 
   test("getNodesBySlots") {
     assert(redisStandaloneConfig.getNodesBySlots(0, 16383).size == 1)
 //    assert(redisClusterConfig.getNodesBySlots(0, 16383).size == 7)
   }
-
-//  test("connectionForKey") {
-//    val key = "connectionForKey"
-//    val slot = JedisClusterCRC16.getSlot(key)
-//    val standaloneConn = redisStandaloneConfig.connectionForKey(key)
-//    assert()
-//    assert()
-//  }
-
-  test("getHost") {
+    
+    test("getHost") {
     val key = "getHost"
     val slot = JedisClusterCRC16.getSlot(key)
     val standaloneHost = redisStandaloneConfig.getHost(key)

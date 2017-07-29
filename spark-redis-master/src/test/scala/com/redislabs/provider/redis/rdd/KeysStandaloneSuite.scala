@@ -17,7 +17,7 @@ class KeysStandaloneSuite extends FunSuite with Keys with ENV with BeforeAndAfte
       .setMaster("local").setAppName(getClass.getName)
       .set("redis.host", "127.0.0.1")
       .set("redis.port", "6379")
-      .set("redis.auth", "passwd")
+      .set("redis.auth", "")
     )
     content = fromInputStream(getClass.getClassLoader.getResourceAsStream("blog")).
       getLines.toArray.mkString("\n")

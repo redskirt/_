@@ -53,6 +53,10 @@
   <error line="326" source="org.scalastyle.file.FileLineLengthChecker" severity="warning" message="File line length exceeds 100 characters"/>
   <error line="336" source="org.scalastyle.file.FileLineLengthChecker" severity="warning" message="File line length exceeds 100 characters"/>
  </file>
+ <file name="/Users/sasaki/git/_/spark-redis-master/src/test/scala/com/redislabs/provider/redis/rdd/RedisTest.scala">
+  <error source="org.scalastyle.file.NewLineAtEofChecker" severity="warning" message="File must end with newline character"/>
+  <error column="6" line="7" source="org.scalastyle.scalariform.EmptyClassChecker" severity="warning" message="Redundant braces after class definition"/>
+ </file>
  <file name="/Users/sasaki/git/_/spark-redis-master/src/test/scala/com/redislabs/provider/redis/rdd/KeysClusterSuite.scala">
   <error line="11" source="org.scalastyle.file.FileLineLengthChecker" severity="warning" message="File line length exceeds 100 characters"/>
  </file>
