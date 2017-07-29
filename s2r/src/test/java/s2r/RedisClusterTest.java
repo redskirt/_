@@ -1,4 +1,4 @@
-package s2r;
+ package s2r;
 
 import static org.junit.Assert.fail;
 
@@ -36,20 +36,71 @@ public class RedisClusterTest {
 
 	@Test
 	public void rw() {
-		println(jc.set("k1", "v1"));
-		println(jc.get("k1"));
+		p(jc.set("k1", "v1"));
+		p(jc.get("k1"));
 	}
 	
 	@Test
-	public void test2() {
-		System.out.println("www");
+	public void genericOperater() throws Exception {
+		// set if not exist.
+//		assert jc.setnx("k2", "v2") == 1;
+//		assert jc.setnx("k2", "v2") == 0;
+		
+		// 带时间set/s
+//		p(jc.setex("k3", 3, "v3")); 
+//        for(int i = 0 ; i < 5 ; i ++){
+//            p(jc.get("k3")); //过期以后redis集群自动删除
+//            Thread.sleep(1000);
+//        }
+        
+        // 操作子串
+//        p(jc.set("k4", "123456"));
+//        p(jc.get("k4"));
+//        p(jc.setrange("k4", 3, "abc"));
+//        p(jc.get("k4"));
+//        p(jc.getrange("k4", 3, 5));
+        
+        // 批量操作key mset
+		/**
+		 * keySlot算法中，如果key包含{}，就会使用第一个{}内部的字符串作为hash key，这样就可以保证拥有同样{}内部字符串的key就会拥有相同slot。
+		 * 本来可以hash到不同的slot中的数据都放到了同一个slot中，所以使用的时候要注意数据不要太多导致一个slot数据量过大，数据分布不均匀！
+		 * mset 是原子性的
+		 */
+		String sortBy = "{s:}";
+//        p(jc.mset(
+//        		sortBy + "name", "sasaki", 
+//        		sortBy + "age", "20",
+//        		sortBy + "score", "100",
+//        		sortBy + "salary", "2000.00"));
+//        p(jc.get(sortBy + "score"));
+		
+        p(jc.del(sortBy + "name"));
+        p(jc.del(sortBy + "age"));
+        p(jc.del(sortBy + "score"));
+        p(jc.del(sortBy + "salary"));
+        
+//        jc.mget(sortBy + "name", sortBy + "age", sortBy + "score", sortBy + "salary").forEach(System.out::println);
+
+        /**
+         * MSETNX 命令：它只会在所有给定 key 都不存在的情况下进行设置操作。
+         */
+        p(jc.msetnx(// 返回值Long 1
+        		sortBy + "name", "sasaki", 
+        		sortBy + "age", "20",
+        		sortBy + "score", "100",
+        		sortBy + "salary", "2000.00"));
+        jc.mget(sortBy + "name", sortBy + "age", sortBy + "score", sortBy + "salary").forEach(System.out::println);
+        
+        p(jc.msetnx(// 该操作将全部无效，因为key已存在
+        		sortBy + "name", "sasaki", 
+        		sortBy + "phone", "1700000000"));
+        
 	}
 
 	@After
 	public void after() throws Exception {
 		jc.close();
 	}
-	void println(Object o) {
-		System.out.println(o);
-	}
+	
+	void p(Object o) { System.out.println(o); }
 }
