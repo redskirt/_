@@ -4,8 +4,9 @@ import org.apache.spark.{SparkContext, SparkConf}
 import org.scalatest.{BeforeAndAfterAll, ShouldMatchers, FunSuite}
 import scala.io.Source.fromInputStream
 import com.redislabs.provider.redis._
+import org.apache.spark.streaming.StreamingContext
 
-class RedisRDDClusterSuite extends FunSuite with ENV with BeforeAndAfterAll with ShouldMatchers {
+class RedisRDDClusterSuite extends FunSuite with RedisFunctions with ENV with BeforeAndAfterAll with ShouldMatchers {
 
   override def beforeAll() {
     super.beforeAll()
@@ -202,3 +203,4 @@ class RedisRDDClusterSuite extends FunSuite with ENV with BeforeAndAfterAll with
     System.clearProperty("spark.driver.port")
   }
 }
+

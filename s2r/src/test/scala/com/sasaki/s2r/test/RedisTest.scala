@@ -34,4 +34,6 @@ class RedisTest extends FunSuite {
     assert(redisStandaloneConfig.getNodes(new RedisEndpoint("127.0.0.1", 6379, null)).size == 1)
 //    assert(redisClusterConfig.getNodes(new RedisEndpoint("127.0.0.1", 7379)).size == 7)
   }
+  
+  
 }

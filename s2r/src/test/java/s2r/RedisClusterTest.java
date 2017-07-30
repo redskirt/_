@@ -1,8 +1,5 @@
  package s2r;
 
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,8 +33,8 @@ public class RedisClusterTest {
 
 	@Test
 	public void rw() {
-		p(jc.set("k1", "v1"));
-		p(jc.get("k1"));
+//		p(jc.set("k1", "v1"));
+//		p(jc.get("k1"));
 	}
 	
 	@Test
