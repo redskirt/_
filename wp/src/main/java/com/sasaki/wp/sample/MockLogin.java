@@ -115,12 +115,12 @@ public class MockLogin {
 			Arrays.asList(headers).forEach(__ -> {
 				String name = __.getName();
 				String value = __.getValue();
-				println("--> Response header: " + __.getName() + ":" + __.getValue());				
+				println("--> Response header: " + name + " : " + value);				
 				
 				if(name.equals(SET_COOKIE))  // 获取Cookie
 					Arrays.asList(value.split(";")).forEach(___ -> {
 	                    String[] cookies = ___.split("=");
-	                    println("--> Cookies: " + cookies[0] + ":" + cookies[1]);
+	                    println("--> Cookies: " + cookies[0] + " : " + cookies[1]);
 	                    store.addCookie(new BasicClientCookie(cookies[0], cookies[1]));
 					});
 			});
