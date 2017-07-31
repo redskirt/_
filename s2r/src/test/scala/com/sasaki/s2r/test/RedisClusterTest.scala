@@ -25,8 +25,8 @@ class RedisClusterTest extends FunSuite with RedisFunctions with Keys with ENV w
         new SparkConf()
           .setMaster("local[1]")
           .setAppName(getClass.getName)
-          .set("redis.host", "127.0.0.1")
-          .set("redis.port", "7000")
+          .set("redis.host", /*"127.0.0.1"*/"188.188.42.134,188.188.42.135,188.188.42.136")
+          .set("redis.port", "6379")
     )
     content = fromInputStream(getClass.getClassLoader.getResourceAsStream("blog")).getLines.toArray.mkString("\n")
     val rddWordCount = sc.parallelize(content.split("\\W+")
@@ -40,7 +40,7 @@ class RedisClusterTest extends FunSuite with RedisFunctions with Keys with ENV w
         .filter(!_.isEmpty))
         // .foreach(println)
     
-    redisConfig = new RedisConfig(new RedisEndpoint("127.0.0.1", 7000))
+    redisConfig = new RedisConfig(new RedisEndpoint("188.188.42.134", 6379))
     redisConfig.hosts.foreach( node => {
       val conn = node.connect
 //      conn.flushAll
@@ -52,7 +52,7 @@ class RedisClusterTest extends FunSuite with RedisFunctions with Keys with ENV w
 //    sc.toRedisKV(rddWordCount)(redisConfig)
     //
 //      sc.toRedisZSET(rddWordCount, "all:words:cnt:sortedset" )(redisConfig)
-//    sc.toRedisHASH(wcnts, "all:words:cnt:hash")(redisConfig)
+    sc.toRedisHASH(rddWordCount, "all:words:cnt:hash")(redisConfig)
 //    sc.toRedisLIST(wds, "all:words:list" )(redisConfig)
 //    sc.toRedisSET(wds, "all:words:set")(redisConfig)
   }

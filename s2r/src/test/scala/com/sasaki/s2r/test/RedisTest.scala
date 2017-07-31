@@ -7,6 +7,7 @@ import com.redislabs.provider.redis.RedisConfig
 import com.redislabs.provider.redis.RedisEndpoint
 import redis.clients.util.JedisClusterCRC16
 
+
 @RunWith(classOf[JUnitRunner])
 class RedisTest extends FunSuite {
   test("t") {
