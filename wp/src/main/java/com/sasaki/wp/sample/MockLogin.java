@@ -3,6 +3,7 @@ package com.sasaki.wp.sample;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -15,15 +16,22 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.impl.cookie.BestMatchSpecFactory;
+import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
@@ -43,16 +51,18 @@ public class MockLogin {
 	final static String SET_COOKIE			= "Set-Cookie";
 	final static String FILE_PATH			= "/Users/sasaki/Desktop/t.png";
 	final static String CAPTCHA_REGEX		= "captcha: '(.+?)'";
+	final static String $toutiao_sso_user	= "toutiao_sso_user";
 	
-	static CookieStore store = new BasicCookieStore();
+	static CookieStore cookieStore = new BasicCookieStore();
 	
 	public static void main(String[] args) {
-		HttpClient client = HttpClientBuilder.create().build();
+//		HttpClient client = HttpClientBuilder.create().build();
+		CloseableHttpClient client = HttpClients.createDefault();
 		try {
 			// 本地上下文
 			HttpContext localContext = new BasicHttpContext();
 			// 绑定本地存储，用于存放Cookie
-			localContext.setAttribute(HttpClientContext.COOKIE_STORE, store);
+			localContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
 			// GET请求，获取验证码
 			HttpGet get = new HttpGet(URI_LOGIN);
@@ -116,14 +126,34 @@ public class MockLogin {
 				String name = __.getName();
 				String value = __.getValue();
 				println("--> Response header: " + name + " : " + value);				
-				
-				if(name.equals(SET_COOKIE))  // 获取Cookie
-					Arrays.asList(value.split(";")).forEach(___ -> {
-	                    String[] cookies = ___.split("=");
-	                    println("--> Cookies: " + cookies[0] + " : " + cookies[1]);
-	                    store.addCookie(new BasicClientCookie(cookies[0], cookies[1]));
+				if(name.equalsIgnoreCase(SET_COOKIE))  // 获取Cookie
+					Arrays.asList(value.split(";")).forEach(___ -> {// 遍历并设置Cookie
+						if(___.contains("=")) {
+							String[] cookies = ___.split("=");
+							println("--> Cookies: " + cookies[0] + " : " + cookies[1]);
+							cookieStore.addCookie(new BasicClientCookie(cookies[0], cookies[1]));
+						} else 
+							cookieStore.addCookie(new BasicClientCookie(___, null));
 					});
 			});
+			
+			// 注册Cookie 到HttpClientContext
+			HttpClientContext context = HttpClientContext.create();
+			Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider> create()
+			.register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
+			.register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+			.build();
+			context.setCookieSpecRegistry(registry);
+			context.setCookieStore(cookieStore);
+
+			// 带context继续请求
+			HttpResponse response_ = client.execute(new HttpGet("http://www.toutiao.com/a6448591268490477837/"), context);
+			InputStream input_ = response_.getEntity().getContent();
+			BufferedReader reader_ = new BufferedReader(new InputStreamReader(input_, "UTF-8"));
+			String line = null;
+			while((line = reader_.readLine()) != null) {
+				println(line);
+			}
 			
 //			HttpEntity hEntity = response.getEntity();
 //	        println("----------------------------------------");
@@ -140,7 +170,11 @@ public class MockLogin {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-
+			try {
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
