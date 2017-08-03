@@ -16,7 +16,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.methods.HttpGet;
@@ -43,9 +42,10 @@ import sun.misc.BASE64Decoder;
  * @Desc			
  */
 public class MockLogin {
-	final static String ACCOUNT 			= "lk111222333";
-	final static String PASSWORD			= "17084117416";
+	final static String DEFAULT_ACCOUNT 	= "lk111222333";
+	final static String DEFAULT_PASSWORD	= "17084117416";
 	final static String URI					= "https://sso.toutiao.com";
+	
 	final static String URI_LOGIN			= URI + "/login/";
 	final static String URI_LOGIN_SUBMIT	= URI + "account_login/";
 	final static String SET_COOKIE			= "Set-Cookie";
@@ -56,7 +56,6 @@ public class MockLogin {
 	static CookieStore cookieStore = new BasicCookieStore();
 	
 	public static void main(String[] args) {
-//		HttpClient client = HttpClientBuilder.create().build();
 		CloseableHttpClient client = HttpClients.createDefault();
 		try {
 			// 本地上下文
@@ -64,40 +63,11 @@ public class MockLogin {
 			// 绑定本地存储，用于存放Cookie
 			localContext.setAttribute(HttpClientContext.COOKIE_STORE, cookieStore);
 
-			// GET请求，获取验证码
-			HttpGet get = new HttpGet(URI_LOGIN);
-			HttpResponse response = client.execute(get);
-			int status = response.getStatusLine().getStatusCode();
-			println("GET /login response --> " + status);
-			if(status == HttpStatus.SC_OK) {
-				HttpEntity entity = response.getEntity();
-				println("Response content length --> " + entity.getContentLength());
-				File captchaImg = new File(FILE_PATH);
-				if(captchaImg.exists()) captchaImg.delete();
-				
-				InputStream input = entity.getContent();
-				// 拼接 /login/ 页面
-				BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
-				StringBuilder builder = new StringBuilder();
-				String line = null;
-				while((line = reader.readLine()) != null) {
-					println(line);
-					builder.append(line);
-				}
+			String loginContent = contentGET(client, URI_LOGIN);
+			String captchaStr = getMatched(loginContent, CAPTCHA_REGEX);
 			
-				FileOutputStream output = null;
-				try {
-					// 正则提取 captcha 字符串
-					output = new FileOutputStream(captchaImg);
-					String captchaStr = getMatched(builder.toString(), CAPTCHA_REGEX);
-					output.write(getStrToBytes(captchaStr));
-					output.flush();
-				} finally {
-					output.close();
-					input.close();
-				}
-			}
-			get.releaseConnection();
+			// 生成本地验证码
+			generateLocalCaptcha(captchaStr); 
 			
 			// 阻塞，解盘输入验证码
 			println("--> You should be taked captcha image and use keybord to input captcha code please...");
@@ -113,13 +83,14 @@ public class MockLogin {
 			StringEntity sEntity = new StringEntity(
 					"mobile="		+ "sw" +
 					"&code="		+ "ss" +
-					"account=" 		+ ACCOUNT + 
-					"&password=" 	+ PASSWORD +
+					"account=" 		+ DEFAULT_ACCOUNT + 
+					"&password=" 	+ DEFAULT_PASSWORD +
 					"&captcha="		+ tCaptcha +
 					"&is_30_days_no_login=false&service=https://www.toutiao.com/", "UTF-8");
 			post.setEntity(sEntity);
+			
 			println("--> request line: " + post.getRequestLine());
-			response = client.execute(post);
+			HttpResponse response = client.execute(post);
 			
 			Header[] headers = response.getAllHeaders();
 			Arrays.asList(headers).forEach(__ -> {
@@ -177,11 +148,62 @@ public class MockLogin {
 			}
 		}
 	}
+
+	private static void generateLocalCaptcha(String captchaStr) throws Exception {
+		File captchaImg = new File(FILE_PATH);
+		if(captchaImg.exists()) 
+			captchaImg.delete();
+		
+		FileOutputStream output = null;
+		try {
+			output = new FileOutputStream(captchaImg);
+			output.write(getStrToBytes(captchaStr));
+			output.flush();
+		} finally {
+			output.close();
+		}
+	}
 	
+	/**
+	 * 
+	 * @param client
+	 * @param url
+	 * @return
+	 * @throws Exception
+	 */
+	private static String contentGET(CloseableHttpClient client, String url) throws Exception {
+		HttpGet get = new HttpGet(url);
+		HttpResponse response = client.execute(get);
+		StringBuilder builder = new StringBuilder("");
+		int status = response.getStatusLine().getStatusCode();
+		println("GET " + url + " response --> " + status);
+		
+		if(status == HttpStatus.SC_OK) {
+			HttpEntity entity = response.getEntity();
+			println("Response content length --> " + entity.getContentLength());
+			
+			InputStream input = entity.getContent();
+			// 拼接页面字符串
+			BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+			String line = null;
+			while((line = reader.readLine()) != null) 
+				builder.append(line);
+		}
+		get.releaseConnection();
+		
+		return builder.toString();
+	}
+	
+	/**
+	 * 
+	 * @param imgStr
+	 * @return
+	 */
+	@SuppressWarnings("restriction")
     public static byte[] getStrToBytes(String imgStr) {   
         if (imgStr == null) // 图像数据为空  
             return null;  
-        BASE64Decoder decoder = new BASE64Decoder();  
+		BASE64Decoder decoder = new BASE64Decoder();  
         try {  
             // Base64解码  
             byte[] bytes = decoder.decodeBuffer(imgStr);  
