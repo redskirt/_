@@ -248,8 +248,10 @@ class RedisConfig(val initialHost: RedisEndpoint) extends  Serializable {
     */
   def getNodes(initialHost: RedisEndpoint): Array[RedisNode] = {
     if (clusterEnabled(initialHost)) {
+      println("> -------------------- Redis:  Cluster Model -----------------------------------")
       getClusterNodes(initialHost)
     } else {
+      println("> -------------------- Redis:  NonCluster Model -----------------------------------")
       getNonClusterNodes(initialHost)
     }
   }
