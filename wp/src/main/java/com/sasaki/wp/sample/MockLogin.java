@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -16,6 +17,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.methods.HttpGet;
@@ -77,45 +79,7 @@ public class MockLogin {
 			scanner.close();
 			
 			println("--> POST submit...");
-			// POST请求，提交登陆
-			HttpPost post = new HttpPost(new URI(URI_LOGIN));
-			// 请求参数
-			StringEntity sEntity = new StringEntity(
-					"mobile="		+ "sw" +
-					"&code="		+ "ss" +
-					"account=" 		+ DEFAULT_ACCOUNT + 
-					"&password=" 	+ DEFAULT_PASSWORD +
-					"&captcha="		+ tCaptcha +
-					"&is_30_days_no_login=false&service=https://www.toutiao.com/", "UTF-8");
-			post.setEntity(sEntity);
-			
-			println("--> request line: " + post.getRequestLine());
-			HttpResponse response = client.execute(post);
-			
-			Header[] headers = response.getAllHeaders();
-			Arrays.asList(headers).forEach(__ -> {
-				String name = __.getName();
-				String value = __.getValue();
-				println("--> Response header: " + name + " : " + value);				
-				if(name.equalsIgnoreCase(SET_COOKIE))  // 获取Cookie
-					Arrays.asList(value.split(";")).forEach(___ -> {// 遍历并设置Cookie
-						if(___.contains("=")) {
-							String[] cookies = ___.split("=");
-							println("--> Cookies: " + cookies[0] + " : " + cookies[1]);
-							cookieStore.addCookie(new BasicClientCookie(cookies[0], cookies[1]));
-						} else 
-							cookieStore.addCookie(new BasicClientCookie(___, null));
-					});
-			});
-			
-			// 注册Cookie 到HttpClientContext
-			HttpClientContext context = HttpClientContext.create();
-			Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider> create()
-			.register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
-			.register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
-			.build();
-			context.setCookieSpecRegistry(registry);
-			context.setCookieStore(cookieStore);
+			HttpClientContext context = getContextWithPost(client, tCaptcha, URI_LOGIN, DEFAULT_ACCOUNT);
 
 			// 带context继续请求
 			HttpResponse response_ = client.execute(new HttpGet("http://www.toutiao.com/a6448591268490477837/"), context);
@@ -147,6 +111,53 @@ public class MockLogin {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	static HttpClientContext getContextWithPost(CloseableHttpClient client, String tCaptcha, String uri, String account) throws Exception {
+		// POST请求，提交登陆
+		HttpPost post = new HttpPost(new URI(uri));
+		
+		String sEntityStr = 
+				"mobile="		+ "sw" +
+				"&code="		+ "ss" +
+				"account=" 		+ account + 
+				"&password=" 	+ DEFAULT_PASSWORD +
+				"&captcha="		+ tCaptcha +
+				"&is_30_days_no_login=false&service=https://www.toutiao.com/";
+				
+		// 请求参数
+		StringEntity sEntity = new StringEntity(sEntityStr, "UTF-8");
+		post.setEntity(sEntity);
+		
+		println("--> request line: " + post.getRequestLine());
+		HttpResponse response = client.execute(post);
+		
+		Header[] headers = response.getAllHeaders();
+		Arrays.asList(headers).forEach(__ -> {
+			String name = __.getName();
+			String value = __.getValue();
+			println("--> Response header: " + name + " : " + value);
+			if(name.equalsIgnoreCase(SET_COOKIE)) {
+				// 获取Cookie
+				Arrays.asList(value.split(";")).forEach(___ -> {// 遍历并设置Cookie
+					if(___.contains("=")) // 设置Cookie
+						cookieStore.addCookie(new BasicClientCookie(___.split("=")[0], ___.split("=")[1]));
+					else 
+						cookieStore.addCookie(new BasicClientCookie(___, null));
+				});
+			}
+		});
+		
+		// 注册Cookie 到HttpClientContext
+		HttpClientContext context = HttpClientContext.create();
+		Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider> create()
+		.register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
+		.register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+		.build();
+		
+		context.setCookieSpecRegistry(registry);
+		context.setCookieStore(cookieStore);
+		return context;
 	}
 
 	private static void generateLocalCaptcha(String captchaStr) throws Exception {
