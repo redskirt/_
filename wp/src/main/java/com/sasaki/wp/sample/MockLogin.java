@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,7 +22,6 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.cookie.CookieSpecProvider;
@@ -51,11 +51,13 @@ public class MockLogin {
 	final static String URI_LOGIN_DIGG		= URI_WWW + "/api/comment/digg/";
 	
 	final static String SET_COOKIE			= "Set-Cookie";
-	final static String FILE_PATH			= "/Users/sasaki/Desktop/t.png";
+//	final static String FILE_PATH			= "/Users/sasaki/Desktop/t.png";
+	final static String FILE_PATH			= "C:\\Users\\wei.liu\\Desktop\\_\\t.png";
 	final static String CAPTCHA_REGEX		= "captcha: '(.+?)'";
 	final static String $toutiao_sso_user	= "toutiao_sso_user";
-	static String cookieStr = "toutiao_sso_user=3460efc068605b814faa04dc84184be3; Domain=sso.toutiao.com; expires=Sun, 10-Sep-2017 06:15:16 GMT; httponly; Max-Age=3024000; Path=/"
-			+ "sso_login_status=0; Domain=toutiao.com; expires=Sun, 10-Sep-2017 06:15:16 GMT; httponly; Max-Age=3024000; Path=/";
+//	static String cookieStr = "toutiao_sso_user=3460efc068605b814faa04dc84184be3; Domain=sso.toutiao.com; expires=Sun, 10-Sep-2017 06:15:16 GMT; httponly; Max-Age=3024000; Path=/"
+//			+ "sso_login_status=0; Domain=toutiao.com; expires=Sun, 10-Sep-2017 06:15:16 GMT; httponly; Max-Age=3024000; Path=/";
+	static String cookieStr = "csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502098437; uuid=\"w:82ca84223a28448cb7dfda2dfa5eab1c\"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard=\"23db5f93ebc0295196623c8cbf22f3d1|1502084673|2591999|Wed\054 06-Sep-2017 05:44:32 GMT\"; __tasessionId=35k4l42191502098523992";
 	
 	public static void main(String[] args) {
 		CloseableHttpClient client = HttpClients.createDefault();
@@ -88,6 +90,7 @@ public class MockLogin {
 			.build();
 			context.setCookieSpecRegistry(registry);
 			context.setCookieStore(parseCookie(cookieStr));
+			
 			// 带context继续请求
 //			HttpResponse response_ = client.execute(new HttpGet("http://www.toutiao.com/i6450092422402671117/?wxshare_count=2"), context);
 //			InputStream input_ = response_.getEntity().getContent();
@@ -96,53 +99,73 @@ public class MockLogin {
 //			while((line = reader_.readLine()) != null) {
 //				println(line);
 //			}
+			
+//			HttpGet get0 = new HttpGet("https://www.toutiao.com/a6450085980351578382/");
+//			println(get0.getURI());
+//			client.execute(get0, context);
 		
-			HttpGet get1 = new HttpGet("http://www.toutiao.com/user/info/");
-			client.execute(get1, context);
+			HttpGet get1 = new HttpGet("https://www.toutiao.com/api/comment/list/?group_id=6450085980351578382&item_id=6450092422402671117&offset=5&count=10");
+			HttpResponse response1 = client.execute(get1, context);
+			int statusCode = response1.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_OK) {
+				HttpEntity entity1 = response1.getEntity();
+		        BufferedReader reader1 = new BufferedReader(new InputStreamReader(entity1.getContent(), CharEncoding.UTF_8));
+		        String line1 = null;
+		        while ((line1 = reader1.readLine()) != null) {
+		            println("https://www.toutiao.com/api/comment/list/?group_id=6450085980351578382&item_id=6450092422402671117&offset=5&count=10 --> " + line1);
+		        }
+			}
+				
 			
-			URI uri2 = new URIBuilder()
-			.setScheme("http")
-			.setHost("ei.cnzz.com")
-			.setPath("/stat.htm")
-			.setParameter("id", "1259612802")
-			.setParameter("r", "")
-			.setParameter("lg", "zh-cn")
-			.setParameter("ntime", "1502009158")
-			.setParameter("cnzz_eid", "362386540-1501164244-https://www.google.co.jp/")
-			.setParameter("showp", "1440x900")
-			.setParameter("ei", "detail_article|click_good_comment||1|")
-			.setParameter("t", "难怪要抛弃ZUK，联想新机将骁龙430卖到快2000")
-			.setParameter("umuuid", "15d84615cf81d0-0d986178526d538-7f682331-13c680-15d84615cf91c2")
-			.setParameter("h", "1")
-			.setParameter("md", "335162160")
-			.build();
-			HttpGet get2 = new HttpGet(uri2);
-			println(get2.getURI());
-			client.execute(get2, context);
+//			URI uri2 = new URIBuilder()
+//			.setScheme("http")
+//			.setHost("ei.cnzz.com")
+//			.setPath("/stat.htm")
+//			.setParameter("id", "1259612802")
+//			.setParameter("r", "")
+//			.setParameter("lg", "zh-cn")
+//			.setParameter("ntime", "1502009158")
+//			.setParameter("cnzz_eid", "362386540-1501164244-https://www.google.co.jp/")
+//			.setParameter("showp", "1440x900")
+//			.setParameter("ei", "detail_article|click_good_comment||1|")
+//			.setParameter("t", "难怪要抛弃ZUK，联想新机将骁龙430卖到快2000")
+//			.setParameter("umuuid", "15d84615cf81d0-0d986178526d538-7f682331-13c680-15d84615cf91c2")
+//			.setParameter("h", "1")
+//			.setParameter("rnd", "335162160")
+//			.build();
+//			HttpGet get2 = new HttpGet(uri2);
+//			println(get2.getURI());
+//			client.execute(get2, context);
 			
-			URI uri3 = new URIBuilder()
-			.setScheme("http")
-			.setHost("www.toutiao.com")
-			.setPath("/api/article/user_log/")
-			.setParameter("c", "detail_article")
-			.setParameter("ev", "click_good_comment")
-			.setParameter("sid", "tq2fj9cga1502022343455")
-			.setParameter("type", "event")
-			.setParameter("t", "1502023878666")
-			.build();
-			HttpGet get3 = new HttpGet(uri3);
-			println(get3.getURI());
-			client.execute(get3, context);
+//			URI uri3 = new URIBuilder()
+//			.setScheme("http")
+//			.setHost("www.toutiao.com")
+//			.setPath("/api/article/user_log/")
+//			.setParameter("c", "detail_article")
+//			.setParameter("ev", "click_good_comment")
+//			.setParameter("sid", "tq2fj9cga1502022343455")
+//			.setParameter("type", "event")
+//			.setParameter("t", "1502023878666")
+//			.build();
+//			HttpGet get3 = new HttpGet(uri3);
+//			println(get3.getURI());
+//			HttpEntity entity3 = client.execute(get3, context).getEntity();
+//	        BufferedReader reader3 = new BufferedReader(new InputStreamReader(entity3.getContent(), CharEncoding.UTF_8));
+//	        String line3 = null;
+//	        while ((line3 = reader3.readLine()) != null) {
+//	            println(line3);
+//	        }
 			
-			String postDigg = "&comment_id=" + "1574770775356429" +
-							  "&dongtai_id=" + "1574770775356429" +
+			
+			String postDigg = "comment_id=" + "1574781618691150" +
+							  "&dongtai_id=" + "1574781618691150" +
 							  "&group_id=" + "6450085980351578382" +
 							  "&item_id=" + "6450092422402671117" + 
 							  "&action=digg";
 			StringEntity postDiggEntity = new StringEntity(postDigg, CharEncoding.UTF_8);
-			HttpPost post = new HttpPost("http://www.toutiao.com/api/comment/digg/");
+			HttpPost post = new HttpPost("https://www.toutiao.com/api/comment/digg/");
 			post.setEntity(postDiggEntity);
-			println(post.getURI());
+			println("postDigg --> " + post.getURI());
 			HttpResponse response = client.execute(post, context);
 			HttpEntity hEntity = response.getEntity();
 	        println("----------------------------------------");
@@ -166,7 +189,7 @@ public class MockLogin {
 		}
 	}
 
-	static HttpClientContext getContextWithPost(CloseableHttpClient client, String tCaptcha, String uri, String account) throws Exception {
+	private static HttpClientContext getContextWithPost(CloseableHttpClient client, String tCaptcha, String uri, String account) throws Exception {
 		// POST请求，提交登陆
 		HttpPost post = new HttpPost(new URI(uri));
 		
