@@ -42,17 +42,21 @@ object WebDigg extends App {
   
   val cookieStr = "UM_distinctid=15db62375bf520-07e30c1eda903a-143a6d54-13c680-15db62375c0424; uuid=\"w:aa24cc220e7a418bb6e4cffa8be3c448\"; login_flag=812f9a7d1d30496c2f308e906425d8cd; sessionid=3130dab04efadc6c8c35e871de3291bd; uid_tt=bd07b45d64ce252fe3fd023283ded123; sid_tt=3130dab04efadc6c8c35e871de3291bd; sid_guard=\"3130dab04efadc6c8c35e871de3291bd|1502011604|2591999|Tue\054 05-Sep-2017 09:26:43 GMT\"; sso_login_status=1; csrftoken=5c0e8529e5ad23b900963421010af5cb; WEATHER_CITY=%E5%8C%97%E4%BA%AC; tt_webid=6451038131775948302; CNZZDATA1259612802=1700012720-1501999169-%7C1502030762; __tasessionId=o5qe4kut81502032004628"
   val postCookie = """csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502152511; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502084673|2591999|Wed\054 06-Sep-2017 05:44:32 GMT"; __tasessionId=e5qz7x4j21502155726741"""
-
   
   context.setCookieSpecRegistry(registry)
 	context.setCookieStore(parseCookie(cookieStr))
-  
+	  
+  val comment_id = "1575095098176542"
+  val dongtai_id = "1575095098176542"
+  val group_id   = "6451469307842429198"
+  val item_id    = "6451472465402003981"
+  val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
 	
-  val response = post(url_post_post_comment, "", postCookie)
+  val response = post(url_post_digg, paramDiggStr, postCookie)
 	val hEntity = response.getEntity()
 	
 	println(readContent(hEntity.getContent))
-
+	
 	/**
 	 * 测试时方法基于页面
 	 * http://www.toutiao.com/a6451469307842429198/#p=1
@@ -84,27 +88,17 @@ object WebDigg extends App {
     val id         = "0"
     val format     = "json"
     val aid        = "24"
-    val param_post_comment = 
-      s"status=$content&content=$content&group_id=$group_id&item_id=$item_id&id=$id&format=$format&aid=$aid"
-    
-    param_post_comment
+    s"status=$content&content=$content&group_id=$group_id&item_id=$item_id&id=$id&format=$format&aid=$aid"
   }
-  
-  val comment_id = "1575153719230494"
-  val dongtai_id = "1575153719230494"
-  val group_id   = "6451469307842429198"
-  val item_id    = "6451472465402003981"
-  val action     = "digg"
 
-  val postDigg = s"comment_id=$comment_id&dongtai_id=$dongtai_id&group_id=$group_id&item_id=$item_id&action=$action"
-  
-  
   /**
    * 拼装点赞参数
-   * 考虑可否用Builder实现？
+	 *
    */
-  def paramDigg(_params_ : Array[String]): String = {
-    "" 
+  def paramDigg(_params_ : String*): String = {
+    assert(_params_.length == 4, "Require _params_ : <comment_id> <dongtai_id> <group_id> <item_id>")
+    "comment_id=" + _params_(0) +  "&dongtai_id=" + _params_(1) + 
+    "&group_id="+ _params_(2) + "&item_id="+ _params_(3) + "&action=digg"
   }
   
   /**
@@ -115,7 +109,7 @@ object WebDigg extends App {
     val post = new HttpPost(url)
     post.setEntity(new StringEntity(paramPattern, ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)))
     post.setHeader("Cookie", postCookie)
-  
+    println("POST --> url: " + url + "\n param: " + paramPattern )
     client.execute(post, context)
   }
   
@@ -124,9 +118,8 @@ object WebDigg extends App {
 	 */
   def readContent(input: java.io.InputStream): String = {
 	  import scala.io.Source
-	  
     val builder = StringBuilder.newBuilder
-    Source.fromInputStream(hEntity.getContent()).getLines().foreach(__ => builder.append(__))
+    Source.fromInputStream(hEntity.getContent()).getLines().foreach(__ => builder.append(__).append("\n"))
     builder.toString()
   }
   
@@ -159,6 +152,8 @@ object E extends Enumeration {
 
   val www_toutiao_com         = "http://www.toutiao.com/"
   val url_post_post_comment   = s"$www_toutiao_com/comment/post_comment/"
+  val url_post_digg           = s"$www_toutiao_com/api/comment/digg/"
+  
   val url_get_usr_info        = s"$www_toutiao_com/user/info/"
   val url_get_comment_list    = s"$www_toutiao_com/api/comment/list/"
   
