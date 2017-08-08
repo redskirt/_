@@ -22,7 +22,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -39,6 +38,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.cookie.BestMatchSpecFactory;
 import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
+import org.apache.http.impl.cookie.DefaultCookieSpecProvider;
 import org.apache.http.message.BasicNameValuePair;
 
 import sun.misc.BASE64Decoder;
@@ -90,9 +90,9 @@ public class MockLogin {
 //			HttpClientContext context = getContextWithPost(client, tCaptcha, URI_LOGIN, DEFAULT_ACCOUNT);
 			
 			HttpClientContext context = HttpClientContext.create();
+			
 			Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider> create()
-			.register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory()/*DefaultCookieSpecProvider*/)
-			.register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
+			.register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
 			.build();
 			context.setCookieSpecRegistry(registry);
 			context.setCookieStore(parseCookie(cookieStr));
@@ -169,38 +169,41 @@ public class MockLogin {
 //							  "&item_id=" + "6450092422402671117" + 
 //							  "&action=digg";
 			
-			List<NameValuePair> formData = new ArrayList<>();
-			formData.add(new BasicNameValuePair("comment_id", "1574799577432078"));
-			formData.add(new BasicNameValuePair("dongtai_id", "1574799577432078"));
-			formData.add(new BasicNameValuePair("group_id", "6450085980351578382"));
-			formData.add(new BasicNameValuePair("item_id", "6450092422402671117"));
-			formData.add(new BasicNameValuePair("action", "digg"));
-			HttpEntity nameValueEntity = new UrlEncodedFormEntity(formData, "UTF-8");
+//			List<NameValuePair> formData = new ArrayList<>();
+//			formData.add(new BasicNameValuePair("comment_id", "1574799577432078"));
+//			formData.add(new BasicNameValuePair("dongtai_id", "1574799577432078"));
+//			formData.add(new BasicNameValuePair("group_id", "6450085980351578382"));
+//			formData.add(new BasicNameValuePair("item_id", "6450092422402671117"));
+//			formData.add(new BasicNameValuePair("action", "digg"));
+//			HttpEntity nameValueEntity = new UrlEncodedFormEntity(formData, "UTF-8");
 			
+//			String postDigg = "comment_id=1574799577432078&dongtai_id=1574799577432078&group_id=6450085980351578382&item_id=6450092422402671117&action=digg";
 			String postDigg = "comment_id=1574799577432078&dongtai_id=1574799577432078&group_id=6450085980351578382&item_id=6450092422402671117&action=digg";
 			StringEntity postDiggEntity = new StringEntity(postDigg, ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8));
 			HttpPost post = new HttpPost("https://www.toutiao.com/api/comment/digg/");
 
-			post.setHeader("Connection", "keep-alive");
-			post.setHeader("Origin", "http://www.toutiao.com");
-			post.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36");
-			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
-			post.setHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
-			post.setHeader("X-Requested-With:", "XMLHttpRequest");
-			post.setHeader("X-CSRFToken", "5c0e8529e5ad23b900963421010af5cb");
-			post.setHeader("Accept-Encoding", "gzip, deflate");
-			post.setHeader("Accept-Language", "ja,en-US;q=0.8,en;q=0.6");
+//			post.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0");
+//			post.setHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*");
+//			post.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");
+//			post.setHeader("Accept-Encoding", "gzip, deflate, br");
+//			post.setHeader("X-CSRFToken", "099c9203c938060b4f1ea3dce16ab1a1");
+//			post.setHeader("X-Requested-With", "XMLHttpRequest");
+//			post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+//			post.setHeader("Referer", "https://www.toutiao.com/a6450085980351578382/");
+			post.setHeader("Cookie", "csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502152511; uuid=\"w:82ca84223a28448cb7dfda2dfa5eab1c\"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard=\"23db5f93ebc0295196623c8cbf22f3d1|1502084673|2591999|Wed\054 06-Sep-2017 05:44:32 GMT\"; __tasessionId=e5qz7x4j21502155726741");
+//			post.setHeader("Connection", "keep-alive");
 			
-			MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+			
+//			MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
 //			entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			entityBuilder.addTextBody("comment_id", "1574799577432078");
-			entityBuilder.addTextBody("dongtai_id", "1574799577432078");
-			entityBuilder.addTextBody("group_id", "6450085980351578382");
-			entityBuilder.addTextBody("item_id", "6450092422402671117");
-			entityBuilder.addTextBody("action", "digg");
-			HttpEntity entity = entityBuilder.build();
+//			entityBuilder.addTextBody("comment_id", "1574799577432078");
+//			entityBuilder.addTextBody("dongtai_id", "1574799577432078");
+//			entityBuilder.addTextBody("group_id", "6450085980351578382");
+//			entityBuilder.addTextBody("item_id", "6450092422402671117");
+//			entityBuilder.addTextBody("action", "digg");
+//			HttpEntity entity = entityBuilder.build();
 			
-			post.setEntity(nameValueEntity);
+			post.setEntity(postDiggEntity);
 			println("postDigg --> " + post.getURI() + " " + post.getEntity().getContentType());
 			HttpResponse response = client.execute(post, context);
 			HttpEntity hEntity = response.getEntity();
