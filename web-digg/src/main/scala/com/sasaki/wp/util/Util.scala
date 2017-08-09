@@ -1,5 +1,7 @@
 package com.sasaki.wp.util
 
+import java.util.regex.Pattern
+
 /**
  *
  */
@@ -19,6 +21,25 @@ object Util {
     keys.foreach(__ => if(!_prop_.containsKey(__)) f = false)
     f
   }
+  
+  def nonNull(o: Any) = null != o
+
+  def getMatched(str: String, regex: String): String = {
+    val pattern = Pattern.compile(regex)
+    val matcher = pattern.matcher(str)
+    
+    if (matcher.find())
+      return matcher.group(1)
+    ""
+  }
+
+  def nonEmpty(o: Any) = 
+    nonNull(o) && (o.getClass().getSimpleName match {
+      case "String" => o != ""
+//      case "???" => 
+      case _ => false
+    })
+  
   
   def main(args: Array[String]): Unit = {
 //    println(Util.prop("kafka.metadata.broker.list"))

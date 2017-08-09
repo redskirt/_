@@ -235,7 +235,7 @@ public class MockLogin {
 		String sEntityStr = 
 				"mobile="		+ "sw" +
 				"&code="		+ "ss" +
-				"account=" 		+ account + 
+				"&account=" 		+ account + 
 				"&password=" 	+ DEFAULT_PASSWORD +
 				"&captcha="		+ tCaptcha +
 				"&is_30_days_no_login=false&service=https://www.toutiao.com/";
@@ -259,7 +259,7 @@ public class MockLogin {
 		
 		context.setCookieSpecRegistry(registry);
 		context.setCookieStore(cookieStore);
-		return context;
+		return context; 
 	}
 
 	private static CookieStore parseCookie(HttpResponse response) {
@@ -271,7 +271,7 @@ public class MockLogin {
 			println("--> Response header: " + name + " : " + value);
 			if(name.equalsIgnoreCase(SET_COOKIE)) 
 				parseCookie(value);
-		});
+		}); 
 		return cookieStore;
 	}
 	
