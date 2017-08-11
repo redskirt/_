@@ -183,7 +183,7 @@ object WebDigg extends App {
   }
 
   /**
-   * 
+   * 带参数体POST方法
    */
   def post(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null)(implicit client: HttpClient): HttpResponse = {
     val post = new HttpPost(url)
