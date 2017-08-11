@@ -1,16 +1,19 @@
 package com.sasaki.wp.persistence
 
 import java.sql.DriverManager
-import org.squeryl.{Schema, Session, SessionFactory, Table}
+
+import org.squeryl.Schema
+import org.squeryl.Session
+import org.squeryl.SessionFactory
 import org.squeryl.adapters.MySQLAdapter
-import org.squeryl.KeyedEntity
+import org.squeryl.annotations.Column
 import org.squeryl.PrimitiveTypeMode._
+
 import com.sasaki.wp.util.Util
-
-
+import java.sql.Timestamp
 
 object QueryHelper {
-  
+
   def getSession(): Option[() => Session] = {
     import org.squeryl.SessionFactory
     if (SessionFactory.concreteFactory.isEmpty && Util.hasConstants("db.url", "db.username", "db.password")) {
@@ -26,49 +29,83 @@ object QueryHelper {
       })
     } else None
   }
+
+  /**
+   * 查询接口
+   */
+  import com.sasaki.wp.persistence.WebDiggSchema._
+  implicit val sf = new SessionFactory { def newSession: Session = QueryHelper.getSession().get() }
+
+  /**
+   * 保存新元数据，带Cookie信息
+   */
+  def saveMetadata(metadata: Metadata) = inTransaction(sf)(t_metadata.insert(metadata))
   
+  /**
+   * 仅查询Cookie字符串
+   */
+  def queryCookie(account: String, _type: String = "init"): String = inTransaction(sf) {
+    from(t_metadata)(__ => where(__.account === account and __._type === _type) select(__.cookie)).headOption.getOrElse("")
+  }
+  
+  /**
+   * 仅更新Cookie字符串
+   */
+  def updateCookie(metadata: Metadata) = inTransaction(sf) {
+    update(t_metadata)(__ => 
+      where(__.account === metadata.account and __._type === metadata._type)  
+        set(__.cookie := metadata.cookie)
+    )
+  }
+  
+
 }
 
 object WebDiggSchema extends Schema {
-  val t_account = table[Account]("t_account") 
+  val t_account = table[Account]("t_account")
+  val t_metadata = table[Metadata]("t_metadata")
 }
-
-import org.squeryl.annotations.{Column, ColumnBase, Transient}
-import org.squeryl.Table
-import org.squeryl.Table
-
 
 class Base {
   @Column("id")
   var id: Long = _
+  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
-class Account(val account: String, val password: String) extends Base {
-	var status: String = _
+case class Account(val account: String, val password: String) extends Base {
+  var status: String = _
 }
 
-class Cookie extends Base {
+case class Metadata(val account: String, val cookie: String) extends Base {
+  @Column("type")
+  var _type: String = _
   
+  def setType(_type: String): Metadata = { this._type = _type; this }
 }
 
 object Sample extends App {
   import com.sasaki.wp.persistence.WebDiggSchema._
-  
+
   val sf = new SessionFactory { def newSession: Session = QueryHelper.getSession().get() }
-  
+
   import scala.io.Source
-  
+
   val accounts: List[Account] = Source.fromFile("""H:\_\a.scala""")
     .getLines()
-    .map {__ =>
-      val account = new Account(__.split(':')(0), __.split(':')(1))  
+    .map { __ =>
+      val account = new Account(__.split(':')(0), __.split(':')(1))
       account.status_=("0")
       account
     } // foreach println
     .toList
-  
-  inTransaction(sf) {
-	  t_account.insert(accounts);
-  }
+
+//  inTransaction(sf) {
+//    t_account.insert(accounts);
+//  }
+    
+//    QueryHelper.saveMetadata(Metadata("t", "t").setType("type"))
+//    println(QueryHelper.queryCookie("t", "type"))
+    QueryHelper.updateCookie(Metadata("t", "sssss").setType("typew"))
+    
 }
 
