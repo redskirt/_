@@ -236,12 +236,11 @@ object WebDigg extends App {
 
   /**
    * 拼接点赞参数
-   *
    */
   def paramDigg(_params_ : String*): String = {
     assert(_params_.length == 4, "Require _params_ : <comment_id> <dongtai_id> <group_id> <item_id>")
     "comment_id=" + _params_(0) + "&dongtai_id=" + _params_(1) +
-      "&group_id=" + _params_(2) + "&item_id=" + _params_(3) + "&action=digg"
+    "&group_id=" + _params_(2) + "&item_id=" + _params_(3) + "&action=digg"
   }
   
   /**
@@ -287,7 +286,6 @@ object WebDigg extends App {
         headers.foreach(__ => post.setHeader(__._1, __._2))
         
       println("POST --> url: " + url + "\nparam: " + entity)
-      
       client.execute(post)
     } finally
 //      post.releaseConnection()
