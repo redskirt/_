@@ -75,6 +75,10 @@ object WebDigg {
     //  val testPage = doGET("http://www.toutiao.com/a6451469307842429198/#p=1")
     //  println(s"testPage --> $testPage")
 
+    /**
+     * 排查当前加载现有Cookie下带Cookie访问时“账号授权过期，请重新登录”的问题
+     * 确定在应用上下文中Cookie应该带的时机
+     */
     doLoadContextService("17084117416", "init")
     //    val testPage = doGET("http://www.toutiao.com/a6451469307842429198/#p=1")
     //    println(s"testPage --> $testPage")
@@ -84,14 +88,26 @@ object WebDigg {
     val group_id = "6451469307842429198"
     val item_id = "6451472465402003981"
 
-    val sParamComment = paramCommentDefault(group_id, item_id)
-    println(parseContent(doPOSTWithContext(url_post_post_comment, sParamComment, null).getEntity.getContent))
+    /**
+     * 经测
+     * 提交评论时页面有三个请求
+     * GET 无参 http://www.toutiao.com/user/info/
+     * GET 带参 http://www.toutiao.com/api/article/user_log/?c=detail_gallery&ev=click_publish_comment&sid=xyotkm1ax1502720223997&type=event&t=1502720253068
+     * POST 带参	http://www.toutiao.com/api/comment/post_comment/
+     * 由无参请求任意请求后返回的Cookie（三个请求携带的Cookie相同）更新后，应该可以提交评论
+     * 为防止不和谐因素，最好在提交评论时三个请求都走一遍。
+     */
+    
+//    val sParamComment = paramCommentDefault(group_id, item_id)
+//    println(parseContent(doPOSTWithContext(url_post_post_comment, sParamComment, null).getEntity.getContent))
+      println(doGET(url_get_user_info))
     
   }
   
   def doLoadContextService(account: String, _type: String) {
     val cookieStr = QueryHelper.queryCookie(account, _type)
-    parseCookie(cookieStr)
+    val store = parseCookie(cookieStr)
+    context.setCookieStore(store)
   }
   
   /**
@@ -265,7 +281,7 @@ object WebDigg {
   def get(url: String, paramPattern: String = null)(implicit context: HttpContext, client: HttpClient): HttpResponse = {
     val get = new HttpGet(url)
     try
-      client.execute(get)
+      client.execute(get, context)
     finally
       println("get finally.")
 //      get.releaseConnection()
@@ -331,8 +347,8 @@ object WebDigg {
   /**
    * 解析cookieStr 提供Cookie
    */
-  def parseCookie(cookieStr: String)/*: CookieStore =*/ {
-//    val cookieStore = new BasicCookieStore()
+  def parseCookie(cookieStr: String): CookieStore = {
+    val cookieStore = new BasicCookieStore()
     // 获取Cookie
     cookieStr.split(';').foreach { __ =>
       if (__.contains('=')) // 设置Cookie
@@ -340,7 +356,7 @@ object WebDigg {
       else
         cookieStore.addCookie(new BasicClientCookie(__, null))
     }
-//    cookieStore
+    cookieStore
   }
 
   /**

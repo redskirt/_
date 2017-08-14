@@ -3,7 +3,7 @@ package com.sasaki.wp.enums
 /**
  * @Author Wei Liu
  * @Mail wei.liu@suanhua.org
- * @Timestamp 2017��8��11�� ����4:24:32
+ * @Timestamp 2017-08-11 下午4:24:32
  * @Description 
  */
 object E extends Enumeration {
@@ -35,7 +35,8 @@ object E extends Enumeration {
   val url_post_account_login = s"$sss_toutiao_com/account_login/"
 
   val url_get_login = s"$sss_toutiao_com/login/"
-  val url_get_usr_info = s"$www_toutiao_com/user/info/"
+  val url_get_user_info = s"$www_toutiao_com/user/info/"
   val url_get_comment_list = s"$www_toutiao_com/api/comment/list/"
+  val url_get_article_user_log  = s"$www_toutiao_com/api/article/user_log/"
 
 }
