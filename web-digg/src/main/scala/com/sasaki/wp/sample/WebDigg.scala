@@ -1,13 +1,9 @@
 package com.sasaki.wp.sample
 
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
-
 import org.apache.http.Consts
 import org.apache.http.HttpResponse
 import org.apache.http.HttpStatus
 import org.apache.http.client.CookieStore
-import org.apache.http.client.HttpClient
 import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.UrlEncodedFormEntity
@@ -24,14 +20,21 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.cookie.BasicClientCookie
 import org.apache.http.impl.cookie.DefaultCookieSpecProvider
 import org.apache.http.message.BasicNameValuePair
-import org.apache.http.protocol.HttpContext
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods
 import org.json4s.jvalue2extractable
 import org.json4s.jvalue2monadic
 import org.json4s.string2JsonInput
 
-import com.sasaki.wp.enums.E._
+import com.sasaki.wp.enums.E.{ & => & }
+import com.sasaki.wp.enums.E.SET_COOKIE
+import com.sasaki.wp.enums.E.appCode
+import com.sasaki.wp.enums.E.captcha_regex
+import com.sasaki.wp.enums.E.init
+import com.sasaki.wp.enums.E.url_captcha
+import com.sasaki.wp.enums.E.url_get_login
+import com.sasaki.wp.enums.E.url_get_user_info
+import com.sasaki.wp.enums.E.url_post_account_login
 import com.sasaki.wp.persistence.Metadata
 import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.Util
@@ -50,17 +53,18 @@ object WebDigg {
   
   implicit val formats = DefaultFormats
   
-  implicit val cookieStore = new BasicCookieStore
-  implicit val requestConfig = RequestConfig.DEFAULT
-  implicit val context = HttpClientContext.create()
-  implicit val registry: Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
+  var cookieStore = new BasicCookieStore
+  var requestConfig = RequestConfig.DEFAULT
+  var context = HttpClientContext.create()
+  var registry: Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
     .register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
     .build
-  implicit val client = HttpClients.custom()
+  var client = HttpClients.custom()
     .setDefaultCookieStore(cookieStore)
     .setDefaultRequestConfig(requestConfig)
     .setDefaultCookieSpecRegistry(registry)
     .build()
+     
 
   /**
    * 登陆前，获取验证码Base64Code
@@ -79,7 +83,32 @@ object WebDigg {
      * 排查当前加载现有Cookie下带Cookie访问时“账号授权过期，请重新登录”的问题
      * 确定在应用上下文中Cookie应该带的时机
      */
-    doLoadContextService("17084117416", "init")
+//    doLoadContextService("17084117416", "init")
+//    context.setCookieSpecRegistry(registry)
+//    val cookieStr = QueryHelper.queryCookie("17084117416", "init")
+    val cookieStr = """
+csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502787569; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=dndjsupys1502788464658
+"""
+    val store = parseCookie(cookieStr)
+    val context_ = HttpClientContext.create()
+    val registry_ : Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
+      .register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
+      .build
+    val client_ = HttpClients.createDefault()
+    context_.setCookieStore(store)
+    context_.setCookieSpecRegistry(registry_)
+
+    val request = new HttpGet("http://www.toutiao.com/user/info/")
+//    request.setHeader("Host", "www.toutiao.com")
+//    request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0")
+//    request.setHeader("Content-Type", "application/x-www-form-urlencoded")
+//    request.setHeader("Referer", "http://www.toutiao.com/a6453992770012741902/")    
+    request.setHeader("Cookie", cookieStr)
+//    request.setHeader("Connection", "keep-alive")
+    val response = client_.execute(request)
+    println(parseContent(response.getEntity.getContent))
+    
+    
     //    val testPage = doGET("http://www.toutiao.com/a6451469307842429198/#p=1")
     //    println(s"testPage --> $testPage")
 
@@ -100,7 +129,7 @@ object WebDigg {
     
 //    val sParamComment = paramCommentDefault(group_id, item_id)
 //    println(parseContent(doPOSTWithContext(url_post_post_comment, sParamComment, null).getEntity.getContent))
-      println(doGET(url_get_user_info))
+//      println(doGET(url_get_user_info))
     
   }
   
@@ -273,12 +302,12 @@ object WebDigg {
   /**
    * GET请求，返回响应字符串
    */
-  def doGET(url: String): String = parseContent(get(url).getEntity.getContent)
+  def doGET(url: String): String = parseContent(get_(url).getEntity.getContent)
 
   /**
    * 原生GET请求
    */
-  def get(url: String, paramPattern: String = null)(implicit context: HttpContext, client: HttpClient): HttpResponse = {
+  def get_(url: String, paramPattern: String = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
     val get = new HttpGet(url)
     try
       client.execute(get, context)
@@ -301,7 +330,7 @@ object WebDigg {
    * 发送带Cookie的POST请求
    * 参数为form提交方式
    */
-  def doPOSTWithContext(url: String, paramPattern: String, headers: Map[String, String] = null)(implicit context: HttpContext, client: HttpClient): HttpResponse = {
+  def doPOSTWithContext(url: String, paramPattern: String, headers: Map[String, String] = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
     val post = new HttpPost(url)
     post.setEntity(new StringEntity(paramPattern, ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)))
     //    post.setHeader("Cookie", postCookie)
@@ -315,7 +344,7 @@ object WebDigg {
   /**
    * 原生POST请求
    */
-  def post(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null)(implicit client: HttpClient): HttpResponse = {
+  def post(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null)/*(implicit client: HttpClient)*/: HttpResponse = {
     val post = new HttpPost(url)
     try {
       import scala.collection.JavaConversions._
