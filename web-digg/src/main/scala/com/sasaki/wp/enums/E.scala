@@ -16,7 +16,7 @@ object E extends Enumeration {
   
   val SET_COOKIE = "Set-Cookie"
   
-  // 验证码接口
+  // 验证码相关
   val url_captcha = "https://ali-checkcode2.showapi.com/checkcode"
   val appCode = "APPCODE b8071dda673d41aeb6b17ac75f86d7eb"
   val captcha_regex = "captcha: '(.+?)'"
@@ -38,5 +38,5 @@ object E extends Enumeration {
   val url_get_user_info = s"$www_toutiao_com/user/info/"
   val url_get_comment_list = s"$www_toutiao_com/api/comment/list/"
   val url_get_article_user_log  = s"$www_toutiao_com/api/article/user_log/"
-
+ 
 }

@@ -27,17 +27,11 @@ import org.json4s.jvalue2monadic
 import org.json4s.string2JsonInput
 
 import com.sasaki.wp.enums.E.{ & => & }
-import com.sasaki.wp.enums.E.SET_COOKIE
-import com.sasaki.wp.enums.E.appCode
-import com.sasaki.wp.enums.E.captcha_regex
-import com.sasaki.wp.enums.E.init
-import com.sasaki.wp.enums.E.url_captcha
-import com.sasaki.wp.enums.E.url_get_login
-import com.sasaki.wp.enums.E.url_get_user_info
-import com.sasaki.wp.enums.E.url_post_account_login
 import com.sasaki.wp.persistence.Metadata
 import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.Util
+import org.apache.http.impl.cookie.BasicClientCookie2
+import org.apache.http.client.utils.URIBuilder
 
 /**
  * @Author Sasaki
@@ -50,6 +44,7 @@ class WebDigg {
 }
 
 object WebDigg {
+  import com.sasaki.wp.enums.E._
   
   implicit val formats = DefaultFormats
   
@@ -64,58 +59,57 @@ object WebDigg {
     .setDefaultRequestConfig(requestConfig)
     .setDefaultCookieSpecRegistry(registry)
     .build()
-     
 
   /**
    * 登陆前，获取验证码Base64Code
    */
-//  println("captchaStr --> " + getCaptchaStrService)
+  //  println("captchaStr --> " + getCaptchaStrService)
   val str = """
     {"showapi_res_code":0,"showapi_res_error":"","showapi_res_body":{"Result":"haue","ret_code":0,"Id":"95f4d921-78c8-41bf-bc78-48a33ca9be56"}}
-  """
+  """.trim()
+
+//  val cookieStr_ = """
+//csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156
+  //    """.trim()
 
   def main(args: Array[String]): Unit = {
     //  doLoginService(DEFAULT_ACCOUNT, DEFAULT_PASSWORD, getCaptchaStrService)
     //  val testPage = doGET("http://www.toutiao.com/a6451469307842429198/#p=1")
-    //  println(s"testPage --> $testPage")
 
     /**
      * 排查当前加载现有Cookie下带Cookie访问时“账号授权过期，请重新登录”的问题
+     * 已解决，是定义""""""字符串时带换行符引起！
      * 确定在应用上下文中Cookie应该带的时机
      */
 //    doLoadContextService("17084117416", "init")
 //    context.setCookieSpecRegistry(registry)
-//    val cookieStr = QueryHelper.queryCookie("17084117416", "init")
-    val cookieStr = """
-csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502787569; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=dndjsupys1502788464658
-"""
-    val store = parseCookie(cookieStr)
-    val context_ = HttpClientContext.create()
-    val registry_ : Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
-      .register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
-      .build
-    val client_ = HttpClients.createDefault()
-    context_.setCookieStore(store)
-    context_.setCookieSpecRegistry(registry_)
-
-    val request = new HttpGet("http://www.toutiao.com/user/info/")
+    val cookieStr = QueryHelper.queryCookie("17084117416", "init").trim()
+    
+    val request = new HttpGet("http://www.toutiao.com/api/article/user_log/?c=detail_gallery&ev=click_publish_comment&sid=9xap2b4hx1502862742156&type=event&t=1502862756690")
 //    request.setHeader("Host", "www.toutiao.com")
 //    request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0")
+//    request.setHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*")
+//    request.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2")
+//    request.setHeader("Accept-Encoding", "gzip, deflate, br")
+//    request.setHeader("X-Requested-With", "XMLHttpRequest")
 //    request.setHeader("Content-Type", "application/x-www-form-urlencoded")
-//    request.setHeader("Referer", "http://www.toutiao.com/a6453992770012741902/")    
-    request.setHeader("Cookie", cookieStr)
+//    request.setHeader("Referer", "http://www.toutiao.com/a6452936570042319374/")    
+//    request.setHeader("Cookie", cookieStr)
 //    request.setHeader("Connection", "keep-alive")
-    val response = client_.execute(request)
-    println(parseContent(response.getEntity.getContent))
     
+//    println(parseResponse(client.execute(request)))
+//    println("userInfo --> " + doUserInfoService(cookieStr))
+//    println(doArticleUserLogService(cookieStr))
     
-    //    val testPage = doGET("http://www.toutiao.com/a6451469307842429198/#p=1")
-    //    println(s"testPage --> $testPage")
-
     //  val comment_id = "1575095098176542"
     //  val dongtai_id = "1575095098176542"
     val group_id = "6451469307842429198"
     val item_id = "6451472465402003981"
+    
+    val paramComment = paramCommentDefault(group_id, item_id)
+//    println(doPOST(url_post_post_comment, paramComment, null))
+    
+    
 
     /**
      * 经测
@@ -133,6 +127,45 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
     
   }
   
+  
+  /**
+   * 点赞
+   */
+  //  val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
+  //  val response = post(url_post_digg, paramDiggStr, postCookie)
+
+  /**
+   * 评论
+   */
+  //	val paramCommentStr = paramComment(group_id, item_id)
+  //  val response = post(url_post_post_comment, paramCommentStr, postCookie)
+  
+  /**
+   * *发布评论第3步
+   * 附带当前Cookie，POST提交评论
+   */
+  def doPublishCommentService(cookieStr: String): String = {
+    val paramComment = paramCommentDefault("")
+    ""
+  }
+  
+  /**
+   * *发布评论第2步
+   * 附带当前Cookie，发送一个记录UserLog请求，经测该请求仅返回{"message": "success"}
+   * 为避免未知异常，最好不省略该步骤。
+   */
+  def doArticleUserLogService(cookieStr: String): String = 
+    doGET(url_get_article_user_log + "?c=detail_gallery&ev=click_publish_comment&sid=xyotkm1ax1502720223997&type=event&t=" + System.currentTimeMillis(), cookieStr)
+  
+  /**
+   * *发布评论第1步
+   * 附带当前Cookie，返回用户信息
+   */
+  def doUserInfoService(cookieStr: String): String = doGET(url_get_user_info, cookieStr)
+  
+  /**
+   * 从数据库中加载Cookie放入当前Context
+   */
   def doLoadContextService(account: String, _type: String) {
     val cookieStr = QueryHelper.queryCookie(account, _type)
     val store = parseCookie(cookieStr)
@@ -205,18 +238,6 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
   }
 
   /**
-   * 点赞
-   */
-  //  val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
-  //  val response = post(url_post_digg, paramDiggStr, postCookie)
-
-  /**
-   * 评论
-   */
-  //	val paramCommentStr = paramComment(group_id, item_id)
-  //  val response = post(url_post_post_comment, paramCommentStr, postCookie)
-
-  /**
    * 1. 调用解析验证码接口获取结果字符串
    * 2. 解析结果返回
    */
@@ -276,7 +297,7 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
    */
   def paramCommentDefault(_params_ : String*): String = {
     assert(_params_.length == 2, "Require _params_ : <group_id> <item_id>")
-    val content = "21这是一条最真实的评论，我也不知道怎么回事~"
+    val content = "这是一条最真实的评论，我也不知道怎么回事~" + new java.util.Random(100).nextInt()
     val group_id = _params_(0)
     val item_id = _params_(1)
     val id = "0"
@@ -300,17 +321,25 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
   def refreshGET(url: String): String = doGET(url)
   
   /**
-   * GET请求，返回响应字符串
+   * 无参GET请求，返回响应字符串
    */
-  def doGET(url: String): String = parseContent(get_(url).getEntity.getContent)
+  def doGET(url: String, cookieStr: String = null): String = {
+    if(Util.nonNull(cookieStr)) 
+    	parseResponse(get(url, null, cookieStr))
+    else 
+    	parseResponse(get(url))
+  }
 
   /**
    * 原生GET请求
    */
-  def get_(url: String, paramPattern: String = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
+  def get(url: String, paramPattern: String = null, cookieStr: String = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
     val get = new HttpGet(url)
-    try
-      client.execute(get, context)
+    try {
+      if(Util.nonNull(cookieStr))
+        get.setHeader("Cookie", cookieStr)
+      client.execute(get/*, context*/)   
+    }
     finally
       println("get finally.")
 //      get.releaseConnection()
@@ -319,7 +348,7 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
   /**
    * POST，返回响应字符串
    */
-  def doPOST(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null): String = parseContent(post(url, entity, headers).getEntity.getContent)
+  def doPOST(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null): String = parseResponse(post(url, entity, headers))
   
   def doPOST(url: String, entity: String, headers: Map[String, String]) : String = {
     val mapEntity: Map[String, String] = entity.split(&).map { __ => (__.split('=')(0), __.split('=')(1)) }.toMap
@@ -356,7 +385,7 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
       if (null != headers) // 参数
         headers.foreach(__ => post.setHeader(__._1, __._2))
         
-      println("POST --> url: " + url + "\nparam: " + entity)
+      println("POST --> \nurl: " + url + "\nparam: " + entity)
       client.execute(post)
     } finally
 //      post.releaseConnection()
@@ -364,12 +393,17 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
   }
 
   /**
+   * 解析Response，即Content
+   */
+  def parseResponse(response: HttpResponse): String = parseContent(response.getEntity.getContent)
+  
+  /**
    * 解析Content流，返回可读字符串
    */
   def parseContent(input: java.io.InputStream): String = {
     import scala.io.Source
     val builder = StringBuilder.newBuilder
-    Source.fromInputStream(input).getLines().foreach(__ => builder.append(__).append("\n"))
+    Source.fromInputStream(input, "UTF-8").getLines().foreach(__ => builder.append(__).append("\n"))
     builder.toString()
   }
 
@@ -380,10 +414,14 @@ csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHE
     val cookieStore = new BasicCookieStore()
     // 获取Cookie
     cookieStr.split(';').foreach { __ =>
-      if (__.contains('=')) // 设置Cookie
-        cookieStore.addCookie(new BasicClientCookie(__.split('=')(0), __.split('=')(1)))
+      if (__.contains('=')) { // 设置Cookie 
+        val cookie = new BasicClientCookie2(__.split('=')(0), __.split('=')(1))
+        cookie.setVersion(0)
+        cookie.setPath("/")
+        cookieStore.addCookie(cookie)
+      }
       else
-        cookieStore.addCookie(new BasicClientCookie(__, null))
+        cookieStore.addCookie(new BasicClientCookie2(__, null))
     }
     cookieStore
   }
