@@ -32,6 +32,7 @@ import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.Util
 import org.apache.http.impl.cookie.BasicClientCookie2
 import org.apache.http.client.utils.URIBuilder
+import org.json4s.JsonMethods
 
 /**
  * @Author Sasaki
@@ -101,16 +102,19 @@ object WebDigg {
 //    println("userInfo --> " + doUserInfoService(cookieStr))
 //    println(doArticleUserLogService(cookieStr))
     
-    //  val comment_id = "1575095098176542"
-    //  val dongtai_id = "1575095098176542"
+    val comment_id = "1575219074914318"
+    val dongtai_id = "1575219074914318"
     val group_id = "6451469307842429198"
     val item_id = "6451472465402003981"
     
-    val paramComment = paramCommentDefault(group_id, item_id)
-//    println(doPOST(url_post_post_comment, paramComment, null))
+    // 提交评论请求
+//    val paramCommentStr = paramCommentDefault(group_id, item_id)
+//    println(doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr))))
+    
+    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
+    println(doDiggService(paramDiggStr, cookieStr))
     
     
-
     /**
      * 经测
      * 提交评论时页面有三个请求
@@ -119,6 +123,8 @@ object WebDigg {
      * POST 带参	http://www.toutiao.com/api/comment/post_comment/
      * 由无参请求任意请求后返回的Cookie（三个请求携带的Cookie相同）更新后，应该可以提交评论
      * 为防止不和谐因素，最好在提交评论时三个请求都走一遍。
+     * ---> 
+     * 经测，POST评论时仅提交url_post_post_comment 请求时，评论有效
      */
     
 //    val sParamComment = paramCommentDefault(group_id, item_id)
@@ -127,27 +133,31 @@ object WebDigg {
     
   }
   
-  
   /**
    * 点赞
    */
   //  val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
   //  val response = post(url_post_digg, paramDiggStr, postCookie)
 
-  /**
-   * 评论
-   */
-  //	val paramCommentStr = paramComment(group_id, item_id)
-  //  val response = post(url_post_post_comment, paramCommentStr, postCookie)
+  def doDiggService(paramDiggStr: String, cookieStr: String): String = {
+    val result = doPOST(url_post_digg, paramDiggStr, Map(("Cookie" -> cookieStr)))
+    val jsonObj = JsonMethods.parse(result)
+    import org.json4s.JsonAST._
+    val message = "comment_id: " + (jsonObj \ "data" \ "comment_id").extract[Int] + ", digg_count: " + (jsonObj \ "data" \ "digg_count").extract[Int]
+    (jsonObj \ "data" \ "action_exist") match {// 根据响应json样例做匹配
+      case JInt(_) => "当前评论已点赞过 --> " + message
+      case JNothing => "当前评论赞成功 --> " + message // 点赞成功时无"action_exist"返回
+      case _ => "-1"
+    }
+  }
+    
   
   /**
    * *发布评论第3步
    * 附带当前Cookie，POST提交评论
    */
-  def doPublishCommentService(cookieStr: String): String = {
-    val paramComment = paramCommentDefault("")
-    ""
-  }
+  def doPublishCommentService(paramCommentStr: String, cookieStr: String): String = 
+    doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr)))
   
   /**
    * *发布评论第2步
@@ -297,7 +307,7 @@ object WebDigg {
    */
   def paramCommentDefault(_params_ : String*): String = {
     assert(_params_.length == 2, "Require _params_ : <group_id> <item_id>")
-    val content = "这是一条最真实的评论，我也不知道怎么回事~" + new java.util.Random(100).nextInt()
+    val content = new java.util.Random(100).nextInt() + "这是一条最真实的评论，我也不知道怎么回事~"
     val group_id = _params_(0)
     val item_id = _params_(1)
     val id = "0"
@@ -434,5 +444,4 @@ object WebDigg {
     response.getAllHeaders.foreach { o => if (o.getName.equalsIgnoreCase(SET_COOKIE)) builder.append(o.getValue) }
     builder.toString()
   }
-  
 }
