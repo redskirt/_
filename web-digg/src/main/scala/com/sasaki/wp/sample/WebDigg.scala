@@ -16,23 +16,25 @@ import org.apache.http.cookie.CookieSpecProvider
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.BasicCookieStore
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.cookie.BasicClientCookie
+import org.apache.http.impl.cookie.BasicClientCookie2
 import org.apache.http.impl.cookie.DefaultCookieSpecProvider
 import org.apache.http.message.BasicNameValuePair
+import org.apache.http.protocol.HttpContext
 import org.json4s.DefaultFormats
+import org.json4s.JsonMethods
 import org.json4s.jackson.JsonMethods
 import org.json4s.jvalue2extractable
 import org.json4s.jvalue2monadic
 import org.json4s.string2JsonInput
 
-import com.sasaki.wp.enums.E.{ & => & }
+import com.sasaki.wp.enums.E.&
 import com.sasaki.wp.persistence.Metadata
 import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.Util
-import org.apache.http.impl.cookie.BasicClientCookie2
-import org.apache.http.client.utils.URIBuilder
-import org.json4s.JsonMethods
+
 
 /**
  * @Author Sasaki
@@ -69,9 +71,10 @@ object WebDigg {
     {"showapi_res_code":0,"showapi_res_error":"","showapi_res_body":{"Result":"haue","ret_code":0,"Id":"95f4d921-78c8-41bf-bc78-48a33ca9be56"}}
   """.trim()
 
-//  val cookieStr_ = """
-//csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156
-  //    """.trim()
+//  csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156
+  val cookieStr_ = """
+toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/
+      """.trim()
 
   def main(args: Array[String]): Unit = {
     //  doLoginService(DEFAULT_ACCOUNT, DEFAULT_PASSWORD, getCaptchaStrService)
@@ -87,33 +90,23 @@ object WebDigg {
     val cookieStr = QueryHelper.queryCookie("17084117416", "init").trim()
     
     val request = new HttpGet("http://www.toutiao.com/api/article/user_log/?c=detail_gallery&ev=click_publish_comment&sid=9xap2b4hx1502862742156&type=event&t=1502862756690")
-//    request.setHeader("Host", "www.toutiao.com")
-//    request.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0")
-//    request.setHeader("Accept", "text/javascript, text/html, application/xml, text/xml, */*")
-//    request.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2")
-//    request.setHeader("Accept-Encoding", "gzip, deflate, br")
-//    request.setHeader("X-Requested-With", "XMLHttpRequest")
-//    request.setHeader("Content-Type", "application/x-www-form-urlencoded")
-//    request.setHeader("Referer", "http://www.toutiao.com/a6452936570042319374/")    
-//    request.setHeader("Cookie", cookieStr)
-//    request.setHeader("Connection", "keep-alive")
-    
-//    println(parseResponse(client.execute(request)))
-//    println("userInfo --> " + doUserInfoService(cookieStr))
-//    println(doArticleUserLogService(cookieStr))
     
     val comment_id = "1575219074914318"
     val dongtai_id = "1575219074914318"
     val group_id = "6451469307842429198"
     val item_id = "6451472465402003981"
     
+    // 返回用户信息
+//        println("userInfo --> " + doUserInfoService(cookieStr_))
+//    println(doArticleUserLogService(cookieStr))
+        
     // 提交评论请求
 //    val paramCommentStr = paramCommentDefault(group_id, item_id)
 //    println(doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr))))
+//    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
+//    println(doDiggService(paramDiggStr, cookieStr_))
     
-    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
-    println(doDiggService(paramDiggStr, cookieStr))
-    
+    doLoginService("17084117416", "lk111222333")
     
     /**
      * 经测
@@ -141,6 +134,7 @@ object WebDigg {
 
   def doDiggService(paramDiggStr: String, cookieStr: String): String = {
     val result = doPOST(url_post_digg, paramDiggStr, Map(("Cookie" -> cookieStr)))
+    println("post digg result --> " + result)
     val jsonObj = JsonMethods.parse(result)
     import org.json4s.JsonAST._
     val message = "comment_id: " + (jsonObj \ "data" \ "comment_id").extract[Int] + ", digg_count: " + (jsonObj \ "data" \ "digg_count").extract[Int]
@@ -150,7 +144,6 @@ object WebDigg {
       case _ => "-1"
     }
   }
-    
   
   /**
    * *发布评论第3步
@@ -183,18 +176,25 @@ object WebDigg {
   }
   
   /**
+   * 请求登录验证码 --> 执行登录及后续动作
+   */
+  def doLoginService(account: String, password: String) = doLogin(account, password, getCaptchaStr())
+  
+  /**
+   * *执行登录第1步
    * 直接获取登陆验证码待识别字符串
    */
-  def getCaptchaStrService(): String = {
+  def getCaptchaStr(): String = {
     val loginContent: String = doGET(url_get_login)
     Util.getMatched(loginContent, captcha_regex)
   }
   
   /**
-   * 登陆，三方验证码解析
+   * *执行登录第2步
+   * 登录，三方验证码解析
    * 执行完毕后，当前Context对象被更新，使后续带Context对象访问
    */
-  def doLoginService(account: String, password: String, captchaStr: String) {
+  def doLogin(account: String, password: String, captchaStr: String) {
     // 执行登陆，返回状态码判断
     try {
       // 调用验证码识别
@@ -226,7 +226,14 @@ object WebDigg {
            */
           context.setCookieSpecRegistry(registry)
           context.setCookieStore(cookieStore)
-
+          
+          /**
+           * 登陆成功后带context进入主页面，获取主页面的响应Cookie，即ACT 的Cookie
+           */
+          
+           // TODO 尝试不带Context，仅用cookieStr的方式请求/ https://www.toutiao.com/能不能获取到需要的响应Cookie
+          
+          
           // CookieStr 插入数据库
           val cookieStr = parseCookie(response)
           println("cookieStr --> " + response)
@@ -236,11 +243,11 @@ object WebDigg {
           println(s"login success. account: $account --> 执行登陆成功，Cookie设置成功。")
         } else {
           println(s"login fail, account: $account --> 重试，验证码解析不通过或异常...")
-          doLoginService(account, password, getCaptchaStrService)
+          doLogin(account, password, getCaptchaStr)
         }
       } else {
         println(s"login fail, account: $account --> 重试，三方验证码识别错误...")
-        doLoginService(account, password, getCaptchaStrService)
+        doLogin(account, password, getCaptchaStr)
       }
     } catch {
       case t: Throwable => println("FAIL --> 执行登陆异常！"); t.printStackTrace()
@@ -339,6 +346,13 @@ object WebDigg {
     else 
     	parseResponse(get(url))
   }
+  
+  /**
+   * 无参GET请求，不带Cookie，带当前Context，返回响应字符串
+   */
+//  def doGET(url: String)(implicit context: HttpContext, client: CloseableHttpClient): String = {
+//    client.execute(new HttpGet(url), context)
+//  }
 
   /**
    * 原生GET请求
