@@ -59,4 +59,7 @@
     }
 }
 
+同事解决登陆后携带Cookie的问题，带该Cookie可进行评论
+    cookies = {'tt_webid': '6455561754583139853', 'csrftoken': 'bc7ee1ecde26ed8ba35e3a0dc01e3fcd',
+     'toutiao_sso_user': 'd3ebc74ee26143dacfaf4b4d3cdc257f', 'sso_login_status': '1'}
 
