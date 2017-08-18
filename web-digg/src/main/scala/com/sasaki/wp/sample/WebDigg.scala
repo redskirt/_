@@ -97,7 +97,7 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
     val item_id = "6451472465402003981"
     
     // 返回用户信息
-//        println("userInfo --> " + doUserInfoService(cookieStr_))
+       println("userInfo --> " + doUserInfoService("""csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156"""))
 //    println(doArticleUserLogService(cookieStr))
         
     // 提交评论请求
@@ -106,7 +106,13 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
 //    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
 //    println(doDiggService(paramDiggStr, cookieStr_))
     
-    doLoginService("17084117416", "lk111222333")
+//    doLoginService("17084117416", "lk111222333")
+    
+//    val cookieStr__ = get("https://www.toutiao.com/", null, cookieStr_)
+//    cookieStr__.getHeaders("X-SS-Set-Cookie").foreach { x => println(x) }
+      // 普通请求后页面的Cookie
+//    Set-Cookie: csrftoken=752f0f1f65baab7368feca7b1ffb240c; expires=Fri, 17-Aug-2018 03:58:19 GMT; Max-Age=31449600; Path=/
+//    Set-Cookie: tt_webid=6455459105310311949; Domain=.toutiao.com; expires=Thu, 16-Nov-2017 11:58:19 GMT; Max-Age=7804800; Path=/
     
     /**
      * 经测
@@ -232,11 +238,14 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
            */
           
            // TODO 尝试不带Context，仅用cookieStr的方式请求/ https://www.toutiao.com/能不能获取到需要的响应Cookie
+          val cookieStr = parseCookie(response)
+          println("登录成功后返回的Cookie --> " + cookieStr)
+          // toutiao_sso_user=60aa2c371acf601fac8b768ef1e03a44; Domain=sso.toutiao.com; expires=Fri, 22-Sep-2017 04:15:40 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Fri, 22-Sep-2017 04:15:40 GMT; httponly; Max-Age=3024000; Path=/
+//          val cookieStr_ = doGET("https://www.toutiao.com/", cookieStr)
           
           
           // CookieStr 插入数据库
-          val cookieStr = parseCookie(response)
-          println("cookieStr --> " + response)
+          println("responseStr --> " + response)
           val metadata = Metadata(account, cookieStr).setType(init)
           QueryHelper.saveMetadata(metadata)
 
