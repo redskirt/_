@@ -34,6 +34,7 @@ import com.sasaki.wp.enums.E.&
 import com.sasaki.wp.persistence.Metadata
 import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.Util
+import scala.util.Try
 
 
 /**
@@ -51,17 +52,17 @@ object WebDigg {
   
   implicit val formats = DefaultFormats
   
-  var cookieStore = new BasicCookieStore
-  var requestConfig = RequestConfig.DEFAULT
-  var context = HttpClientContext.create()
-  var registry: Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
-    .register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
-    .build
-  var client = HttpClients.custom()
-    .setDefaultCookieStore(cookieStore)
-    .setDefaultRequestConfig(requestConfig)
-    .setDefaultCookieSpecRegistry(registry)
-    .build()
+//  var cookieStore = new BasicCookieStore
+//  var requestConfig = RequestConfig.DEFAULT
+//  var context = HttpClientContext.create()
+//  var registry: Registry[CookieSpecProvider] = RegistryBuilder.create[CookieSpecProvider]()
+//    .register(CookieSpecs.DEFAULT, new DefaultCookieSpecProvider())
+//    .build
+//  var client = HttpClients.custom()
+//    .setDefaultCookieStore(cookieStore)
+//    .setDefaultRequestConfig(requestConfig)
+//    .setDefaultCookieSpecRegistry(registry)
+//    .build()
 
   /**
    * 登陆前，获取验证码Base64Code
@@ -72,9 +73,10 @@ object WebDigg {
   """.trim()
 
 //  csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156
+//  tt_webid=6455561754583139853; csrftoken=bc7ee1ecde26ed8ba35e3a0dc01e3fcd; sso_login_status=1;toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/
   val cookieStr_ = """
-toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Thu, 21-Sep-2017 02:19:06 GMT; httponly; Max-Age=3024000; Path=/
-      """.trim()
+sso_login_status=1; toutiao_sso_user=da7d4c3fa2702da32e5fc33548ac1716; Domain=sso.toutiao.com; expires=Sat, 23-Sep-2017 14:55:59 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Sat, 23-Sep-2017 14:55:59 GMT; httponly; Max-Age=3024000; Path=/
+   """.trim()
 
   def main(args: Array[String]): Unit = {
     //  doLoginService(DEFAULT_ACCOUNT, DEFAULT_PASSWORD, getCaptchaStrService)
@@ -87,32 +89,48 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
      */
 //    doLoadContextService("17084117416", "init")
 //    context.setCookieSpecRegistry(registry)
-    val cookieStr = QueryHelper.queryCookie("17084117416", "init").trim()
+//    val cookieStr = QueryHelper.queryCookie("15557174418", "init").trim()
     
-    val request = new HttpGet("http://www.toutiao.com/api/article/user_log/?c=detail_gallery&ev=click_publish_comment&sid=9xap2b4hx1502862742156&type=event&t=1502862756690")
+//    val request = new HttpGet("http://www.toutiao.com/api/article/user_log/?c=detail_gallery&ev=click_publish_comment&sid=9xap2b4hx1502862742156&type=event&t=1502862756690")
     
-    val comment_id = "1575219074914318"
-    val dongtai_id = "1575219074914318"
+    val comment_id = "1575154965270558"
+    val dongtai_id = "1575154965270558"
     val group_id = "6451469307842429198"
     val item_id = "6451472465402003981"
     
     // 返回用户信息
-       println("userInfo --> " + doUserInfoService("""csrftoken=099c9203c938060b4f1ea3dce16ab1a1; tt_webid=6447316118323512846; WEATHER_CITY=%E5%8C%97%E4%BA%AC; UM_distinctid=15d827c2ccf51-0963e2cc5326bc8-41554330-1fa400-15d827c2cd038c; CNZZDATA1259612802=407746919-1501128910-https%253A%252F%252Fwww.bing.com%252F%7C1502857769; uuid="w:82ca84223a28448cb7dfda2dfa5eab1c"; sso_login_status=1; login_flag=0c02740c9e36917cafaabd4768f9ec29; sessionid=23db5f93ebc0295196623c8cbf22f3d1; uid_tt=18383eb38585d5a3988fa25d7eb5fe9a; sid_tt=23db5f93ebc0295196623c8cbf22f3d1; sid_guard="23db5f93ebc0295196623c8cbf22f3d1|1502680367|2591999|Wed\054 13-Sep-2017 03:12:46 GMT"; __tasessionId=9xap2b4hx1502862742156"""))
+//       println("userInfo --> " + doUserInfoService(cookieStr))
 //    println(doArticleUserLogService(cookieStr))
         
     // 提交评论请求
 //    val paramCommentStr = paramCommentDefault(group_id, item_id)
-//    println(doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr))))
-//    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
-//    println(doDiggService(paramDiggStr, cookieStr_))
+//    println(doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr_))))
     
+    // 提交点赞请求 注意，进行提交点赞请求时应该先调用 doUserInfoService 否则失败
+    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
+//    println(doDiggService(paramDiggStr, cookieStr))
+    
+    // 执行所有用户点赞
+    val cookies = QueryHelper.listMetadata.map(_.cookie)
+    cookies.foreach { __ =>
+      val client = HttpClients.createDefault()
+      println("userInfo --> " + doUserInfoService(client, __))
+      println(doDiggService(client, paramDiggStr, __))
+      client.close()
+      Thread.sleep(2000)
+    }
+    
+//    def accounts = List(("15557174418", "EPudrq624534"), ("17081267754", "VEdefi761615"))
+//    def accounts = QueryHelper.listAccount.map(__ => (__.account, __.password))
+//    accounts.foreach { __ =>
+//      val client: CloseableHttpClient = HttpClients.createDefault()
+//      if(!doLoginService(client, __._1, __._2)) println("当前用户注册登录信息失败：" + __._1)
+//      client.close()
+//    }
 //    doLoginService("17084117416", "lk111222333")
     
 //    val cookieStr__ = get("https://www.toutiao.com/", null, cookieStr_)
 //    cookieStr__.getHeaders("X-SS-Set-Cookie").foreach { x => println(x) }
-      // 普通请求后页面的Cookie
-//    Set-Cookie: csrftoken=752f0f1f65baab7368feca7b1ffb240c; expires=Fri, 17-Aug-2018 03:58:19 GMT; Max-Age=31449600; Path=/
-//    Set-Cookie: tt_webid=6455459105310311949; Domain=.toutiao.com; expires=Thu, 16-Nov-2017 11:58:19 GMT; Max-Age=7804800; Path=/
     
     /**
      * 经测
@@ -135,19 +153,24 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
   /**
    * 点赞
    */
-  //  val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
-  //  val response = post(url_post_digg, paramDiggStr, postCookie)
+//    val paramDiggStr = paramDigg(comment_id, dongtai_id, group_id, item_id)
+//    val response = post(url_post_digg, paramDiggStr, postCookie)
 
-  def doDiggService(paramDiggStr: String, cookieStr: String): String = {
-    val result = doPOST(url_post_digg, paramDiggStr, Map(("Cookie" -> cookieStr)))
+  def doDiggService(client: CloseableHttpClient, paramDiggStr: String, cookieStr: String): String = {
+    val result = doPOST(client, url_post_digg, paramDiggStr, Map(("Cookie" -> cookieStr)))
     println("post digg result --> " + result)
     val jsonObj = JsonMethods.parse(result)
     import org.json4s.JsonAST._
-    val message = "comment_id: " + (jsonObj \ "data" \ "comment_id").extract[Int] + ", digg_count: " + (jsonObj \ "data" \ "digg_count").extract[Int]
-    (jsonObj \ "data" \ "action_exist") match {// 根据响应json样例做匹配
-      case JInt(_) => "当前评论已点赞过 --> " + message
-      case JNothing => "当前评论赞成功 --> " + message // 点赞成功时无"action_exist"返回
-      case _ => "-1"
+    try {
+      val message = "comment_id: " + (jsonObj \ "data" \ "comment_id").extract[Int] + ", digg_count: " + (jsonObj \ "data" \ "digg_count").extract[Int]
+      (jsonObj \ "data" \ "action_exist") match {// 根据响应json样例做匹配
+        case JInt(_) => "当前评论已点赞过 --> " + message
+        case JNothing => "当前评论赞成功 --> " + message // 点赞成功时无"action_exist"返回
+        case _ => "-1"
+      }
+    } catch {
+      case t: Throwable => t.printStackTrace()
+      "点赞请求有误，可能是Cookie参数异常。--> " + result
     }
   }
   
@@ -155,43 +178,44 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
    * *发布评论第3步
    * 附带当前Cookie，POST提交评论
    */
-  def doPublishCommentService(paramCommentStr: String, cookieStr: String): String = 
-    doPOST(url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr)))
+  def doPublishCommentService(client: CloseableHttpClient, paramCommentStr: String, cookieStr: String): String = 
+    doPOST(client, url_post_post_comment, paramCommentStr, Map(("Cookie" -> cookieStr)))
   
   /**
    * *发布评论第2步
    * 附带当前Cookie，发送一个记录UserLog请求，经测该请求仅返回{"message": "success"}
    * 为避免未知异常，最好不省略该步骤。
    */
-  def doArticleUserLogService(cookieStr: String): String = 
-    doGET(url_get_article_user_log + "?c=detail_gallery&ev=click_publish_comment&sid=xyotkm1ax1502720223997&type=event&t=" + System.currentTimeMillis(), cookieStr)
+  def doArticleUserLogService(client: CloseableHttpClient, cookieStr: String): String = 
+    doGET(client, url_get_article_user_log + "?c=detail_gallery&ev=click_publish_comment&sid=xyotkm1ax1502720223997&type=event&t=" + System.currentTimeMillis(), cookieStr)
   
   /**
    * *发布评论第1步
    * 附带当前Cookie，返回用户信息
    */
-  def doUserInfoService(cookieStr: String): String = doGET(url_get_user_info, cookieStr)
+  def doUserInfoService(client: CloseableHttpClient, cookieStr: String): String = doGET(client, url_get_user_info, cookieStr)
   
   /**
    * 从数据库中加载Cookie放入当前Context
    */
+  @deprecated
   def doLoadContextService(account: String, _type: String) {
     val cookieStr = QueryHelper.queryCookie(account, _type)
     val store = parseCookie(cookieStr)
-    context.setCookieStore(store)
+//    context.setCookieStore(store)
   }
   
   /**
    * 请求登录验证码 --> 执行登录及后续动作
    */
-  def doLoginService(account: String, password: String) = doLogin(account, password, getCaptchaStr())
+  def doLoginService(client: CloseableHttpClient, account: String, password: String) = doLogin(client, account, password, getCaptchaStr(client))
   
   /**
    * *执行登录第1步
    * 直接获取登陆验证码待识别字符串
    */
-  def getCaptchaStr(): String = {
-    val loginContent: String = doGET(url_get_login)
+  def getCaptchaStr(client: CloseableHttpClient): String = {
+    val loginContent: String = doGET(client, url_get_login)
     Util.getMatched(loginContent, captcha_regex)
   }
   
@@ -200,49 +224,46 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
    * 登录，三方验证码解析
    * 执行完毕后，当前Context对象被更新，使后续带Context对象访问
    */
-  def doLogin(account: String, password: String, captchaStr: String) {
+  def doLogin(client: CloseableHttpClient, account: String, password: String, captchaStr: String): Boolean = {
     // 执行登陆，返回状态码判断
     try {
       // 调用验证码识别
-      var _resultCaptchaCode = invokeParseCaptcha(captchaStr)
+      var _resultCaptchaCode = invokeParseCaptcha(client, captchaStr)
       println("invokeParseCaptcha，三方验证码返回结果： --> " + _resultCaptchaCode)
 //      var _resultCaptchaCode = getResultCaptchaCode(_requltCaptchaCodeJson)
 
-      val response = post(url_post_account_login,
+      val response = post(client, url_post_account_login,
         Map(("mobile" -> "sw"), ("code" -> "ss"), ("account" -> account), ("password" -> password),
           ("captcha" -> _resultCaptchaCode), ("is_30_days_no_login" -> "false"), ("service", "https://www.toutiao.com/")),
         Map())
 
-      if (_resultCaptchaCode != "-1" /*验证码有返回*/ ) {
-        val statusCode = response.getStatusLine.getStatusCode
-
-        if (statusCode == HttpStatus.SC_OK /*登陆成功*/ ) { // 登陆流程
+//      if (_resultCaptchaCode != "-1" /*验证码有返回*/ ) {
+//        val statusCode = response.getStatusLine.getStatusCode
+//
+//        if (statusCode == HttpStatus.SC_OK /*登陆成功*/ ) { // 登陆流程
           val entity = response.getEntity
           response.getAllHeaders.foreach { h => s"header--> $h" }
 
           import scala.collection.JavaConversions._
+          val cookieStore = new BasicCookieStore
           val cookies = cookieStore.getCookies
           if (cookies.nonEmpty)
             cookies.foreach { o => cookieStore.addCookie(new BasicClientCookie(o.getName, o.getValue)); println(s"add CookieStore --> $o") }
           else
             println("cookies is empty.")
-
           /**
            * 更新Context CookieStore
            */
-          context.setCookieSpecRegistry(registry)
-          context.setCookieStore(cookieStore)
+//          context.setCookieSpecRegistry(registry)
+//          context.setCookieStore(cookieStore)
           
           /**
            * 登陆成功后带context进入主页面，获取主页面的响应Cookie，即ACT 的Cookie
            */
-          
-           // TODO 尝试不带Context，仅用cookieStr的方式请求/ https://www.toutiao.com/能不能获取到需要的响应Cookie
-          val cookieStr = parseCookie(response)
+          val cookieStr = "sso_login_status=1; "/*Cookie串中加入已登录标识*/ + parseCookie(response)
           println("登录成功后返回的Cookie --> " + cookieStr)
           // toutiao_sso_user=60aa2c371acf601fac8b768ef1e03a44; Domain=sso.toutiao.com; expires=Fri, 22-Sep-2017 04:15:40 GMT; httponly; Max-Age=3024000; Path=/sso_login_status=1; Domain=toutiao.com; expires=Fri, 22-Sep-2017 04:15:40 GMT; httponly; Max-Age=3024000; Path=/
 //          val cookieStr_ = doGET("https://www.toutiao.com/", cookieStr)
-          
           
           // CookieStr 插入数据库
           println("responseStr --> " + response)
@@ -250,16 +271,18 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
           QueryHelper.saveMetadata(metadata)
 
           println(s"login success. account: $account --> 执行登陆成功，Cookie设置成功。")
-        } else {
-          println(s"login fail, account: $account --> 重试，验证码解析不通过或异常...")
-          doLogin(account, password, getCaptchaStr)
-        }
-      } else {
-        println(s"login fail, account: $account --> 重试，三方验证码识别错误...")
-        doLogin(account, password, getCaptchaStr)
-      }
+          client.close()
+          return true
+//        } else {
+//          println(s"login fail, account: $account --> 重试，验证码解析不通过或异常...")
+//          doLogin(account, password, getCaptchaStr)
+//        }
+//      } else {
+//        println(s"login fail, account: $account --> 重试，三方验证码识别错误...")
+//        doLogin(account, password, getCaptchaStr)
+//      }
     } catch {
-      case t: Throwable => println("FAIL --> 执行登陆异常！"); t.printStackTrace()
+      case t: Throwable => println("FAIL --> 执行登陆异常！"); t.printStackTrace(); return false
     }
   }
 
@@ -267,8 +290,8 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
    * 1. 调用解析验证码接口获取结果字符串
    * 2. 解析结果返回
    */
-  def invokeParseCaptcha(captchaStr: String): String = {
-    val responseCpatcha = post(url_captcha,
+  def invokeParseCaptcha(client: CloseableHttpClient, captchaStr: String): String = {
+    val responseCpatcha = post(client, url_captcha,
       Map(("convert_to_jpg" -> "0"), ("img_base64" -> captchaStr), ("typeId" -> "34")),
       Map(("Authorization", appCode)))
     val resultCaptchaStr = parseContent(responseCpatcha.getEntity.getContent)
@@ -323,7 +346,7 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
    */
   def paramCommentDefault(_params_ : String*): String = {
     assert(_params_.length == 2, "Require _params_ : <group_id> <item_id>")
-    val content = new java.util.Random(100).nextInt() + "这是一条最真实的评论，我也不知道怎么回事~"
+    val content = new java.util.Random(10).nextInt() + "这是一条最真实的评论，我也不知道怎么回事~"
     val group_id = _params_(0)
     val item_id = _params_(1)
     val id = "0"
@@ -344,16 +367,16 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
   /**
    * 刷新页面，仅GET请求
    */
-  def refreshGET(url: String): String = doGET(url)
+  def refreshGET(client: CloseableHttpClient, url: String): String = doGET(client, url)
   
   /**
    * 无参GET请求，返回响应字符串
    */
-  def doGET(url: String, cookieStr: String = null): String = {
+  def doGET(client: CloseableHttpClient, url: String, cookieStr: String = null): String = {
     if(Util.nonNull(cookieStr)) 
-    	parseResponse(get(url, null, cookieStr))
+    	parseResponse(get(client, url, null, cookieStr))
     else 
-    	parseResponse(get(url))
+    	parseResponse(get(client, url))
   }
   
   /**
@@ -366,7 +389,7 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
   /**
    * 原生GET请求
    */
-  def get(url: String, paramPattern: String = null, cookieStr: String = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
+  def get(client: CloseableHttpClient, url: String, paramPattern: String = null, cookieStr: String = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
     val get = new HttpGet(url)
     try {
       if(Util.nonNull(cookieStr))
@@ -381,18 +404,19 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
   /**
    * POST，返回响应字符串
    */
-  def doPOST(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null): String = parseResponse(post(url, entity, headers))
+  def doPOST(client: CloseableHttpClient, url: String, entity: Map[String, String] = null, headers: Map[String, String] = null): String = parseResponse(post(client, url, entity, headers))
   
-  def doPOST(url: String, entity: String, headers: Map[String, String]) : String = {
+  def doPOST(client: CloseableHttpClient, url: String, entity: String, headers: Map[String, String]) : String = {
     val mapEntity: Map[String, String] = entity.split(&).map { __ => (__.split('=')(0), __.split('=')(1)) }.toMap
-    doPOST(url, mapEntity, headers)
+    doPOST(client, url, mapEntity, headers)
   }
  
   /**
    * 发送带Cookie的POST请求
    * 参数为form提交方式
    */
-  def doPOSTWithContext(url: String, paramPattern: String, headers: Map[String, String] = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
+  @deprecated
+  def doPOSTWithContext(client: CloseableHttpClient, url: String, paramPattern: String, headers: Map[String, String] = null)/*(implicit context: HttpContext, client: HttpClient)*/: HttpResponse = {
     val post = new HttpPost(url)
     post.setEntity(new StringEntity(paramPattern, ContentType.create("application/x-www-form-urlencoded", Consts.UTF_8)))
     //    post.setHeader("Cookie", postCookie)
@@ -400,13 +424,13 @@ toutiao_sso_user=7375e938671969be357c88736de3dfe4; Domain=sso.toutiao.com; expir
       headers.foreach(__ => post.setHeader(__._1, __._2))
 
     println("POST --> url: " + url + "\nparam: " + paramPattern)
-    client.execute(post, context)
+    client.execute(post/*, context*/)
   }
   
   /**
    * 原生POST请求
    */
-  def post(url: String, entity: Map[String, String] = null, headers: Map[String, String] = null)/*(implicit client: HttpClient)*/: HttpResponse = {
+  def post(client: CloseableHttpClient, url: String, entity: Map[String, String] = null, headers: Map[String, String] = null)/*(implicit client: HttpClient)*/: HttpResponse = {
     val post = new HttpPost(url)
     try {
       import scala.collection.JavaConversions._

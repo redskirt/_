@@ -58,6 +58,8 @@ object QueryHelper {
     )
   }
   
+  def listAccount = inTransaction(sf)(from(t_account)(select(_)).toList)
+  def listMetadata = inTransaction(sf)(from(t_metadata)(select(_)).toList)
 
 }
 
@@ -69,7 +71,6 @@ object WebDiggSchema extends Schema {
 class Base {
   @Column("id")
   var id: Long = _
-  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
 case class Account(val account: String, val password: String) extends Base {
@@ -79,6 +80,7 @@ case class Account(val account: String, val password: String) extends Base {
 case class Metadata(val account: String, val cookie: String) extends Base {
   @Column("type")
   var _type: String = _
+  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
   
   def setType(_type: String): Metadata = { this._type = _type; this }
 }
@@ -90,14 +92,14 @@ object Sample extends App {
 
   import scala.io.Source
 
-  val accounts: List[Account] = Source.fromFile("""H:\_\a.scala""")
-    .getLines()
-    .map { __ =>
-      val account = new Account(__.split(':')(0), __.split(':')(1))
-      account.status_=("0")
-      account
-    } // foreach println
-    .toList
+//  val accounts: List[Account] = Source.fromFile("""H:\_\a.scala""")
+//    .getLines()
+//    .map { __ =>
+//      val account = new Account(__.split(':')(0), __.split(':')(1))
+//      account.status_=("0")
+//      account
+//    } // foreach println
+//    .toList
 
 //  inTransaction(sf) {
 //    t_account.insert(accounts);
@@ -105,7 +107,9 @@ object Sample extends App {
     
 //    QueryHelper.saveMetadata(Metadata("t", "t").setType("type"))
 //    println(QueryHelper.queryCookie("t", "type"))
-    QueryHelper.updateCookie(Metadata("t", "sssss").setType("typew"))
+//    QueryHelper.updateCookie(Metadata("t", "sssss").setType("typew"))
+//    QueryHelper.listMetadata.foreach(println)
+    QueryHelper.listAccount.foreach(println)
     
 }
 
