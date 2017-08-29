@@ -13,7 +13,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
 		<java.version>1.8</java.version>
 
 		<scala.version>2.11</scala.version>
@@ -21,18 +20,10 @@
 		<scala.complete.version>${scala.minor.version}.8</scala.complete.version>
 
 		<hadoop.version>2.6.0-${cdh.version}</hadoop.version>
-
-		<hive.group><!-- org.apache.hive -->
-			org.spark-project.hive
-		</hive.group>
-		<!-- Version used in Maven Hive dependency -->
-		<hive.version><!-- 1.1.0-cdh5.11.1 -->
-			1.2.1.spark2
-		</hive.version>
-		<!-- Version used for internal directory structure -->
-		<hive.version.short><!-- 1.1.0 -->
-			1.2.1
-		</hive.version.short>
+		<spark.version>2.1.1</spark.version>
+		<hive.group>org.spark-project.hive</hive.group>
+		<hive.version>1.2.1.spark2</hive.version>
+		<hive.version.short>1.2.1</hive.version.short>
 	</properties>
 
 	<dependencies>
@@ -46,11 +37,19 @@
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-core_${scala.minor.version}</artifactId>
-			<version>2.1.1</version>
+			<version>${spark.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.apache.hadoop</groupId>
-					<artifactId>hadoop-client</artifactId>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-reflect</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.zookeeper</groupId>
+					<artifactId>zookeeper</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -58,20 +57,25 @@
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming_${scala.minor.version}</artifactId>
-			<version>2.1.1</version>
+			<version>${spark.version}</version>
 		</dependency>
+		<dependency> 
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-streaming-kafka-0-10_${scala.minor.version}</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+				
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-sql_${scala.minor.version}</artifactId>
-			<version>2.1.1</version>
+			<version>${spark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-hive_${scala.minor.version}</artifactId>
-			<version>2.1.1</version>
+			<version>${spark.version}</version>
 		</dependency>
 	</dependencies>
-
 
 	<build>
 		<plugins>
