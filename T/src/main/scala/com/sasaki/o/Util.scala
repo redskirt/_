@@ -1,5 +1,6 @@
 package com.sasaki.o
 import java.util.regex.Pattern
+import scala.reflect.ClassTag
 
 /**
  *
@@ -30,6 +31,11 @@ object Util {
   def getSimpleName[T](t: T): String = { 
     val o = t.getClass().getSimpleName
     if(o.contains("$")) o.replaceAll("\\$", "") else o 
+  }
+
+  def getSimpleName2[T: ClassTag](t: T): String = {
+    val o = t.getClass().getSimpleName
+    if (o.contains("$")) o.replaceAll("\\$", "") else o
   } 
   
   def main(args: Array[String]): Unit = {
