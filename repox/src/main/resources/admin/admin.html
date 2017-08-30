@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="/admin/bower_components/semantic-ui/dist/semantic.min.css"/>
+    <link rel="stylesheet" href="admin.css"/>
+</head>
+<body>
+<h1 class="ui header" id="page-header">
+    <i class="rocket icon"></i>
+
+    <span class="content">
+        Repox
+        <div class="sub header">Make your sbt more responsive.</div>
+    </span>
+</h1>
+<div id="app" ng-app="repoxApp">
+    <div id="progressBar"></div>
+    <nav class="ui pointing menu" id="mainMenu" ng-controller="MenuCtrl" ng-init="init()">
+        <a class="{{activeOn('/upstreams')}} teal item" href="#/upstreams">
+            <i class="vertically flipped sitemap icon"></i> Upstream Repositories
+        </a>
+        <a class="{{activeOn('/connectors')}} green item" href="#/connectors">
+            <i class="compress link icon"></i> Connectors
+        </a>
+        <a class="{{activeOn('/proxies')}} orange item" href="#/proxies">
+            <i class="external link icon"></i> Proxies
+        </a>
+        <a class="{{activeOn('/immediate404Rules')}} purple item" href="#/immediate404Rules">
+            <i class="hide icon"></i> Immediate 404 Rules
+        </a>
+        <a class="{{activeOn('/expireRules')}} red item" href="#/expireRules">
+            <i class="refresh icon"></i> Expire Rules
+        </a>
+        <a class="{{activeOn('/parameters')}} blue item" href="#/parameters">
+            <i class="tasks icon"></i> Parameters
+        </a>
+        <div class="right menu">
+            <div class="ui dropdown link item">Config Data
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a class="item" href="exportConfig" id="exportConfig">
+                        <i class="icon download"></i>Export
+                    </a>
+                    <div class="item" type="file" ngf-select="importConfig($file, $invalidFiles)"
+                         accept="application/json" ngf-max-size="1MB" id="importConfig">
+                        <i class="icon upload"></i>
+                        Import
+                    </div>
+                    <div class="divider"></div>
+                    <a class="item" data-content="And delete older ones" ng-click="saveSnapshot()" id="saveSnapshot">
+                        <i class="icon save"></i>Save Snapshot
+                    </a>
+                </div>
+            </div>
+            <a class="item" ng-click="modifyPassword()"> <i class="icon write"></i>Modify Password</a>
+            <a class="item" ng-click="logout()"> <i class="icon power"></i>Logout</a>
+        </div>
+    </nav>
+    <section id="channel-content" ng-view>
+    </section>
+</div>
+
+<script src="/admin/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/admin/bower_components/semantic-ui/dist/semantic.min.js"></script>
+<script src="/admin/bower_components/underscore/underscore-min.js"></script>
+<script src="/admin/bower_components/angular/angular.min.js"></script>
+<script src="/admin/bower_components/angular-route/angular-route.min.js"></script>
+<script src="/admin/bower_components/ng-file-upload/ng-file-upload.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

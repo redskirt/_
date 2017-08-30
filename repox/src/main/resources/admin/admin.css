@@ -1,0 +1,37 @@
+#page-header {
+    margin-top: 0.5em ;
+    margin-left: 0.5em ;
+}
+
+.ui.table thead th, .ui.table td {
+    text-align: center;
+}
+
+.ui.tiny.icon.button {
+    padding: .39em;
+}
+
+.ui.modal {
+    margin-top: -15%;
+}
+.ui.modal > .header {
+    padding: 0.6rem 2rem;
+}
+
+.ui.form select {
+    height: 2.5em;
+    line-height: 2.5em;
+}
+
+.ui.authForm {
+    width: 50%;
+    margin: 0 auto;
+}
+
+#progressBar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background-color: seagreen;
+}

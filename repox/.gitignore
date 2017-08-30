@@ -1,0 +1,12 @@
+build/
+.gradle/
+.idea/
+*.iml
+*.log
+*.swp
+.DS_Store
+
+target/
+bower_components/
+node_modules/
+angular-semantic-ui/
