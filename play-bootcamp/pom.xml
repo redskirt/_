@@ -7,6 +7,13 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>play-bootcamp Maven Webapp</name>
 	<url>http://maven.apache.org</url>
+
+	<properties>
+		<play2.version>2.6.3</play2.version>
+		<scala.version>2.11</scala.version>
+		<play2.plugin.version>1.0.0-rc1</play2.plugin.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -18,10 +25,64 @@
 		<!-- https://mvnrepository.com/artifact/com.typesafe.play/play_2.11 -->
 		<dependency>
 			<groupId>com.typesafe.play</groupId>
-			<artifactId>play_2.11</artifactId>
-			<version>2.6.3</version>
+			<artifactId>play_${scala.version}</artifactId>
+			<version>${play2.version}</version>
 		</dependency>
-	</dependencies> 
+		<dependency>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play-akka-http-server_${scala.version}</artifactId>
+			<version>${play2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play-java-forms_${scala.version}</artifactId>
+			<version>${play2.version}</version>
+		</dependency>
+	</dependencies>
+	
+    <profiles>
+        <profile>
+            <id>eclipse</id>
+
+            <build>
+                <directory>${project.basedir}/target-eclipse</directory>
+
+                <plugins>
+					<plugin>
+		                <groupId>com.google.code.play2-maven-plugin</groupId>
+		                <artifactId>play2-maven-plugin</artifactId>
+		                <version>${play2.plugin.version}</version>
+		                <extensions>true</extensions>
+		                <configuration>
+		                    <templateAdditionalImports>play.data._ play.core.j.PlayFormsMagicForJava._</templateAdditionalImports>
+		                </configuration>
+		            </plugin>
+		                
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <skipMain>true</skipMain>
+                            <skip>true</skip>
+                            <source>1.8</source> <!-- 1.8 for Play! 2.5+ -->
+                            <target>1.8</target> <!-- 1.8 for Play! 2.5+ -->
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-compile</id>
+                                <goals><goal>compile</goal></goals>
+                            </execution>
+                            <execution>
+                                <id>default-testCompile</id>
+                                <goals><goal>testCompile</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    	
 	<build>
 		<finalName>play-bootcamp</finalName>
 	</build>
