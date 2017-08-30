@@ -1,5 +1,10 @@
 //src/main/java=main
 //src/main/scala=main
+<<<<<<< HEAD
+=======
+//src/test/java=tests
+//src/test/scala=tests
+>>>>>>> da7187c164b3adcf7869c58094e0087f41d55756
 P=
 Xcheckinit=false
 Xdisable-assertions=false
@@ -12,7 +17,11 @@ Xno-uescape=false
 Xplugin=
 Xplugin-disable=
 Xplugin-require=
+<<<<<<< HEAD
 Xpluginsdir=misc/scala-devel/plugins
+=======
+Xpluginsdir=misc\\scala-devel\\plugins
+>>>>>>> da7187c164b3adcf7869c58094e0087f41d55756
 Ypresentation-debug=false
 Ypresentation-delay=0
 Ypresentation-log=
@@ -25,13 +34,21 @@ eclipse.preferences.version=1
 explaintypes=false
 feature=false
 g=vars
+<<<<<<< HEAD
+=======
+nameHashing=false
+>>>>>>> da7187c164b3adcf7869c58094e0087f41d55756
 no-specialization=false
 nowarn=false
 optimise=false
 recompileOnMacroDef=true
 relationsDebug=false
 scala.compiler.additionalParams=
+<<<<<<< HEAD
 scala.compiler.installation=311647253
+=======
+scala.compiler.installation=2.11
+>>>>>>> da7187c164b3adcf7869c58094e0087f41d55756
 scala.compiler.sourceLevel=2.11
 scala.compiler.useProjectSettings=true
 stopBuildOnError=true
