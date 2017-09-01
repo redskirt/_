@@ -16,16 +16,16 @@ class Spark2Template {
 }
 
 object Spark2Template extends Object with T {
-  conf
-    .setAppName(Util.getSimpleName(this))
-    .setMaster("local[1]")
-    .set("_key_", "_value_")
+
+  val settings = List(
+    ("_key_" -> "_value_"))
+  val conf = _conf_(Util.getSimpleName(this), settings, "local[1]")
 
   def main(args: Array[String]): Unit = {
-    val spark: SparkSession = SparkSession.builder().config(conf).getOrCreate()
+    val spark: SparkSession = _spark_(conf)
+
     val dataSet: Dataset[String] = spark.read.textFile("")
     val dataFrame: DataFrame = spark.readStream.json("")
-    
-    
+
   }
 }
