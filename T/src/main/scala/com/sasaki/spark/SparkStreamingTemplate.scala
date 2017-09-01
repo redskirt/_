@@ -18,13 +18,9 @@ class SparkStreamingTemplate {
 }
 
 object SparkStreamingTemplate extends Object with T {
-  conf
-    .setAppName(Util.getSimpleName(this))
-    .setMaster("local[1]")
-    .set("_key_", "_value_")
-
-    
-  val ssc = new StreamingContext(conf, Seconds(2))
   
+  val conf = _conf_(Util.getSimpleName(this), List(("_key_" -> "_value_")))
+
+  val ssc = new StreamingContext(conf, Seconds(2))
   
 }
