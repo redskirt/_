@@ -11,6 +11,8 @@
 	<properties>
 		<play2.version>2.6.3</play2.version>
 		<scala.version>2.11</scala.version>
+		<scala.minor.version>${scala.version}.8</scala.minor.version>
+		
 		<play2.plugin.version>1.0.0-rc1</play2.plugin.version>
 	</properties>
 
@@ -21,6 +23,13 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+		
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.minor.version}</version>
+        </dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/com.typesafe.play/play_2.11 -->
 		<dependency>
@@ -28,62 +37,75 @@
 			<artifactId>play_${scala.version}</artifactId>
 			<version>${play2.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-akka-http-server_${scala.version}</artifactId>
-			<version>${play2.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.play</groupId>
-			<artifactId>play-java-forms_${scala.version}</artifactId>
-			<version>${play2.version}</version>
-		</dependency>
+        <!-- default DI framework -->
+        <!-- see https://www.playframework.com/documentation/2.6.x/Migration26#Guice-DI-support-moved-to-separate-module for more info -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-guice_${scala.version}</artifactId>
+            <version>${play2.version}</version>
+        </dependency>
+        
+        <!-- default SLF4J logging implementation, can be replaced by other -->
+        <!-- see https://www.playframework.com/documentation/2.6.x/SettingsLogger for more info -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-logback_${scala.version}</artifactId>
+            <version>${play2.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- default HTTP server -->
+        <!-- see https://www.playframework.com/documentation/2.6.x/AkkaHttpServer -->
+        <!--     https://www.playframework.com/documentation/2.6.x/NettyServer -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-akka-http-server_${scala.version}</artifactId>
+            <version>${play2.version}</version>
+            <scope>runtime</scope>
+        </dependency>
 	</dependencies>
-	
-    <profiles>
-        <profile>
-            <id>eclipse</id>
-
-            <build>
-                <directory>${project.basedir}/target-eclipse</directory>
-
-                <plugins>
-					<plugin>
-		                <groupId>com.google.code.play2-maven-plugin</groupId>
-		                <artifactId>play2-maven-plugin</artifactId>
-		                <version>${play2.plugin.version}</version>
-		                <extensions>true</extensions>
-		                <configuration>
-		                    <templateAdditionalImports>play.data._ play.core.j.PlayFormsMagicForJava._</templateAdditionalImports>
-		                </configuration>
-		            </plugin>
-		                
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <skipMain>true</skipMain>
-                            <skip>true</skip>
-                            <source>1.8</source> <!-- 1.8 for Play! 2.5+ -->
-                            <target>1.8</target> <!-- 1.8 for Play! 2.5+ -->
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>default-compile</id>
-                                <goals><goal>compile</goal></goals>
-                            </execution>
-                            <execution>
-                                <id>default-testCompile</id>
-                                <goals><goal>testCompile</goal></goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
     	
-	<build>
-		<finalName>play-bootcamp</finalName>
-	</build>
+    <build>
+        <sourceDirectory>${project.basedir}/app</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/test</testSourceDirectory>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/conf</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/public</directory>
+                <targetPath>public</targetPath>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>com.google.code.play2-maven-plugin</groupId>
+                <artifactId>play2-maven-plugin</artifactId>
+                <version>1.0.0-rc1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- if using controllers without dependency injection; default value is "injected" -->
+                    <routesGenerator>static</routesGenerator>
+                </configuration>
+            </plugin>
+            
+<!--             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.plugin.version}</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Spec.java</include>
+                    </includes>
+                </configuration>
+            </plugin> -->
+            
+            <plugin>
+                <groupId>com.google.code.sbt-compiler-maven-plugin</groupId>
+                <artifactId>sbt-compiler-maven-plugin</artifactId>
+                <version>1.0.0</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
