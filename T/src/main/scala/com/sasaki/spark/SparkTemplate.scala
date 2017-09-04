@@ -18,26 +18,6 @@ object SparkTemplate extends Object with T {
   val conf = _conf_(Util.getSimpleName(this), List(("_key_" -> "_value_")))
 
   def main(args: Array[String]): Unit = {
-//    val sc = new SparkContext(conf)
-    
-//    invokeHandler(sc) { () =>
-//      sc.textFile("""file:///H:\迅雷下载\spark-2.1.1\graphx\pom.xml""", 1).flatMap(_.split(' ')).map((_, 1)).reduceByKey(_ + _) foreach println
-//    val fs = List(
-//        FrdAppReqLog(1, 1, 2, 2),
-//        FrdAppReqLog(1, 2, 21, 12),
-//        FrdAppReqLog(1, 3, 1, 32),
-//        FrdAppReqLog(1, 2, 22, 32),
-//        FrdAppReqLog(1, 6, 3, 24)
-//    )
-//    
-//    val rdd = sc.parallelize(fs, 1)
-//    val f: (FrdAppReqLog, FrdAppReqLog) => FrdAppReqLog = 
-//      (_o: FrdAppReqLog, o_ : FrdAppReqLog) => FrdAppReqLog(
-//          _o.count + o_.count,
-//          _o.total_costTime + o_.total_costTime, 
-//          _o.Validate_costTime + o_.Validate_costTime, 
-//          _o.Clean_costTime + o_.Clean_costTime)
-//    rdd.reduce(f)
       
     val logs = List(
       Aggregator(Seq(1, 1, 3, 4)),    
