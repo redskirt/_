@@ -27,3 +27,16 @@ class AtomicCounter extends Counter {
   private val atomicCounter = new AtomicInteger()
   override def nextCount(): Int = atomicCounter.getAndIncrement()
 }
+
+object ECounter {
+  val c = new Counter { override def nextCount() = 49 }
+  def f(counter: Counter) = "nextCount " + counter.nextCount()
+  
+  def main(args: Array[String]): Unit = {
+//    println(f(c))
+//    println("nextCount " + new Counter { override def nextCount() = 49 }.nextCount())
+
+//    f(() => 49)
+  }
+  
+}

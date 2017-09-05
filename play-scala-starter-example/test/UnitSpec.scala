@@ -12,7 +12,8 @@ class UnitSpec extends PlaySpec {
   "CountController" should {
 
     "return a valid result with action" in {
-      val controller = new CountController(stubControllerComponents(), () => 49)
+      val controller = new CountController(stubControllerComponents(), 
+          new services.Counter { override def nextCount() = 49 } /*() => 49*/)
       val result = controller.count(FakeRequest())
       contentAsString(result) must equal("49")
     }
