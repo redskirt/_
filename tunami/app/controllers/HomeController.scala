@@ -22,8 +22,4 @@ class HomeController @Inject()(cc: ControllerComponents) extends AbstractControl
     Ok(views.html.index())
   }
 
-  def login() = Action { implicit request: Request[AnyContent] =>
-    println("login --> " + request.uri)
-    Ok(views.html.login())
-  }
 }
