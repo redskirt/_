@@ -21,4 +21,5 @@ class LoginController @Inject()(cc: ControllerComponents) extends AbstractContro
     Ok(views.html.login())
   }
   
+  
 }
