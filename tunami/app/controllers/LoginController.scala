@@ -14,8 +14,7 @@ import play.api.mvc.AnyContent
  * @Description 
  */
 @Singleton
-@Inject()
-class LoginController(cc: ControllerComponents) extends AbstractController(cc) {
+class LoginController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
   
   def login() = Action { implicit request: Request[AnyContent] =>
     println("login --> " + request.uri)
