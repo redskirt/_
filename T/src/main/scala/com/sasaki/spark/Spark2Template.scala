@@ -2,7 +2,6 @@ package com.sasaki.spark
 
 import org.apache.spark.SparkConf
 
-import com.sasaki.o.Util
 import org.apache.spark.sql._
 
 /**
@@ -19,7 +18,7 @@ object Spark2Template extends Object with T {
 
   val settings = List(
     ("_key_" -> "_value_"))
-  val conf = _conf_(Util.getSimpleName(this), settings, "local[1]")
+  val conf = _conf_(independent.getSimpleName(this), settings, "local[1]")
 
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = _spark_(conf)

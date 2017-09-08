@@ -1,8 +1,9 @@
 package com.sasaki.spark
 
 import org.apache.spark.SparkConf
-import com.sasaki.o.Util
 import org.apache.spark.SparkContext
+
+import independent._
 
 /**
  * @Author Wei Liu
@@ -15,7 +16,7 @@ class SparkTemplate {
 }
 
 object SparkTemplate extends Object with T {
-  val conf = _conf_(Util.getSimpleName(this), List(("_key_" -> "_value_")))
+  val conf = _conf_(getSimpleName(this), List(("_key_" -> "_value_")))
 
   def main(args: Array[String]): Unit = {
       

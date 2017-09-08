@@ -1,6 +1,5 @@
 package com.sasaki.spark
 
-import com.sasaki.o.Util
 import org.apache.spark.streaming.StreamingContext
 
 import org.apache.log4j.{Level, Logger}
@@ -19,7 +18,7 @@ class SparkStreamingTemplate {
 
 object SparkStreamingTemplate extends Object with T {
   
-  val conf = _conf_(Util.getSimpleName(this), List(("_key_" -> "_value_")))
+  val conf = _conf_(independent.getSimpleName(this), List(("_key_" -> "_value_")))
 
   val ssc = new StreamingContext(conf, Seconds(2))
   
