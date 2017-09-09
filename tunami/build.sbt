@@ -17,3 +17,4 @@ libraryDependencies += jdbc
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.tunami.binders._"
+
