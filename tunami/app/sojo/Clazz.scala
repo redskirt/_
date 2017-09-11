@@ -16,7 +16,7 @@ class Super[T] {
   def _id(id: Int) = { this.id = id; this}
 }
 
-case class Account(username: String, password: String) extends Super[Account]{
+case class Account(val username: String, val password: String) extends Super[Account]{
     var mail: String = _
     var type_ : String = "0"
     var status: String = "0"
