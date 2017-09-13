@@ -8,9 +8,8 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.8"
 
 libraryDependencies += guice
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
+libraryDependencies += jdbc
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.8"
-//libraryDependencies += jdbc
 libraryDependencies ++= Seq( 
   "com.typesafe.play" %% "play-slick" % "3.0.1",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.1"
@@ -22,4 +21,8 @@ libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % "3.0.1"
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.tunami.binders._"
+
+//libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += specs2 % Test
 
