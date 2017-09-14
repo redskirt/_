@@ -30,8 +30,8 @@ class AccountRepository @Inject() (protected val dbConfigProvider: DatabaseConfi
     def username = column[String]("username")
     def password = column[String]("password")
     def mail     = column[String]("mail")
-    def typee    = column[String]("type")
-    def status   = column[String]("status")
+    def typee    = column[Int]("type")
+    def status   = column[Int]("status")
     def timestamp      = column[Timestamp]("timestamp")
     
     def * = (username, password) <> ((Account.apply _).tupled, Account.unapply)
@@ -46,6 +46,11 @@ class AccountRepository @Inject() (protected val dbConfigProvider: DatabaseConfi
     ) += (username, password)
   }
   
-  def insert(a: Account): Future[Int] = db.run { t_account += a }
+  def insert(a: Account): Future[Int] = db.run { 
+    (t_account.map { o => (o.username, o.password, o.mail, o.typee, o.status, o.timestamp) }
+    ) += (a.username, a.password, a.mail, a.typee, a.status, a.timestamp) 
+  }
+  
+  
 }
 

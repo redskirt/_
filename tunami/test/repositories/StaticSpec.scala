@@ -39,13 +39,15 @@ class StaticSpec extends FunSuite with Mockito with BeforeAndAfter {
     
   test("insertAccount") {
     	val accountService : AccountService = Application.instanceCache[AccountService].apply(_app_)
-	    val r = Await.result(accountService.insertAccount(Account("s", "s")), 1.second)
+    	val account = Account("username", "password")._mail("email")._status(0)._typee(0)
+	    val r = Await.result(accountService.insertAccount(account), 5.second)
 	    assert(r == 1)
   }
   
-  test("bb") {
-	  assert(1 == 1)
+  test("Account construcor") {
+  
   }
   
+  after(Play.stop(_app_))
   
 }

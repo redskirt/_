@@ -15,7 +15,6 @@ import scala.concurrent.Await
 
 class DeployInitialization(mode: Mode = Mode.Dev) {
   var _app_ : Application = _
-
   try {
     lazy val env = Environment(new java.io.File("."), this.getClass.getClassLoader, mode)
     lazy val context = ApplicationLoader.createContext(env)
@@ -27,26 +26,27 @@ class DeployInitialization(mode: Mode = Mode.Dev) {
     case t: Throwable => Logger.error(" ------------ Application start fail! ------------ ", t)
   }
 
-  lazy val accountService: AccountService = Application.instanceCache[AccountService].apply(_app_)
+  val accountService: AccountService = Application.instanceCache[AccountService].apply(_app_)
+  
+  def handler(app: Application)(f_x: () => Unit) = 
+    try f_x()
+    finally {
+      if (null != app) Play.stop(app)
+      Logger.info(" ------------ Application have stoped! ------------ ")
+    }
 
-  def init(implicit f_x: Application => Unit) = {
-    import scala.concurrent.duration.DurationInt
-    val admin = Account("Sasaki", "redskirt_")._mail("redskirt@outlook.com")
-    val init_admin = Await.result(accountService.insertAccount(admin), 5.second)
-    assert(init_admin == 1, "init_admin fail!")
-    
-    f_x
+  private def init() = {
+		import scala.concurrent.duration.DurationInt
+    handler(_app_) { () => 
+      val admin = Account("Sasaki", "redskirt_")._mail("redskirt@outlook.com")._status(0)._typee(0)
+      val init_admin = Await.result(accountService.insertAccount(admin), 15.second)
+      assert(init_admin == 1, "init_admin fail!")
+    }
   }
 }
 
 object DeployInitialization {
-  implicit val handler = (app: Application) => {
-//    if (null != app)
-    Play.stop(app)
-    Logger.info(" ------------ Application have stoped! ------------ ")
-  }
-
   def main(args: Array[String]): Unit = {
-    new DeployInitialization(Mode.Dev).init(handler)
+    new DeployInitialization(Mode.Dev).init()
   }
 }

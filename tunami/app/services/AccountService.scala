@@ -5,6 +5,7 @@ import javax.inject.{ Inject, Singleton }
 import poso.Account
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.Future
 
 
 /**
@@ -22,9 +23,7 @@ class AccountService @Inject() (accountRepository: AccountRepository) {
     1
   }
   
-  def insertAccount(a: Account) = {
-    val result = accountRepository.insert(a)
-    println(result)
-    result
+  def insertAccount(a: Account): Future[Int] = {
+    accountRepository.insert(a)
   }
 }
