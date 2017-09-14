@@ -8,14 +8,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.8"
 
 libraryDependencies += guice
-libraryDependencies += jdbc
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.8"
 libraryDependencies ++= Seq( 
   "com.typesafe.play" %% "play-slick" % "3.0.1",
   "com.typesafe.play" %% "play-slick-evolutions" % "3.0.1"
 )
-libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % "3.0.1"
- 
+libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % "3.1.0"
+
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.tunami.controllers._"
 

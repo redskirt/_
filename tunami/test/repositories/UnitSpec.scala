@@ -6,6 +6,7 @@ import org.specs2.runner._
 import poso.Account
 import org.specs2.mock.Mockito
 import services.AccountService
+import javax.inject.Inject
 
 /**
  * @Author Sasaki
@@ -23,15 +24,25 @@ class UnitSpec extends Specification with Mockito {
 //    }
 //  }
   
-  "AccountService$createAccount" should {
-	  "have a name" in {
+//  "AccountService$createAccount" should {
+//	  "cratea account" in {
+//	    val accountRepository = mock[AccountRepository]
+//	    accountRepository.create("Sasaki", "xxx")
+//	    
+//	    val accountService = new AccountService(accountRepository)
+//	    val accountId = accountService.createAccount(Account("Sasaki", "xxx"))
+//	    accountId != 0 must beTrue
+//	  }
+//  }
+  
+  "AccountService$insertAccount" should {
+	  "insert account" in {
 	    val accountRepository = mock[AccountRepository]
-	    accountRepository.create("Sasaki", "xxx")
-	    
 	    val accountService = new AccountService(accountRepository)
-	    val accountId = accountService.createAccount(Account("Sasaki", "xxx"))
-	    accountId != 0 must beTrue
+	    val result = accountService.insertAccount(Account("Sasaki", "xxx"))
+	    result.value.get.get must beEqualTo(1)
 	  }
   }
+  
 
 }

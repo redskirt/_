@@ -12,13 +12,21 @@ import java.sql.Timestamp
 class Super[T] {
   var id: Int = _
   var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
-  
+
   def _id(id: Int) = { this.id = id; this}
+  
+  // TODO: 实现Scala反射，设置属性方法
+  def set(t: T, attr: String, $attr: Any): T = ???
+  
+  def setMult(t: T, attrs_$attrs: Array[Array[Any]]): T = ???
 }
 
 case class Account(val username: String, val password: String) extends Super[Account]{
     var mail: String = _
-    var type_ : String = "0"
-    var status: String = "0"
-       
+    var typee : Int = _ // admin -> 0, user -> 1
+    var status: Int = _ // enable -> 0, lock -> 1, delete -> 2
+    
+    def _mail(mail: String) = { this.mail = mail; this}
+    def _typee(typee: Int) = { this.typee = typee; this}
+    def _status(status: Int) = { this.status = status; this} 
 }

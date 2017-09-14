@@ -17,7 +17,7 @@ import java.sql.Timestamp
  * @Description 
  */
 @Singleton
-class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Repository[Account] {
+class AccountRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) extends Repository[Account] {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   
   import dbConfig._
@@ -30,14 +30,14 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
     def username = column[String]("username")
     def password = column[String]("password")
     def mail     = column[String]("mail")
-    def type_    = column[String]("type")
+    def typee    = column[String]("type")
     def status   = column[String]("status")
     def timestamp      = column[Timestamp]("timestamp")
     
     def * = (username, password) <> ((Account.apply _).tupled, Account.unapply)
   }
   
-  private val t_account = TableQuery[TAccount]
+  private lazy val t_account = TableQuery[TAccount]
   
   def create(username: String, password: String): Future[Account] = db.run {
     (t_account.map(__ => (__.username, __.password))
@@ -46,6 +46,6 @@ class AccountRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(imp
     ) += (username, password)
   }
   
-  
+  def insert(a: Account): Future[Int] = db.run { t_account += a }
 }
 
