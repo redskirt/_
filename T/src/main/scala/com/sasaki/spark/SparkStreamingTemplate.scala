@@ -4,6 +4,7 @@ import org.apache.spark.streaming.StreamingContext
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.streaming.Seconds
+import org.apache.spark.streaming.Duration
 
 
 /**
@@ -12,14 +13,15 @@ import org.apache.spark.streaming.Seconds
  * @Timestamp 2017-08-29 下午2:07:42
  * @Description
  */
-class SparkStreamingTemplate {
+class SparkStreamingTemplate(val duration: Duration) {
 
 }
 
-object SparkStreamingTemplate extends Object with T {
+object SparkStreamingTemplate extends AnyRef with T {
   
   val conf = _conf_(independent.getSimpleName(this), List(("_key_" -> "_value_")))
 
-  val ssc = new StreamingContext(conf, Seconds(2))
+  val ssc = new StreamingContext(conf, new SparkStreamingTemplate(Seconds(10)).duration)
   
+  invokeHandler(ssc) { () => }
 }

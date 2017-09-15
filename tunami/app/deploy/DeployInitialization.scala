@@ -14,6 +14,8 @@ import scala.concurrent.Await
  */
 
 class DeployInitialization(mode: Mode = Mode.Dev) {
+  import independent._
+  
   var _app_ : Application = _
   try {
     lazy val env = Environment(new java.io.File("."), this.getClass.getClassLoader, mode)
@@ -38,8 +40,8 @@ class DeployInitialization(mode: Mode = Mode.Dev) {
   private def init() = {
 		import scala.concurrent.duration.DurationInt
     handler(_app_) { () => 
-      val admin = Account("Sasaki", "redskirt_")._mail("redskirt@outlook.com")._status(0)._typee(0)
-      val init_admin = Await.result(accountService.insertAccount(admin), 15.second)
+      val admin = Account("Sasaki", md5("redskirt_"))._mail("redskirt@outlook.com")._status(0)._typee(0)
+      val init_admin = Await.result(accountService.createAccount(admin), 15.second)
       assert(init_admin == 1, "init_admin fail!")
     }
   }

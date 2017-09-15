@@ -22,9 +22,7 @@ class AccountRepository @Inject() (protected val dbConfigProvider: DatabaseConfi
   
   import dbConfig._
   import profile.api._
-  
-  override def list[T](): List[T] = ??? 
-  
+
   private class TAccount(tag: Tag) extends Table[Account](tag, "t_account") {
     def id       = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username")
@@ -39,12 +37,19 @@ class AccountRepository @Inject() (protected val dbConfigProvider: DatabaseConfi
   
   private lazy val t_account = TableQuery[TAccount]
   
-  def create(username: String, password: String): Future[Account] = db.run {
-    (t_account.map(__ => (__.username, __.password))
-      returning(t_account.map(_.id))    
-      into((k, v) => Account(k._1, k._2))
-    ) += (username, password)
-  }
+//  def create(username: String, password: String): Future[Account] = db.run {
+//    (t_account.map(__ => (__.username, __.password))
+//      returning(t_account.map(_.id))    
+//      into((k, v) => Account(k._1, k._2))
+//    ) += (username, password)
+//  }
+  
+  type TPAccount =  (String, String, String, Int, Int, Timestamp)
+  
+  override def list[Account](): List[Account] = ???
+//    db.run {
+//    t_account.map { o => TPAccount }//.filter(_.status == 0)
+//  }
   
   def insert(a: Account): Future[Int] = db.run { 
     (t_account.map { o => (o.username, o.password, o.mail, o.typee, o.status, o.timestamp) }

@@ -13,8 +13,8 @@ import play.api._
 import scala.concurrent.duration.DurationInt
 
 /**
- * @Author Wei Liu
- * @Mail wei.liu@suanhua.org
+ * @Author Sasaki
+ * @Mail redskirt@outlook.com
  * @Description 
  */
 
@@ -45,7 +45,7 @@ class StaticSpec extends FunSuite with Mockito with BeforeAndAfter {
   }
   
   test("Account construcor") {
-  
+
   }
   
   after(Play.stop(_app_))

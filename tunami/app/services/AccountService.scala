@@ -1,11 +1,11 @@
 package services
 
-import repositories.AccountRepository
-import javax.inject.{ Inject, Singleton }
-import poso.Account
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import scala.concurrent.Future
+
+import javax.inject.Inject
+import javax.inject.Singleton
+import poso.Account
+import repositories.AccountRepository
 
 
 /**
@@ -16,14 +16,7 @@ import scala.concurrent.Future
  */
 @Singleton
 class AccountService @Inject() (accountRepository: AccountRepository) {
+
+  def createAccount(a: Account): Future[Int] = accountRepository.insert(a)
   
-  def createAccount(a: Account): Int = {
-    println(accountRepository)
-    accountRepository.create(a.username, a.password)//.value.get.getOrElse(new poso.Super[Account]).id
-    1
-  }
-  
-  def insertAccount(a: Account): Future[Int] = {
-    accountRepository.insert(a)
-  }
 }

@@ -19,7 +19,10 @@ object SparkTemplate extends Object with T {
   val conf = _conf_(getSimpleName(this), List(("_key_" -> "_value_")))
 
   def main(args: Array[String]): Unit = {
-      
+    val sc: SparkContext = new SparkContext(conf)
+    
+    invokeHandler(sc) { () => }
+    
     val logs = List(
       Aggregator(Seq(1, 1, 3, 4)),    
       Aggregator(Seq(15, 1, 3, 4)),    
@@ -29,15 +32,11 @@ object SparkTemplate extends Object with T {
     )
 //    val aggr = sc.parallelize(logs, 1).reduce(_.combine(_)((_o: Double, o_ :Double) => _o + o_))
     
-//    println(aggr)
-    
-    
-    
 //    implicit val add = (_o: Int, o_ : Int) => _o + o_
 //    println(Aggregator(Seq(1, 1, 3, 4), 1).combine(Aggregator(Seq(11, 12, 3, 4), 1)).combine(Aggregator(Seq(1, 1, 3, 4), 1)))
 //      println(Aggregator(Seq(1, 1, 3, 4), 3).within((_o, o_) => _o / o_))
-      
 //    }
+    
   }
 }
 
