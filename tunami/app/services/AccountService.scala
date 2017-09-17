@@ -4,7 +4,7 @@ import scala.concurrent.Future
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import poso.Account
+import repositories.poso.Account
 import repositories.AccountRepository
 
 

@@ -7,6 +7,8 @@ import poso.Account
 import org.specs2.mock.Mockito
 import services.AccountService
 import javax.inject.Inject
+import poso.Account
+
 
 /**
  * @Author Sasaki
@@ -39,7 +41,7 @@ class UnitSpec extends Specification with Mockito {
 	  "insert account" in {
 	    val accountRepository = mock[AccountRepository]
 	    val accountService = new AccountService(accountRepository)
-	    val result = accountService.insertAccount(Account("Sasaki", "xxx"))
+	    val result = accountService.createAccount(Account("Sasaki", "xxx"))
 	    result.value.get.get must beEqualTo(1)
 	  }
   }

@@ -3,7 +3,7 @@ package deploy
 import play.api._
 import javax.inject.Inject
 import services.AccountService
-import poso.Account
+import repositories.poso.Account
 import scala.concurrent.Await
 
 /**
