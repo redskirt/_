@@ -17,7 +17,7 @@ class SparkStreamingTemplate(val duration: Duration) {
 
 }
 
-object SparkStreamingTemplate extends AnyRef with T {
+object SparkStreamingTemplate extends AnyRef with SparkHandler {
   
   val conf = _conf_(independent.getSimpleName(this), List(("_key_" -> "_value_")))
 

@@ -41,9 +41,7 @@ package object independent {
   } 
   
   def main(args: Array[String]): Unit = {
-//    val p = new org.sh.sbdp.slap.streaming.util.UtilProperties()
     println(getSimpleName(this))
-//    println("swer$".replaceAll("\\$", ""))
   }
   
 }

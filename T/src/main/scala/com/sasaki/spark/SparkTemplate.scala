@@ -15,7 +15,7 @@ class SparkTemplate {
 
 }
 
-object SparkTemplate extends Object with T {
+object SparkTemplate extends Object with SparkHandler {
   val conf = _conf_(getSimpleName(this), List(("_key_" -> "_value_")))
 
   def main(args: Array[String]): Unit = {

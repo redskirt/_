@@ -3,7 +3,7 @@ package com.sasaki.o
 /**
  * @Author Wei Liu
  * @Mail wei.liu@suanhua.org
- * @Timestamp 2017��8��28�� ����2:36:02
+ * @Timestamp 2017-08-28 下午2:36:02
  * @Description 高阶函数文件查找示例
  */
 class FileMatcher {
