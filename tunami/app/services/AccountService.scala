@@ -15,8 +15,9 @@ import repositories.AccountRepository
  * @Description 
  */
 @Singleton
-class AccountService @Inject() (accountRepository: AccountRepository) {
+class AccountService /*@Inject() (accountRepository: AccountRepository)*/ {
+  
 
-  def createAccount(a: Account): Future[Int] = accountRepository.insert(a)
   
 }
+
