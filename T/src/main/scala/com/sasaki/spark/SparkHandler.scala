@@ -23,7 +23,12 @@ trait SparkHandler {
     conf
   }
     
-  def _sparkSession_(conf: SparkConf) = SparkSession.builder().config(conf).getOrCreate()
+  def _sparkSession_(conf: SparkConf, enableHive: Boolean = false) = {
+    val builder = SparkSession.builder().config(conf)
+    if(enableHive) builder.enableHiveSupport()
+    builder.getOrCreate()
+  }
+  
   def _sparkContext_(conf: SparkConf) = _sparkSession_(conf: SparkConf).sparkContext
 
   /**
@@ -35,7 +40,8 @@ trait SparkHandler {
   /**
    * by Custom
    */
-  def initHandler(conf: SparkConf) = _sparkSession_(conf)
+  def initHandler(conf: SparkConf, enableHive: Boolean) = 
+    if(enableHive) _sparkSession_(conf, enableHive) else _sparkSession_(conf)
 
   def invokeHandler(spark: SparkSession)(f_x: () => Unit) = try f_x() finally spark.stop
   def invokeHandler(sc: SparkContext)(f_x: () => Unit) = try f_x() finally sc.stop
