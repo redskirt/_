@@ -1,7 +1,11 @@
 package enums
 
 object Enum extends Enumeration{
-  // table
-  val $t_account = Value("t_account")
   
+  
+}
+
+object Constant {
+  // table
+  val $t_account = "t_account"
 }

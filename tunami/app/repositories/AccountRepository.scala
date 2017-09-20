@@ -1,18 +1,11 @@
 package repositories
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-
-import javax.inject.Inject
+import play.api.Play
 import play.api.db.slick.DatabaseConfigProvider
+import play.api.db.slick.HasDatabaseConfig
 import repositories.poso.Account
 import slick.jdbc.JdbcProfile
-import slick.lifted.CanBeQueryCondition
-import play.api.db.slick.HasDatabaseConfig
-import slick.lifted.Tag
-import play.api.Play
-import akka.Main
-import scala.concurrent.Await
+
 
 /**
  * @Author Sasaki
@@ -59,8 +52,9 @@ class AccountRepository /*@Inject() (protected val dbConfigProvider: DatabaseCon
 object AccountRepository extends HasDatabaseConfig[JdbcProfile] {
   protected lazy val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
   import dbConfig.driver.api._
+  import enums.Constant._
 
-  class TAccount(tag: Tag) extends RepositoryUtil.SuperTable[Account](tag, "") {
+  class TAccount(tag: Tag) extends RepositoryUtil.SuperTable[Account](tag, $t_account) {
     def username = column[String]("username")
     def password = column[String]("password")
     def mail = column[String]("mail")
@@ -69,9 +63,7 @@ object AccountRepository extends HasDatabaseConfig[JdbcProfile] {
 
     def * = (username, password) <> ((Account.apply _).tupled, Account.unapply)
   }
+  
   lazy val t_account = TableQuery[TAccount]
   
-  def main(args: Array[String]): Unit = {
-    AbstractRepository[Account, TAccount]
-  }
 }

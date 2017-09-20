@@ -37,14 +37,14 @@ class UnitSpec extends Specification with Mockito {
 //	  }
 //  }
   
-  "AccountService$insertAccount" should {
-	  "insert account" in {
-	    val accountRepository = mock[AccountRepository]
-	    val accountService = new AccountService(accountRepository)
-	    val result = accountService.createAccount(Account("Sasaki", "xxx"))
-	    result.value.get.get must beEqualTo(1)
-	  }
-  }
+//  "AccountService$insertAccount" should {
+//	  "insert account" in {
+//	    val accountRepository = mock[AccountRepository]
+//	    val accountService = new AccountService(accountRepository)
+//	    val result = accountService.createAccount(Account("Sasaki", "xxx"))
+//	    result.value.get.get must beEqualTo(1)
+//	  }
+//  }
   
 
 }

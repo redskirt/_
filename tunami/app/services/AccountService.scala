@@ -1,11 +1,11 @@
 package services
 
-import scala.concurrent.Future
-
 import javax.inject.Inject
 import javax.inject.Singleton
+import repositories.Repository
+import repositories.AccountRepository.TAccount
 import repositories.poso.Account
-import repositories.AccountRepository
+import scala.concurrent.ExecutionContext
 
 
 /**
@@ -15,8 +15,9 @@ import repositories.AccountRepository
  * @Description 
  */
 @Singleton
-class AccountService /*@Inject() (accountRepository: AccountRepository)*/ {
+class AccountService @Inject() (accountRepository: Repository[Account, TAccount])(implicit exec: ExecutionContext) {
   
+  def queryAll() = accountRepository.list()
 
   
 }

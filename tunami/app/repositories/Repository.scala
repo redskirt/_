@@ -10,6 +10,7 @@ import repositories.poso.Super
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.lifted.CanBeQueryCondition
+import javax.inject.Singleton
 
 /**
  * @Author Sasaki
@@ -18,10 +19,15 @@ import slick.lifted.CanBeQueryCondition
  * @Description 
  */
 trait Repository[E/*Entity*/, T/*Table*/] {
-  def list(): Future[Seq[T]]
-  def queryBy[C : CanBeQueryCondition](f_x: T => C): Future[Seq[T]]
+  def list(): Future[Seq[E]]
+  def queryBy[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]]
+
+}
+
+@Singleton
+abstract class AbstractRepository[E <: Super[E], T <: SuperTable[E]]() extends Repository[E, T] with HasDatabaseConfig[JdbcProfile] {
   
-//  implicit val fxShow = (l: List[E]) => l foreach println
+  //  implicit val fxShow = (l: List[E]) => l foreach println
 //  def peek(list: List[E], top: Int = -1)(implicit f_x: List[E] => Unit): List[E] = { 
 //    if(top == -1) 
 //      f_x(list)
@@ -29,16 +35,14 @@ trait Repository[E/*Entity*/, T/*Table*/] {
 //      f_x(list take(top))
 //    list
 //  }
-}
-
-abstract class AbstractRepository[E <: Super[E], T <: SuperTable[T]] extends Repository[E, T] with HasDatabaseConfig[JdbcProfile] {
+  
   protected lazy val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfigProvider.get[JdbcProfile](Play.current)
   import dbConfig.driver.api._
   protected val t__ : TableQuery[T]
   
-  override def list(): Future[Seq[T]] = db.run(t__.result)
-  override def queryBy[C : CanBeQueryCondition](f_x: T => C): Future[Seq[T]] = db.run(t__.withFilter(f_x).result)
-  def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[T]] = db.run(t__.withFilter(f_x).result.headOption)
+  override def list(): Future[Seq[E]] = db.run(t__.result)
+  override def queryBy[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]] = db.run(t__.withFilter(f_x).result)
+  def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]] = db.run(t__.withFilter(f_x).result.headOption)
   
 }
 

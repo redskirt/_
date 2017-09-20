@@ -1,23 +1,25 @@
 package repositories
 
-import org.junit.runner._
-import org.scalatest.Suite
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.FunSuite
-import org.specs2.mock.Mockito
-import services.AccountService
-import poso.Account
-import scala.concurrent.Await
-import org.scalatest.BeforeAndAfter
-import play.api._
-import scala.concurrent.duration.DurationInt
-import play.api.db.slick.DatabaseConfigProvider
-import slick.jdbc.JdbcProfile
 import java.sql.Timestamp
+
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
-import scala.reflect.ClassTag
-import slick.lifted.CanBeQueryCondition
 import scala.concurrent.Future
+import scala.concurrent.duration.DurationInt
+import scala.reflect.ClassTag
+
+import org.junit.runner._
+import org.scalatest.BeforeAndAfter
+import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
+import org.specs2.mock.Mockito
+
+import play.api._
+import play.api.db.slick.DatabaseConfigProvider
+import poso.Account
+import services.AccountService
+import slick.jdbc.JdbcProfile
+import slick.lifted.CanBeQueryCondition
 
 /**
  * @Author Sasaki
@@ -65,10 +67,10 @@ class StaticSpec extends FunSuite with Mockito with BeforeAndAfter {
   }
     
   test("insertAccount") {
-    	val accountService : AccountService = Application.instanceCache[AccountService].apply(_app_)
+      val accountService : AccountService = Application.instanceCache[AccountService].apply(_app_)
     	val account = Account("username", "password")._mail("email")._status(0)._typee(0)
-	    val r = Await.result(accountService.createAccount(account), 5.second)
-	    assert(r == 1)
+//	    val r = Await.result(accountService.createAccount(account), 5.second)
+//	    assert(r == 1)
   }
 
   test("list filter account") {
@@ -92,7 +94,14 @@ class StaticSpec extends FunSuite with Mockito with BeforeAndAfter {
     }
     val a = queryBy { o => o.status === 0 }
     println(Await.result(a, 5.second).status)
+  }
+  
+  test("query list accunt") {
+//     val accountService : AccountService = Application.instanceCache[AccountService].apply(_app_)
+//    println(Await.result(accountService.queryAll(), 5.second))
     
+    val abstractRepository = Application.instanceCache[AbstractRepository[Account, repositories.AccountRepository.TAccount]].apply(_app_)
+    println(abstractRepository)
   }
   
   after(Play.stop(_app_))
