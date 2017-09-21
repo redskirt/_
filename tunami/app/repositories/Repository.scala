@@ -24,7 +24,7 @@ trait Repository[E/*Entity*/, T/*Table*/] {
 
 }
 
-@Singleton
+//@Singleton
 abstract class AbstractRepository[E <: Super[E], T <: SuperTable[E]]() extends Repository[E, T] with HasDatabaseConfig[JdbcProfile] {
   
   //  implicit val fxShow = (l: List[E]) => l foreach println

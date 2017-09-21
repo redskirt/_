@@ -2,24 +2,29 @@ package repositories
 
 import java.sql.Timestamp
 
+import scala.annotation.implicitNotFound
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
-import scala.reflect.ClassTag
 
-import org.junit.runner._
+import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
+import org.scalatest.Finders
 import org.scalatest.FunSuite
 import org.scalatest.junit.JUnitRunner
 import org.specs2.mock.Mockito
 
-import play.api._
+import play.api.Application
+import play.api.ApplicationLoader
+import play.api.Environment
+import play.api.Mode
+import play.api.Play
 import play.api.db.slick.DatabaseConfigProvider
 import poso.Account
 import services.AccountService
 import slick.jdbc.JdbcProfile
 import slick.lifted.CanBeQueryCondition
+import slick.lifted.ProvenShape.proveShapeOf
 
 /**
  * @Author Sasaki
@@ -99,9 +104,9 @@ class StaticSpec extends FunSuite with Mockito with BeforeAndAfter {
   test("query list accunt") {
 //     val accountService : AccountService = Application.instanceCache[AccountService].apply(_app_)
 //    println(Await.result(accountService.queryAll(), 5.second))
-    
-    val abstractRepository = Application.instanceCache[AbstractRepository[Account, repositories.AccountRepository.TAccount]].apply(_app_)
-    println(abstractRepository)
+
+    val accountRepository = Application.instanceCache[Repository[Account, TAccount]].apply(_app_)
+    println(accountRepository)
   }
   
   after(Play.stop(_app_))
