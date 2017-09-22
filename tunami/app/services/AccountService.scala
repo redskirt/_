@@ -1,11 +1,12 @@
 package services
 
+import scala.concurrent.ExecutionContext
+
 import javax.inject.Inject
 import javax.inject.Singleton
-import repositories.Repository
 import repositories.AccountRepository.TAccount
+import repositories.Repository
 import repositories.poso.Account
-import scala.concurrent.ExecutionContext
 
 
 /**

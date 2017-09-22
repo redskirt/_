@@ -10,7 +10,7 @@ import scala.reflect.ClassTag
  * @Description 
  */
 
-class Super[T: ClassTag] {
+class Clazz[T: ClassTag] {
   var id: Int = _
   var timestamp: java.sql.Timestamp = new java.sql.Timestamp(System.currentTimeMillis())
 
@@ -27,12 +27,12 @@ class Super[T: ClassTag] {
   
   def setMult(t: T, attrs_$attrs: Array[Array[Any]]): T = ???
   
-//  implicit class TypeDetector[T: TypeTag](related: Super[T]) {
+//  implicit class TypeDetector[T: TypeTag](related: Clazz[T]) {
 //    def getType(): Type = typeOf[T]
 //  } 
 }
 
-case class Account(val username: String, val password: String) extends Super[Account] {
+case class Account(val username: String, val password: String) extends Clazz[Account] {
     var mail: String = _
     var typee : Int = _ // admin -> 0, user -> 1
     var status: Int = _ // enable -> 0, lock -> 1, delete -> 2

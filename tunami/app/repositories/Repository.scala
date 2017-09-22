@@ -6,7 +6,7 @@ import play.api.Play
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfig
 import repositories.RepositoryUtil.SuperTable
-import repositories.poso.Super
+import repositories.poso.Clazz
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.lifted.CanBeQueryCondition
@@ -25,7 +25,7 @@ trait Repository[E/*Entity*/, T/*Table*/] {
 }
 
 //@Singleton
-abstract class AbstractRepository[E <: Super[E], T <: SuperTable[E]]() extends Repository[E, T] with HasDatabaseConfig[JdbcProfile] {
+abstract class AbstractRepository[E <: Clazz[E], T <: SuperTable[E]]() extends Repository[E, T] with HasDatabaseConfig[JdbcProfile] {
   
   //  implicit val fxShow = (l: List[E]) => l foreach println
 //  def peek(list: List[E], top: Int = -1)(implicit f_x: List[E] => Unit): List[E] = { 
