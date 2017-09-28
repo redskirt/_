@@ -45,7 +45,7 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
     
     val application = new GuiceApplicationBuilder()
       .in(Environment(new File("path/to/app"), this.getClass.getClassLoader, Mode.Test))
-      .bindings(new modules.Module)
+//      .bindings(new modules.Module)
 //      .bindings(bind[Repository[Account, TAccount]].to[AbstractRepository[Account, TAccount]])
       .build()
       

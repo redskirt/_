@@ -21,11 +21,18 @@ class Module extends AbstractModule {
   override def configure() = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+ 
+        bind(classOf[AbstractRepository[Account, TAccount]])
+    .annotatedWith(Names.named("accountRepository"))
+    .to(classOf[AccountRepository])
+    .asEagerSingleton()
     
     bind(classOf[Repository[Account, TAccount]])
-//      .annotatedWith(Names.named("abstractRepository"))
+      .annotatedWith(Names.named("abstractRepository"))
       .to(classOf[AbstractRepository[Account, TAccount]])
       .asEagerSingleton()
+
+      
   }
 
   @Provides
