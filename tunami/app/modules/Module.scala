@@ -1,12 +1,16 @@
 
 
+package modules
+
 import java.time.Clock
 import com.google.inject.{Provides, AbstractModule}
 import repositories._
 import repositories.AccountRepository.TAccount
 import repositories.poso.Account
 import java.time.Clock
-import javax.inject.Singleton
+import com.google.inject.ImplementedBy
+import java.time.Clock
+import com.google.inject.name.Names
 
 /**
  * @Author Wei Liu
@@ -19,7 +23,11 @@ class Module extends AbstractModule {
   override def configure() = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
-//    bind(classOf[Repository[Account, TAccount]]).to(classOf[AbstractRepository[Account, TAccount]])
+    
+    bind(classOf[Repository[Account, TAccount]])
+//      .annotatedWith(Names.named("abstractRepository"))
+      .to(classOf[AbstractRepository[Account, TAccount]])
+      .asEagerSingleton()
   }
 
   @Provides

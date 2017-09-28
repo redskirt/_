@@ -29,11 +29,11 @@ import org.scalatest.junit.JUnitRunner
 class StaticSpec extends FunSuite with BeforeAndAfter {
   var _app_ : Application = _
   before {
-    val env = Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Dev)
-    val context = ApplicationLoader.createContext(env)
-    val loader = ApplicationLoader(context)
-    _app_ = loader.load(context)
-    Play.start(_app_)
+//    val env = Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Dev)
+//    val context = ApplicationLoader.createContext(env)
+//    val loader = ApplicationLoader(context)
+//    _app_ = loader.load(context)
+//    Play.start(_app_)
   }
 
   test("An empty Set should have size 0") {
@@ -45,8 +45,8 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
     
     val application = new GuiceApplicationBuilder()
       .in(Environment(new File("path/to/app"), this.getClass.getClassLoader, Mode.Test))
-//      .bindings(new Module)
-      .bindings(bind[Repository[Account, TAccount]].to[AbstractRepository[Account, TAccount]])
+      .bindings(new modules.Module)
+//      .bindings(bind[Repository[Account, TAccount]].to[AbstractRepository[Account, TAccount]])
       .build()
       
    val dao = Application.instanceCache[Repository[TAccount, Account]].apply(application)
