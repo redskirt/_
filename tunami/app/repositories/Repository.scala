@@ -11,6 +11,7 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.lifted.CanBeQueryCondition
 import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 
 /**
  * @Author Sasaki
@@ -18,6 +19,7 @@ import javax.inject.Singleton
  * @Timestamp 2017-09-13 下午11:28:06
  * @Description 
  */
+//@ImplementedBy(classOf[AbstractRepository[_, _]])
 trait Repository[E/*Entity*/, T/*Table*/] {
   def list(): Future[Seq[E]]
   def queryBy[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]]
