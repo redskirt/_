@@ -2,22 +2,22 @@ package repositories
 
 import java.io.File
 
-
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
 
 import play.api.Application
-import play.api.ApplicationLoader
 import play.api.Environment
 import play.api.Mode
 import play.api.Play
-import repositories.AccountRepository.TAccount
-import repositories.poso.Account
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.scalatest.junit.JUnitRunner
-
+import org.junit.runner.RunWith
+import org.scalatest.BeforeAndAfter
+import org.scalatest.FunSuite
 
 /**
  * @Author Sasaki
@@ -27,13 +27,15 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class StaticSpec extends FunSuite with BeforeAndAfter {
-  var _app_ : Application = _
+  
+  lazy val application = new GuiceApplicationBuilder()
+    .in(Environment(new File("path/to/app"), this.getClass.getClassLoader, Mode.Test))
+    .build()
+    
+  lazy val accountRepository = Application.instanceCache[AccountRepository].apply(application)  
+  
   before {
-//    val env = Environment(new java.io.File("."), this.getClass.getClassLoader, Mode.Dev)
-//    val context = ApplicationLoader.createContext(env)
-//    val loader = ApplicationLoader(context)
-//    _app_ = loader.load(context)
-//    Play.start(_app_)
+    Play.start(application)
   }
 
   test("An empty Set should have size 0") {
@@ -41,19 +43,9 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
   }
 
   test("test1") {
-    import play.api.inject.bind
-    
-    val application = new GuiceApplicationBuilder()
-      .in(Environment(new File("path/to/app"), this.getClass.getClassLoader, Mode.Test))
-//      .bindings(new modules.Module)
-//      .bindings(bind[Repository[Account, TAccount]].to[AbstractRepository[Account, TAccount]])
-      .build()
-      
-   val dao = Application.instanceCache[Repository[TAccount, Account]].apply(application)
-   println("dao ----- " + dao)     
-
+   Await.result(accountRepository.list(), Duration.Inf).foreach(println)    
   }
 
-  after(Play.stop(_app_))
+  after(Play.stop(application))
 
 }

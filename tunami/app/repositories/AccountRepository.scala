@@ -17,11 +17,10 @@ import slick.jdbc.JdbcProfile
 @Singleton
 class AccountRepository /*@Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext)*/ extends AbstractRepository[Account, AccountRepository.TAccount]{
 //  protected val dbConfig = dbConfigProvider.get[JdbcProfile]
-//
   import AccountRepository._
   import profile.api._
   
-  override protected val t__ : TableQuery[TAccount] = TableQuery[TAccount]
+  override protected val q: TableQuery[TAccount] = TableQuery[TAccount]
 
   //  def create(username: String, password: String): Future[Account] = db.run {
   //    (t_account.map(__ => (__.username, __.password))

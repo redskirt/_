@@ -21,23 +21,17 @@ class Module extends AbstractModule {
   override def configure() = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
- 
-        bind(classOf[AbstractRepository[Account, TAccount]])
-    .annotatedWith(Names.named("accountRepository"))
-    .to(classOf[AccountRepository])
-    .asEagerSingleton()
     
-    bind(classOf[Repository[Account, TAccount]])
-      .annotatedWith(Names.named("abstractRepository"))
-      .to(classOf[AbstractRepository[Account, TAccount]])
-      .asEagerSingleton()
-
-      
+//        bind(classOf[AbstractRepository[Account, TAccount]])
+//    .annotatedWith(Names.named("accountRepository"))
+//    .to(classOf[AccountRepository])
+//    .asEagerSingleton()
+    
   }
 
   @Provides
   def accountRepository: Repository[Account, TAccount] = new AbstractRepository[Account, TAccount] {
-    override protected val t__ : dbConfig.driver.api.TableQuery[TAccount] = AccountRepository.t_account
+    override protected val q : dbConfig.driver.api.TableQuery[TAccount] = AccountRepository.t_account
   }
 
 }

@@ -13,10 +13,6 @@ class CodeSpec extends FunSuite with BeforeAndAfter {
 
   test("Constructor") {
     val account = Account("username", "password")._mail("email")._status(0)._typee(0)
-    // public void poso.Account.mail_$eq(java.lang.String)
-    // public poso.Account poso.Account._mail(java.lang.String)
-    //    println(account.getClass.getMethods foreach println)
-    //    account.getClass.getm.getMethod("_mail").invoke(account, "ttt")
     println(account.mail)
 
   }
