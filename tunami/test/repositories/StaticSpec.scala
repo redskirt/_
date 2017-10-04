@@ -42,8 +42,14 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
     assert(Set.empty.size == 0)
   }
 
-  test("test1") {
-   Await.result(accountRepository.list(), Duration.Inf).foreach(println)    
+  test("query") {
+    val inf = Duration.Inf
+//   Await.result(accountRepository.list(), inf).foreach(println)    
+//    Await.result(accountRepository.queryList(a => a.password === "redskirt_"), inf).foreach(println)
+//    println(Await.result(accountRepository.count(), inf))
+    println(Await.result(accountRepository.queryList(a => true), inf))
+//    println(Await.result(accountRepository.queryWithId(1), inf))
+   
   }
 
   after(Play.stop(application))
