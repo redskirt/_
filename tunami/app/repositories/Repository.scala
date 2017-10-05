@@ -21,9 +21,9 @@ trait Repository[E/*Entity*/, T/*Table*/] {
     
   def list(): Future[Seq[E]]
   def queryList[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]]
-  def queryWithId(id: Long): Future[Option[E]]
+//  def queryWithId(id: Long): Future[Option[E]]
   def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]]
-  def exists(id: Long): Future[Boolean]
+//  def exists(id: Long): Futurse[Boolean]
   def exists[C : CanBeQueryCondition](f_x: T => C): Future[Boolean]
   def count(): Future[Int]
 
@@ -46,9 +46,9 @@ abstract class AbstractRepository[E <: Clazz[E], T <: SuperTable[E]]() extends R
   
   override def list(): Future[Seq[E]] = db.run(q.result)
   override def queryList[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]] = db.run(q.withFilter(f_x).result)
-  override def queryWithId(id: Long): Future[Option[E]] = db.run(q.filter(_.id === id).result.headOption)
+//  override def queryWithId(id: Long): Future[Option[E]] = db.run(q.filter(_.id === id).result.headOption)
   override def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]] = db.run(q.withFilter(f_x).result.headOption)
-  override def exists(id: Long): Future[Boolean] = db.run(q.filter(_.id === id).exists.result)
+//  override def exists(id: Long): Future[Boolean] = db.run(q.filter(_.id === id).exists.result)
   override def exists[C : CanBeQueryCondition](f_x: T => C): Future[Boolean] = db.run(q.withFilter(f_x).exists.result)
   override def count(): Future[Int] = db.run(q.length.result)
 

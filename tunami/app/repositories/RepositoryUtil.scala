@@ -16,7 +16,7 @@ object RepositoryUtil {
   import dbConfig.driver.api._
 
   abstract class SuperTable[T](tag: Tag, name: String) extends Table[T](tag, name) {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def timestamp = column[Timestamp]("timestamp")
+//    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+//    def timestamp = column[Timestamp]("timestamp")
   }
 }

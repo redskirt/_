@@ -40,7 +40,7 @@ class DeployInitialization(mode: Mode = Mode.Dev) {
   private def init() = {
 		import scala.concurrent.duration.DurationInt
     handler(_app_) { () => 
-      val admin = Account("Sasaki", md5("redskirt_"))._mail("redskirt@outlook.com")._status(0)._typee(0)
+//      val admin = Account(1, "Sasaki", md5("redskirt_"), "")/*._mail("redskirt@outlook.com")*/._status(0)._typee(0)
 //      val init_admin = Await.result(accountService.createAccount(admin), 15.second)
 //      assert(init_admin == 1, "init_admin fail!")
     }

@@ -10,11 +10,11 @@ import scala.reflect.ClassTag
  * @Description 
  */
 
-class Clazz[T: ClassTag] {
-  var id: Int = _
+class Clazz[T: ClassTag]{
+//  val _id: Int = id
   var timestamp: java.sql.Timestamp = new java.sql.Timestamp(System.currentTimeMillis())
 
-  def _id(id: Int) = { this.id = id; this.asInstanceOf[T] }
+//  def _id(id: Int) = { this.id = id; this.asInstanceOf[T] }
   def _timestamp(timestamp: java.sql.Timestamp) = { this.timestamp = timestamp; this.asInstanceOf[T] }
   
   // TODO: 实现Scala反射，设置属性方法
@@ -32,12 +32,17 @@ class Clazz[T: ClassTag] {
 //  } 
 }
 
-case class Account(val username: String, val password: String) extends Clazz[Account] {
-    var mail: String = _
+case class Account(
+    id: Int,
+    username: String, 
+    password: String,
+    mail: Option[String]
+) extends Clazz[Account] {
+//    var mail: String = _
     var typee : Int = _ // admin -> 0, user -> 1
     var status: Int = _ // enable -> 0, lock -> 1, delete -> 2
     
-    def _mail(mail: String) = { this.mail = mail; this }
+//    def _mail(mail: String) = { this.mail = mail; this }
     def _typee(typee: Int) = { this.typee = typee; this }
     def _status(status: Int) = { this.status = status; this } 
 }

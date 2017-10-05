@@ -56,13 +56,14 @@ object AccountRepository extends HasDatabaseConfig[JdbcProfile] {
   import enums.Constant._
 
   class TAccount(tag: Tag) extends RepositoryUtil.SuperTable[Account](tag, $t_account) {
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username")
     def password = column[String]("password")
-    def mail = column[String]("mail")
+    def mail = column[Option[String]]("mail")
     def typee = column[Int]("type")
     def status = column[Int]("status")
 
-    def * = (username, password) <> ((Account.apply _).tupled, Account.unapply)
+    def * = (id, username, password, mail) <> ((Account.apply _).tupled, Account.unapply)
   }
   
   lazy val t_account = TableQuery[TAccount]
