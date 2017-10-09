@@ -18,9 +18,12 @@ import slick.lifted.CanBeQueryCondition
  * @Description 
  */
 trait Repository[E/*Entity*/, T/*Table*/] {
+  protected lazy val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+  import dbConfig.driver.api._
     
   def list(): Future[Seq[E]]
-  def queryList[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]]
+ // def queryList[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]]
+  def queryList[C <: Rep[_]](f_x: T => C)(implicit wt: CanBeQueryCondition[C]): Future[Seq[E]]
 //  def queryWithId(id: Long): Future[Option[E]]
   def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]]
 //  def exists(id: Long): Futurse[Boolean]
@@ -40,17 +43,19 @@ abstract class AbstractRepository[E <: Clazz[E], T <: SuperTable[E]]() extends R
 //    list
 //  }
   
-  protected lazy val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+//  protected lazy val dbConfig: DatabaseConfig[JdbcProfile] = DatabaseConfigProvider.get[JdbcProfile](Play.current)
   import dbConfig.driver.api._
   protected val q : TableQuery[T]
   
   override def list(): Future[Seq[E]] = db.run(q.result)
-  override def queryList[C : CanBeQueryCondition](f_x: T => C): Future[Seq[E]] = db.run(q.withFilter(f_x).result)
+  override def queryList[C <: Rep[_]](f_x: T => C)(implicit wt: CanBeQueryCondition[C]): Future[Seq[E]] = db.run(q.filter(f_x).result)
 //  override def queryWithId(id: Long): Future[Option[E]] = db.run(q.filter(_.id === id).result.headOption)
-  override def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]] = db.run(q.withFilter(f_x).result.headOption)
+  override def querySingle[C : CanBeQueryCondition](f_x: T => C): Future[Option[E]] = db.run(q.withFilter(f_x(_)).result.headOption)
 //  override def exists(id: Long): Future[Boolean] = db.run(q.filter(_.id === id).exists.result)
-  override def exists[C : CanBeQueryCondition](f_x: T => C): Future[Boolean] = db.run(q.withFilter(f_x).exists.result)
+  override def exists[C : CanBeQueryCondition](f_x: T => C): Future[Boolean] = db.run(q.withFilter(f_x(_)).exists.result)
   override def count(): Future[Int] = db.run(q.length.result)
+  
+//  def test(id: Long) = q.filter(f)
 
 //  def withFilter[C : CanBeQueryCondition](f: T => C) = q.withFilter(f).result
 //  def queryFilter(fi: String): Future[Seq[E]] = db.run(q.filter(o => o.username == fi).result)
