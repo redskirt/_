@@ -18,6 +18,8 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSuite
+import slick.lifted.CanBeQueryCondition
+import slick.lifted.Rep
 
 /**
  * @Author Sasaki
@@ -43,6 +45,11 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
   }
 
   test("query") {
+      implicit val BooleanColumnCanBeQueryCondition : CanBeQueryCondition[Rep[Boolean]] =
+    new CanBeQueryCondition[Rep[Boolean]] {
+      def apply(value: Rep[Boolean]) = value
+    }
+    
     val inf = Duration.Inf
 //   Await.result(accountRepository.list(), inf).foreach(println)    
 //    println(Await.result(accountRepository.queryList(a => a.id === 1), inf))
