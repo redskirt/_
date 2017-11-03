@@ -17,7 +17,6 @@ import repositories.poso.Account
  */
 @Singleton
 class AccountService @Inject() (accountRepository: Repository[Account, TAccount])(implicit exec: ExecutionContext) {
-  
   def queryAll() = accountRepository.list()
   
 }

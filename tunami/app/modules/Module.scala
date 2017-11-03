@@ -5,9 +5,6 @@ import com.google.inject.{Provides, AbstractModule}
 import repositories._
 import repositories.AccountRepository.TAccount
 import repositories.poso.Account
-import java.time.Clock
-import com.google.inject.ImplementedBy
-import java.time.Clock
 import com.google.inject.name.Names
 
 /**

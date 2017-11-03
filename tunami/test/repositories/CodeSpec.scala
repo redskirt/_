@@ -12,8 +12,6 @@ import scala.reflect.NameTransformer
 class CodeSpec extends FunSuite with BeforeAndAfter {
 
   test("Constructor") {
-    val account = Account("username", "password")._mail("email")._status(0)._typee(0)
-    println(account.mail)
 
   }
 

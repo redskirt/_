@@ -17,6 +17,12 @@ trait SparkHandler {
     val yarn = "yarn"
   }
 
+  protected object LaunchMode extends Enumeration {
+    type AssemblyMode = Value
+    val DEVELOP = Value("DEVELOP")
+    val DEPLOY = Value("DEPLOY")
+  }
+
   def _conf_(name: String, settings: List[(String, String)], master: String = null) = {
     val conf = new SparkConf().setAppName(name).setAll(settings)
     if(nonNull(master)) conf.setMaster(master)
@@ -43,9 +49,16 @@ trait SparkHandler {
   def initHandler(conf: SparkConf, enableHive: Boolean) = 
     if(enableHive) _sparkSession_(conf, enableHive) else _sparkSession_(conf)
 
-  def invokeHandler(spark: SparkSession)(f_x: () => Unit) = try f_x() finally spark.stop
-  def invokeHandler(sc: SparkContext)(f_x: () => Unit) = try f_x() finally sc.stop
-  def invokeHandler(ssc: StreamingContext)(f_x: () => Unit) = try { f_x(); ssc.start(); ssc.awaitTermination() } finally ssc.stop()
+  def invokeSessionHandler(f_x: () => Unit)(implicit spark: SparkSession) = try f_x() finally spark.stop
+  def invokeContextHandler(f_x: () => Unit)(implicit sc: SparkContext) = try f_x() finally sc.stop
+  def invokeStreamingHandler(f_x: () => Unit)(implicit ssc: StreamingContext) = try { f_x(); ssc.start(); ssc.awaitTermination() } finally ssc.stop()
 
 }
+
+object Test {
+  def main(args: Array[String]): Unit = {
+    
+  }
+}
+
 

@@ -23,5 +23,4 @@ object SparkStreamingTemplate extends AnyRef with SparkHandler {
 
   val ssc = new StreamingContext(conf, new SparkStreamingTemplate(Seconds(10)).duration)
   
-  invokeHandler(ssc) { () => }
 }

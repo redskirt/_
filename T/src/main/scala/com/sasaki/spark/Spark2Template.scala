@@ -21,9 +21,6 @@ object Spark2Template extends SparkHandler {
 //  val dataFrame: DataFrame = spark.readStream.json("")
  
   def main(args: Array[String]): Unit = {
-    invokeHandler(spark) { () =>
       System.setProperty("hadoop.home.dir", "H:\\hadoop-common-2.2.0-bin-master" /*调试启用临时目录*/ )
-      
-    }
   }
 }

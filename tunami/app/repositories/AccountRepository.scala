@@ -68,6 +68,4 @@ object AccountRepository extends HasDatabaseConfig[JdbcProfile] {
   
   lazy val t_account = TableQuery[TAccount]
   
-  t_account.filter { x => x.id === 1 }
-  t_account.withFilter { x => x.id === 1 }
 }

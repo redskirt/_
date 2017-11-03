@@ -7,17 +7,16 @@ import scala.concurrent.duration.Duration
 
 import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfter
+import org.scalatest.Finders
 import org.scalatest.FunSuite
+import org.scalatest.junit.JUnitRunner
 
+import javax.inject.Singleton
 import play.api.Application
 import play.api.Environment
 import play.api.Mode
 import play.api.Play
 import play.api.inject.guice.GuiceApplicationBuilder
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
-import org.scalatest.BeforeAndAfter
-import org.scalatest.FunSuite
 import slick.lifted.CanBeQueryCondition
 import slick.lifted.Rep
 
@@ -48,15 +47,14 @@ class StaticSpec extends FunSuite with BeforeAndAfter {
       implicit val BooleanColumnCanBeQueryCondition : CanBeQueryCondition[Rep[Boolean]] =
     new CanBeQueryCondition[Rep[Boolean]] {
       def apply(value: Rep[Boolean]) = value
-    }
+    } 
     
     val inf = Duration.Inf
 //   Await.result(accountRepository.list(), inf).foreach(println)    
 //    println(Await.result(accountRepository.queryList(a => a.id === 1), inf))
 //    println(Await.result(accountRepository.count(), inf))
-    println(Await.result(accountRepository.list(), inf)) 
+//    println(Await.result(accountRepository.querySingle { x => x.id === 1 }, inf)) 
 //    println(Await.result(accountRepository.queryWithId(1), inf))
-   
   }
 
   after(Play.stop(application))
