@@ -1,6 +1,5 @@
 package com.sasaki.spark
 
-import independent._
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.apache.spark.sql.SparkSession
@@ -12,42 +11,29 @@ import org.apache.spark.sql.SparkSession
  * @Description For Spark Call.
  */
 trait SparkHandler {
-  protected object Master {
-    val local_1 = "local[1]"
-    val yarn = "yarn"
-  }
+  import SparkHandler._
 
-  protected object LaunchMode extends Enumeration {
-    type AssemblyMode = Value
-    val DEVELOP = Value("DEVELOP")
-    val DEPLOY = Value("DEPLOY")
-  }
-
-  def _conf_(name: String, settings: List[(String, String)], master: String = null) = {
-    val conf = new SparkConf().setAppName(name).setAll(settings)
-    if(nonNull(master)) conf.setMaster(master)
-    conf
-  }
+  def buildConf(name: String, settings: Seq[(String, String)] = defaultSettings, master: String = Master.local_1) = new SparkConf().setAppName(name).setMaster(master).setAll(settings)
     
-  def _sparkSession_(conf: SparkConf, enableHive: Boolean = false) = {
+  def buildSparkSession(conf: SparkConf, enableHive: Boolean = false) = {
     val builder = SparkSession.builder().config(conf)
     if(enableHive) builder.enableHiveSupport()
     builder.getOrCreate()
   }
   
-  def _sparkContext_(conf: SparkConf) = _sparkSession_(conf: SparkConf).sparkContext
-
+  def buildSparkContext(conf: SparkConf) = buildSparkSession(conf: SparkConf).sparkContext
+  
   /**
    * by Default Local
    */
   def initHandler(name: String, settings: List[(String, String)], master: String = Master.local_1) = 
-    _sparkSession_(_conf_(name, settings, master))
+    buildSparkSession(buildConf(name, settings, master))
     
   /**
    * by Custom
    */
   def initHandler(conf: SparkConf, enableHive: Boolean) = 
-    if(enableHive) _sparkSession_(conf, enableHive) else _sparkSession_(conf)
+    if(enableHive) buildSparkSession(conf, enableHive) else buildSparkSession(conf)
 
   def invokeSessionHandler(f_x: () => Unit)(implicit spark: SparkSession) = try f_x() finally spark.stop
   def invokeContextHandler(f_x: () => Unit)(implicit sc: SparkContext) = try f_x() finally sc.stop
@@ -55,10 +41,19 @@ trait SparkHandler {
 
 }
 
-object Test {
-  def main(args: Array[String]): Unit = {
+object SparkHandler {
+   val defaultSettings = Seq(
+    ("spark.serializer", "org.apache.spark.serializer.KryoSerializer"))
     
+   object Master {
+    val local_1 = "local[1]"
+    val yarn = "yarn"
+  }
+  
+  object LaunchMode extends Enumeration {
+    type LaunchMode = Value
+    val DEVELOP = Value("DEVELOP")
+    val DEPLOY = Value("DEPLOY")
   }
 }
-
 

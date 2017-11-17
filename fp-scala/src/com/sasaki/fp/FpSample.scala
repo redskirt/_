@@ -1,7 +1,5 @@
 package com.sasaki.fp
 
-import scala.annotation.migration
-
 // -----------------------  P.3 售咖啡案例  -----------------------
 class Coffee {
   val price: Double = 0
@@ -62,19 +60,19 @@ class Cafe {
 object Module {
   // 求绝对值
   def abs(n: Int): Int = if (n < 0) -n else n
-
+  
   // P.16 阶乘 
   def factorial(n: Int): Int = {
     @annotation.tailrec // 尾递归优化
     def loop(n: Int, acc: Int): Int = if (n <= 0) acc else loop(n - 1, n * acc)
-
+  
     loop(n, 1)
   }
-
+  
   // ------------------------ P.17/练习2.1 斐波那契数  --------------------------
   // 递归实现
   def fib(n: Int): Int = if (n <= 2) n - 1 else fib(n - 1) + fib(n - 2)
-
+  
   // 尾递归实现
   def tfib(n: Int): Int = {
     @annotation.tailrec
@@ -83,34 +81,34 @@ object Module {
       else if (n == 1) acc
       else if (n == 2) acc_
       else loop(n - 1, acc_, acc + acc_)
-
+  
     loop(n, 0, 1)
   }
 
   // ----------------------------  P.17 高阶函数  ------------------------------
   private def formatAbs(x: Int) = "The absolute value of %d is %d".format(x, abs(x))
-
+  
   private def formatFactorial(n: Int) = "The factorial of %d is %d".format(n, factorial(n))
-
+  
   // 将formatAbs和formatFactorial泛化
   def formapResult(name: String, n: Int, f: Int => Int /*接收函数参数*/ ) = "Thr %s of %d is %d".format(name, n, f(n))
-
+  
   // 在数组中查找字符串的单态函数
   def findFirst(array: Array[String], key: String): Int = {
     @annotation.tailrec
     def loop(n: Int): Int = if (n >= array.length) -1 else if (array(n) == key) n else loop(n + 1)
-
+  
     loop(0)
   }
-
+  
   // 在数组中查找字符串的多态函数
   def findFirst[T](array: Array[T], p: T => Boolean): Int = {
     @annotation.tailrec
     def loop(n: Int): Int = if (n >= array.length)/*跳出*/ -1 else if (p(array(n)) /*使用函数匹配当前元素*/ ) n else loop(n + 1)
-
+  
     loop(0)
   }
-
+  
   // -------  P.20/练习2.2 实现isSorted方法，检测Array[A]是否按照给定的比较函数排序  --------
   def isSorted[A](array: Array[A], ordered: (A, A) => Boolean): Boolean = {
     def loop(n: Int): Boolean = {
@@ -121,7 +119,7 @@ object Module {
       else 
         false
     }
-
+  
     loop(0)
   }
 

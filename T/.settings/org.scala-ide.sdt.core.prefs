@@ -1,16 +1,11 @@
 =\=\=\=\=\=\=
 //src/main/java=main
-<<<<<<< HEAD
 //src/main/resources=main
 //src/main/scala=main
 //src/test/java=tests
 //src/test/scala=tests
-=======
-//src/main/scala=main
-//src/test/java=tests
->>>>>>> fa984901a5b4a425e037575702c1affcd444c840
 <<<<<<<=HEAD
->>>>>>>=da7187c164b3adcf7869c58094e0087f41d55756
+>>>>>>>=fa984901a5b4a425e037575702c1affcd444c840
 P=
 Xcheckinit=false
 Xdisable-assertions=false
@@ -23,11 +18,7 @@ Xno-uescape=false
 Xplugin=
 Xplugin-disable=
 Xplugin-require=
-<<<<<<< HEAD
-Xpluginsdir=misc\\scala-devel\\plugins
-=======
 Xpluginsdir=misc/scala-devel/plugins
->>>>>>> fa984901a5b4a425e037575702c1affcd444c840
 Ypresentation-debug=false
 Ypresentation-delay=0
 Ypresentation-log=
@@ -40,22 +31,14 @@ eclipse.preferences.version=1
 explaintypes=false
 feature=false
 g=vars
-<<<<<<< HEAD
 nameHashing=false
-=======
->>>>>>> fa984901a5b4a425e037575702c1affcd444c840
 no-specialization=false
 nowarn=false
 optimise=false
 recompileOnMacroDef=true
 relationsDebug=false
-<<<<<<< HEAD
-scala.compiler.additionalParams=
-scala.compiler.installation=2068853716
-=======
 scala.compiler.additionalParams=\ -Xsource\:2.11 -Ymacro-expand\:none
-scala.compiler.installation=-1182919327
->>>>>>> fa984901a5b4a425e037575702c1affcd444c840
+scala.compiler.installation=-909666271
 scala.compiler.sourceLevel=2.11
 scala.compiler.useProjectSettings=true
 stopBuildOnError=true
