@@ -14,9 +14,9 @@ class Spark2Template {
 
 object Spark2Template extends SparkHandler {
   val settings = List(("_key_" -> "_value_"))
-  val conf = _conf_(independent.getSimpleName(this), settings, "local[1]")
+  val conf = buildConf(independent.getSimpleName(this), settings, "local[1]")
   
-  val spark: SparkSession = _sparkSession_(conf, true)
+  val spark: SparkSession = buildSparkSession(conf, true)
 //  val dataSet: Dataset[String] = spark.read.textFile("")
 //  val dataFrame: DataFrame = spark.readStream.json("")
  

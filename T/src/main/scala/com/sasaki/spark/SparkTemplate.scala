@@ -16,10 +16,10 @@ class SparkTemplate {
 }
 
 object SparkTemplate extends Object with SparkHandler {
-  val conf = _conf_(getSimpleName(this), List(("_key_" -> "_value_")))
+  val conf = buildConf(getSimpleName(this), List(("_key_" -> "_value_")))
 
   def main(args: Array[String]): Unit = {
-    implicit val spark = _sparkSession_(conf, false)
+    implicit val spark = buildSparkSession(conf, false)
 
     invokeSessionHandler { () => ??? }
 

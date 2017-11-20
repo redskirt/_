@@ -11,7 +11,7 @@ class SparkSessionTemplate {
 }
 
 object SparkSessionTemplate extends SparkHandler {
-    val conf = _conf_(independent.getSimpleName(this), List(("_key_" -> "_value_")))
+    val conf = buildConf(independent.getSimpleName(this), List(("_key_" -> "_value_")))
     
     def main(args: Array[String]): Unit = {
       
