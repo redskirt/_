@@ -1,5 +1,3 @@
-
-
 package com.sasaki.fp
 
 /**
@@ -105,18 +103,17 @@ object List { // 伴生对象，包含List操作函数
     }
   }
   
-  
   /**
    * 基于list的递归并泛化为高阶函数
    */
   def sum(list: List[Int]): Int = list match {
     case Nil => 0
-    case Cons(__, __s) => __ + sum(__s)
+    case Cons(h, t) => h + sum(t)
   }
   
   def product(list: List[Double]): Double = list match {
     case Nil => 1.0
-    case Cons(__, __s) => __ * product(__s)
+    case Cons(h, t) => h * product(t)
   }
   
   /**

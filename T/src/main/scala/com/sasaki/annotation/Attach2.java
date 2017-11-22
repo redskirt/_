@@ -1,4 +1,4 @@
-package org.sh.sbdp.slap.jp.annotation;
+package com.sasaki.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
