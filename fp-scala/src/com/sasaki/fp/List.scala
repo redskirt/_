@@ -31,7 +31,6 @@ object List { // 伴生对象，包含List操作函数
   /**
    * P.30/练习3.2 
    * 实现tail函数，删除一个List的第一个元素。
-   * !!!
    */
   def tail[T](list: List[T]): List[T] = list match {
     case Nil => sys.error("empty list!")
@@ -41,7 +40,6 @@ object List { // 伴生对象，包含List操作函数
   /**
    * P.30/练习3.3
    * 实现函数setHead用一个不同的值替代列表中的第一个元素。
-   * !!!
    */
   def setHead[T](list: List[T], t: T): List[T] = list match {
     case Nil => Cons(t, Nil)
@@ -51,7 +49,6 @@ object List { // 伴生对象，包含List操作函数
   /**
    * P.30/练习3.4
    * 把tail泛化为drop函数，用于从列表中删除前n个元素。
-   * ???
    */
   def drop[T](list: List[T], n: Int): List[T] = {
     if(n <= 0) list
@@ -64,7 +61,6 @@ object List { // 伴生对象，包含List操作函数
   /**
    * P.30/练习3.5
    * 实现dropWhile函数，删除列表中前缀全部符合判定的元素。
-   * !!!
    */
   def dropWhile[T](list: List[T], f: T => Boolean): List[T] = {
     list match {
@@ -154,7 +150,6 @@ object List { // 伴生对象，包含List操作函数
 
   /**
    * P.34/练习3.12 写一个对原列表元素颠倒顺序的函数。
-   * ???
    */
   def reverse[T](list: List[T]): List[T] = foldLeft(list, List[T]())((acc, h) => Cons(h, acc))
   
