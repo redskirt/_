@@ -29,7 +29,7 @@ class UtilProperties(val pFile: String = null) extends java.util.Properties {
 }
 
 object Test {
-  
   def main(args: Array[String]): Unit = {
+    println(4 - 2 -3)
   }
 }
