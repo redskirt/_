@@ -1,5 +1,6 @@
 package com.sasaki.o
 
+
 /**
  *
  */
@@ -23,5 +24,12 @@ class UtilProperties(val pFile: String = null) extends java.util.Properties {
     var _f = true
     keys.foreach(__ => if(!p.containsKey(__)) _f = false)
     _f
+  }
+
+}
+
+object Test {
+  
+  def main(args: Array[String]): Unit = {
   }
 }
