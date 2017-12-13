@@ -37,8 +37,13 @@ nowarn=false
 optimise=false
 recompileOnMacroDef=true
 relationsDebug=false
+<<<<<<< HEAD
 scala.compiler.additionalParams=\ -Xsource\:2.11 -Ymacro-expand\:none
 scala.compiler.installation=-1182919327
+=======
+scala.compiler.additionalParams=
+scala.compiler.installation=20273765
+>>>>>>> d063c7304d5073160a75fd074220ac7f70bbc854
 scala.compiler.sourceLevel=2.11
 scala.compiler.useProjectSettings=true
 stopBuildOnError=true

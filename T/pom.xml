@@ -76,6 +76,12 @@
 			<artifactId>spark-hive_${scala.minor.version}</artifactId>
 			<version>${spark.version}</version>
 		</dependency>
+		
+		<!-- <dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-mllib_${scala.minor.version}</artifactId>
+			<version>${spark.version}</version>
+		</dependency> -->
         
 		<!-- https://mvnrepository.com/artifact/org.apache.hive/hive-metastore -->
 		<dependency>
