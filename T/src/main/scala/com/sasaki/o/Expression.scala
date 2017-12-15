@@ -21,6 +21,9 @@ object Expression {
     // 如果不使用yiled，for的返回类型为Unit
     val list3: Unit = for(i <- 1 to 5) i
      
+    // 在参数位置传入一个表达式，忽略这里的恒为真情况
+    show(if(true) "is ture." else "is trouble.")
   }
+    def show(s: String) = println(s)
   
 }

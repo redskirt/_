@@ -1,77 +1,113 @@
+import scala.collection.mutable.ListBuffer
+import java.util.regex.Matcher
+
+
 /**
- * @Author Wei Liu
- * @Mail wei.liu@suanhua.org
+ * @Author Sasaki
+ * @Mail redskirt@outlook.com
  * @Timestamp 2017-09-08 上午11:31:46
- * @Description 
+ * @Description 工具类
  */
 package object independent {
-  
-  private[this] val empty = ""
-  private[this] val space = " "
-  
-  def isNull(o: Any) = null == o
-  def nonNull(o: Any) = !isNull(o)
 
+  val $e = ""        // empty
+  val $s = " "       // space
+  val $p = "."       // point
+  val $n = null      // null
+  val $u = "_"       // underline
+  
+  def MUST_NOT_BE_NULL(s: AnyRef = "Argument") = s"$s must not be null!"
+  def MUST_NOT_BE_EMPTY(s: AnyRef = "Argument") = s"$s must not be empty!"
+    
+  def isNull(o: Any) = null == o
+  
+  def nonNull(o: Any) = !isNull(o)
+  
   @deprecated
   def nonEmpty(o: Any) =
     nonNull(o) && (o.getClass().getSimpleName match {
-      case "String" => o != empty
+      case "String" => o != $e
       //      case "???" =>
       case _        => false
     })
+    
+  // ------------------------------------ Invoke Template --------------------------------------------
+  
+  def invokeWithRequire[T](f_x: () => Boolean, slogan: String)(g_x: () => T) = {
+    require(f_x(), slogan)
+    g_x()
+  }
+
+  def invokeNonNull[T](args: Any*)(g_x: () => T) =
+    invokeWithRequire(() => args.forall(nonNull _), MUST_NOT_BE_NULL(args))(g_x)
+    
+  def invokeNonEmpty[T](args: Any*)(g_x: () => T) =
+    invokeWithRequire(() => args.forall(nonEmpty _), MUST_NOT_BE_NULL(args))(g_x)
+    
+  // -------------------------------------------------------------------------------------------------
 
   /**
-   * 去除指定字符  
+   * 去除指定字符
    */
-  def wipe(o:String, s: String) = o.replace(s, empty)
-    
-  def peek[T](o: Any) = { println(o); o.asInstanceOf[T] }
+  def erase(o: String, s: String): String = o.replace(s, $e)
 
-  import java.util.regex.Pattern
-  def getMatched(str: String, regex: String): String = {
-    val pattern = Pattern.compile(regex)
-    val matcher = pattern.matcher(str)
-    if (matcher.find()) matcher.group(1) else empty
-  }
+  def eraseMultiple(o: String, ss: String*): String =
+    invokeWithRequire(() => nonNull(ss), MUST_NOT_BE_NULL(s"Target character: $ss")) { () =>
+      def loop(o: String, i: Int): String =
+        if (i != ss.length - 1)
+          loop(erase(o, ss(i)), i + 1)
+        else
+          erase(o, ss(i))
+          
+      loop(o, 0)
+    }
   
+  def peek[T](o: Any): T = { println(o); o.asInstanceOf[T] }
+
   /**
    * 返回不带$类简称
    */
-  def getSimpleName[T](t: T): String = { 
+  def getSimpleName[T](t: T): String = {
     val o = t.getClass().getSimpleName
-    if(o.contains("$")) o.replaceAll("\\$", empty) else o 
+    if (o.contains("$")) o.replaceAll("\\$", $e) else o
   }
 
-  def trimBothSide(s: String) = {
-    require(nonEmpty(s), "String is Empty!")
-    if(s.length() == 1) empty else s.substring(1, s.length() - 1)
-  }
+  def trimBothSide(s: String) =
+    invokeNonEmpty(s) { () =>
+      if (s.length() == 1) $e else s.substring(1, s.length() - 1)
+    }
 
-  def md5(s: String) = 
-    if(nonNull(s)) {
-    	val digest = java.security.MessageDigest.getInstance("MD5")
-    	digest.digest(s.getBytes).map("%02x" format _).mkString
+  def md5(s: String) =
+    if (nonNull(s)) {
+      val digest = java.security.MessageDigest.getInstance("MD5")
+      digest.digest(s.getBytes).map("%02x" format _).mkString
     } else null
-  
+
   /**
    * JSON检验器
    * 仅检验字符串是否满足JSON标准
    */
-  def invalidJson(json: String) = scala.util.parsing.json.JSON.parseFull(json) match {
+  def isJson(json: String) = scala.util.parsing.json.JSON.parseFull(json) match {
     case Some(map: Map[_, Any]) => true
-    case _ => println(s"Invalid json --> $json"); false
+    case _                      => println(s"Invalid json --> $json"); false
   }
-  
+
   def timestamp(s: String): Option[java.sql.Timestamp] =
     if (nonEmpty(s))
-      if (s.contains(space)) 
+      if (s.contains($s))
         Option(new java.sql.Timestamp(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(s).getTime))
-      else 
+      else
         Option(new java.sql.Timestamp(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(s).getTime))
     else None
- 
-  def formatDuration(durationTimeMillis: Long) = org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)  
-  def formatUntilDuration(lastTimeMillis: Long) = formatDuration(/*java.time.Instant.now().toEpochMilli()*/java.time.Clock.systemUTC().millis() - lastTimeMillis)
+
+  def currentTimeMillis = /*java.time.Instant.now().toEpochMilli()*/ java.time.Clock.systemUTC().millis()
+
+  def currentFormatTime = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new java.util.Date(currentTimeMillis))
+
+  def currentFormatDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(currentTimeMillis))
+
+  def formatDuration(durationTimeMillis: Long) = org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
+  def formatUntilDuration(lastTimeMillis: Long) = formatDuration(currentTimeMillis - lastTimeMillis)
 
   /**
    * 平行映射
@@ -82,59 +118,66 @@ package object independent {
     require(r.size == s.size, "Seq[R] and Seq[S] must have equal size!")
     for (i <- 0 until r.size) yield f_x(r(i), s(i))
   }
-    	
-  // ----------------------------   反射     -------------------------------
-  import _root_.scala.reflect.runtime.universe._
-  
+}
+
+/**
+ * 反射
+ */
+package object reflect {
+
+  import scala.reflect.runtime.universe._
+
   type SA = scala.annotation.StaticAnnotation
 
   def clazz[T: Manifest] = symbolOf[T].asClass
-//  def mirror[T: Manifest] = runtimeMirror(getClass.getClassLoader)
-  
-  def buildInstance[T: Manifest](args: Any*) = 
+  //  def mirror[T: Manifest] = runtimeMirror(getClass.getClassLoader)
+
+  def buildInstance[T: Manifest](args: Any*) =
     runtimeMirror(getClass.getClassLoader).reflectClass(clazz[T]).reflectConstructor(extractConstructor[T]).apply(args: _*).asInstanceOf[T]
-		  
-  def extractConstructor[T: Manifest] = typeOf[T].decl(TermName("<init>"/*Name of constructor.*/)).asMethod
-  
+
+  def extractConstructor[T: Manifest] = typeOf[T].decl(TermName("<init>" /*Name of constructor.*/ )).asMethod
+
   @deprecated
   def extractClass[T: Manifest] = implicitly[Manifest[T]].erasure
-  
+
   @deprecated
   def extractFieldNames[T: Manifest]: Seq[String] = extractClass[T].getDeclaredFields.map(_.getName)
-  
+
   @deprecated
-  def extractFieldNames___Types[T: Manifest] = extractClass[T].getDeclaredFields.map(o => (o.getName, o.getType.toString().replace("class ", empty)))
-  
+  def extractFieldNames___Types[T: Manifest] = extractClass[T].getDeclaredFields.map(o => (o.getName, o.getType.toString().replace("class ", independent.$e)))
+
   @deprecated
   def extractFieldName___Type[T: Manifest] = extractClass[T].getDeclaredFields.map(o => (o.getName, o.getType))
-  
+
   @deprecated
   def extractSimpleName[T: Manifest] = extractClass[T].getSimpleName
-  
+
   @deprecated
   def extractFullName[T: Manifest] = extractClass[T].getName
-  
+
   def extractType[T: Manifest] = symbolOf[T].asClass.primaryConstructor.typeSignature
-    
+
   def extractClassAnnotations[T: Manifest] = symbolOf[T].asClass.annotations
-	
+
   def extractFieldAnnotations[T: Manifest] = {
     val paramLists: List[List[Symbol]] = extractType[T].paramLists
     paramLists.head.map(_ annotations)
   }
-  
+
   def extractTypes[T: Manifest] = {
     val paramLists: List[List[Symbol]] = extractType[T].paramLists
     paramLists.head.map(_ typeSignature)
   }
 
   def extractField2Annotations[T: Manifest] = extractFieldNames[T] zip extractFieldAnnotations[T]
-		  
-	def extractField2Type[T: Manifest] = extractFieldNames[T] zip extractTypes[T]
-  
+
+  def extractField2Type[T: Manifest] = extractFieldNames[T] zip extractTypes[T]
+
   def extractSingleFieldWhileAnnotation[T: Manifest, A <: SA: TypeTag] = extractField2Annotations[T].find(_._2.exists(o => fxTypeIs[A](o.tree.tpe))).map(_._1)
-  
+
   def extractListFieldWhileAnnotation[T: Manifest, A <: SA: TypeTag] = ???
+
+  def existsAnnotationFromType[T: Manifest, A <: SA: TypeTag] = extractClassAnnotations[T].exists(o => fxTypeIs[A](o.tree.tpe))
 
   def existsAnnotationFromField[T: Manifest, A <: SA: TypeTag](f: String) = {
     val opField___Annotations = extractField2Annotations[T].find(_._1 == f)
@@ -143,8 +186,60 @@ package object independent {
       case None    => false
     }
   }
-  
-  def fxTypeIs[T : TypeTag](t: Type) = t =:= typeOf[T]
-  
-  // -------------------------------------------------------------------
+
+  def fxTypeIs[T: TypeTag](t: Type) = t =:= typeOf[T]
 }
+
+/**
+ * 正则
+ */
+package object regex {
+  import independent._
+
+  private[this] val buildMatcher = (s: String, regex: String) =>
+    java.util.regex.Pattern.compile(regex).matcher(s)
+
+  def extractMatched(s: String, regex: String): String = {
+    val matcher = buildMatcher(s, regex)
+    if (matcher.find()) matcher.group(1) else independent.$e
+  }
+
+  def extractMatchedMultiple(s: String, regex: String): Seq[String] = {
+    val matcher = buildMatcher(s, regex)
+    val list = new ListBuffer[String]
+
+    //    				def loop(i: Int): ListBuffer[String] =
+    //    				if (matcher.find()) {
+    //    					list.append(matcher.group(i))
+    //    					loop(i + 1)
+    //    				} else
+    //    					list
+    //    					
+    //    		loop(0)
+
+    var i: java.lang.Integer = 0
+    i.synchronized {
+      while (matcher.find()) {
+        list.append(matcher.group(i))
+        i + 1
+      }
+    }
+    list.toList
+  }
+
+  /**
+   * 判断一个字符串是否都为数字  
+   */
+  def isDigit(s: String) = invokeNonNull(s)(() => s.matches("[0-9]{1,}"))
+
+  /**
+   * 提取数字  
+   */
+  def extractNumbers(s: String): Seq[Int] = extractMatchedMultiple(s, "\\d+").map(_ toInt)
+
+  /**
+   * 提取非数字  
+   */
+  def extractNonNumbers(s: String) = extractMatchedMultiple(s, "\\D+")
+}
+

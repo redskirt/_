@@ -16,7 +16,7 @@ sealed trait Number[T <: Number[_]] {
 }
 
 abstract class AbstractNumber[T <: AbstractNumber[_]] extends Number[T] {
-  def +(n: T): T
+  def +(n: T): this.type
   def -(n: T): T
   def *(n: T): T
   def /(n: T): T
@@ -102,5 +102,7 @@ object Main {
      // n1 + n2
       power(2, 1)
     }
+    
   }
 }
+
