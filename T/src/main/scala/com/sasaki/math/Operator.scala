@@ -61,13 +61,29 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   
   type C = CharNumber
   
+    //      $v.split($_+).map { o =>
+//        extractNumbers(erase(o, $e)/*each $v*/).reduce(_ * _)
+//      }.reduce(_ + _)
+  
+  def parse$V: Map[Int, String] = 
+        if($v.contains($_+)) {
+          // 3a + 2b + 2b -> (3, a) (4, b)
+         $v.split($_+).map { o =>
+            (extractNonNumbers(o).reduce(_ + _), extractNumbers(o).reduce(_ * _))
+          }.groupBy(o => o._1).map { case (k, ks_vs)=>
+            (ks_vs.map(_._2).reduce(_ + _) -> k)
+          }
+        }
+      else // 3a2b -> 6 
+      Map(extractNumbers($v).reduce(_ * _) -> extractNonNumbers($v).reduce(_ + _))
   
   protected val coefficient = 
-    if($v.contains(__+))
-      $v.split(__+).map { o =>
-        extractNumbers(erase(o, $e)/*each $v*/).reduce(_ * _)
-      }.mkString(" + ")
-    else
+    if($v.contains($_+)) // 3a + 2b + 2b -> 0
+      0
+//      $v.split($_+).map { o =>
+//        extractNumbers(erase(o, $e)/*each $v*/).reduce(_ * _)
+//      }.reduce(_ + _)
+    else // 3a2b -> 6
       extractNumbers($v).reduce(_ * _)
       
   protected val item = extractNonNumbers($v).distinct.reduce(_ + _) 
@@ -78,10 +94,10 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
     val item_ = o.item
     println(coefficient_ + " " + item_ + " "+ coefficient)
     CharNumber({
-      if(item == item_)
+      if(item == item_) // 2a and 3a -> 5a
         s"${coefficient + coefficient_}$item"
-      else
-        s"${this.coefficient}$item + $coefficient_$item_"
+      else // 2a and 3b -> 2a + 3b
+        s"${coefficient}$item + $coefficient_$item_"
     })
   }
     
@@ -91,7 +107,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   override def ^(i: Int): C = ???
   protected override def power(num: C, n: Int): C = ???
   
-  override def toString = s"$coefficient$item"
+  override def toString = parse$V.mkString(" + ") 
 }
 
 object CharNumber {
@@ -113,7 +129,7 @@ object Symbol extends Enumeration {
   val / = Value("/")  
   val ^ = Value("^")  
   
-  val __+ = +.toString()
+  val $_+ = "\\+"
 }
 
 object Main {
@@ -136,11 +152,12 @@ object Main {
     val n1 = new PureNumber(123)
     val n2 = new PureNumber(2)
     
-    val n3 = CharNumber("2ab")
+    val n3 = CharNumber("3a + 2b + 2b")
     val n4 = CharNumber("3a")
     println {
      // n1 + n2
-     n3 + n4
+//     n3 + n4
+      n3
     }
     
   }
