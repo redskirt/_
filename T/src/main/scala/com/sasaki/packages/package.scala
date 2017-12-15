@@ -92,21 +92,32 @@ package object independent {
     case _                      => println(s"Invalid json --> $json"); false
   }
 
+  private type JTimestamp = java.sql.Timestamp
+  private type JSimpleDateFormat = java.text.SimpleDateFormat
+  private type JDate = java.util.Date
+  
   def timestamp(s: String): Option[java.sql.Timestamp] =
     if (nonEmpty(s))
       if (s.contains($s))
-        Option(new java.sql.Timestamp(new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(s).getTime))
+        Option(new JTimestamp(new JSimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(s).getTime))
       else
-        Option(new java.sql.Timestamp(new java.text.SimpleDateFormat("yyyy-MM-dd").parse(s).getTime))
+        Option(new JTimestamp(new JSimpleDateFormat("yyyy-MM-dd").parse(s).getTime))
     else None
 
-  def currentTimeMillis = /*java.time.Instant.now().toEpochMilli()*/ java.time.Clock.systemUTC().millis()
+  def currentTimeMillis = /*java.time.Instant.now().toEpochMilli()*/ 
+     java.time.Clock.systemUTC().millis()
 
-  def currentFormatTime = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new java.util.Date(currentTimeMillis))
+  def currentFormatTime = 
+    new JSimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+      .format(new JDate(currentTimeMillis))
 
-  def currentFormatDate = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date(currentTimeMillis))
+  def currentFormatDate = 
+    new java.text.SimpleDateFormat("yyyy-MM-dd")
+      .format(new JDate(currentTimeMillis))
 
-  def formatDuration(durationTimeMillis: Long) = org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
+  def formatDuration(durationTimeMillis: Long) = 
+    org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
+    
   def formatUntilDuration(lastTimeMillis: Long) = formatDuration(currentTimeMillis - lastTimeMillis)
 
   /**
@@ -133,7 +144,10 @@ package object reflect {
   //  def mirror[T: Manifest] = runtimeMirror(getClass.getClassLoader)
 
   def buildInstance[T: Manifest](args: Any*) =
-    runtimeMirror(getClass.getClassLoader).reflectClass(clazz[T]).reflectConstructor(extractConstructor[T]).apply(args: _*).asInstanceOf[T]
+    runtimeMirror(getClass.getClassLoader)
+      .reflectClass(clazz[T])
+      .reflectConstructor(extractConstructor[T]).apply(args: _*)
+      .asInstanceOf[T]
 
   def extractConstructor[T: Manifest] = typeOf[T].decl(TermName("<init>" /*Name of constructor.*/ )).asMethod
 
@@ -144,10 +158,17 @@ package object reflect {
   def extractFieldNames[T: Manifest]: Seq[String] = extractClass[T].getDeclaredFields.map(_.getName)
 
   @deprecated
-  def extractFieldNames___Types[T: Manifest] = extractClass[T].getDeclaredFields.map(o => (o.getName, o.getType.toString().replace("class ", independent.$e)))
+  def extractFieldNames___Types[T: Manifest] = 
+    extractClass[T]
+      .getDeclaredFields
+      .map(o => (o.getName, o.getType.toString()
+      .replace("class ", independent.$e)))
 
   @deprecated
-  def extractFieldName___Type[T: Manifest] = extractClass[T].getDeclaredFields.map(o => (o.getName, o.getType))
+  def extractFieldName___Type[T: Manifest] = 
+    extractClass[T]
+      .getDeclaredFields
+      .map(o => (o.getName, o.getType))
 
   @deprecated
   def extractSimpleName[T: Manifest] = extractClass[T].getSimpleName
@@ -173,11 +194,16 @@ package object reflect {
 
   def extractField2Type[T: Manifest] = extractFieldNames[T] zip extractTypes[T]
 
-  def extractSingleFieldWhileAnnotation[T: Manifest, A <: SA: TypeTag] = extractField2Annotations[T].find(_._2.exists(o => fxTypeIs[A](o.tree.tpe))).map(_._1)
+  def extractSingleFieldWhileAnnotation[T: Manifest, A <: SA: TypeTag] = 
+    extractField2Annotations[T]
+      .find(_._2.exists(o => fxTypeIs[A](o.tree.tpe)))
+      .map(_._1)
 
   def extractListFieldWhileAnnotation[T: Manifest, A <: SA: TypeTag] = ???
 
-  def existsAnnotationFromType[T: Manifest, A <: SA: TypeTag] = extractClassAnnotations[T].exists(o => fxTypeIs[A](o.tree.tpe))
+  def existsAnnotationFromType[T: Manifest, A <: SA: TypeTag] = 
+    extractClassAnnotations[T]
+      .exists(o => fxTypeIs[A](o.tree.tpe))
 
   def existsAnnotationFromField[T: Manifest, A <: SA: TypeTag](f: String) = {
     val opField___Annotations = extractField2Annotations[T].find(_._1 == f)
@@ -196,7 +222,7 @@ package object reflect {
 package object regex {
   import independent._
 
-  private[this] val buildMatcher = (s: String, regex: String) =>
+  protected val buildMatcher = (s: String, regex: String) =>
     java.util.regex.Pattern.compile(regex).matcher(s)
 
   def extractMatched(s: String, regex: String): String = {
