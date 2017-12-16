@@ -1,14 +1,16 @@
 package com.sasaki.math.number
 
 import independent._
+import regex._
+import Symbol._
 
 /**
  * 
  */
 class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   
-  import regex._
-  import Symbol._
+  import com.sasaki.math.number.{ CharNumber => CN }
+  import CharNumber._
   
   type C = CharNumber
 
@@ -19,66 +21,42 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    */
   def parse$V: Seq[Tuple2[Int, String]] =
     if (isExpression) {
-      if (isMetaAdd) {
+      if (isPureAdd) {
         val item___coefficient = $v.split($_+)                               // 3a + 2b + 2b
-          .map { o => (exItem(o), exCoefficient(o)) }                        // (a, 3) (b,2) (b,2)
+          .map { o => (CN.exMetaItem(o), CN.exMetaCoefficient(o)) }          // (a, 3) (b,2) (b,2)
           .groupBy(o => o._1)                                                // (a, [(a,3)]) (b, [(b,2), (b,2)])  
           .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }     //
 
         item___coefficient.values zip item___coefficient.keys toList
-      } else
+      } else if(isMetaMult) {
+        val item___coefficient = $v.split($_+)                               // 3a + 2b + 2b
+          .map { o => (exMetaItem(o), exMetaCoefficient(o)) }                        // (a, 3) (b,2) (b,2)
+          .groupBy(o => o._1)                                                // (a, [(a,3)]) (b, [(b,2), (b,2)])  
+          .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ * _)) }     //
+
+        item___coefficient.values zip item___coefficient.keys toList
+      } else 
         null
     } else // 3a2b -> 6 
       List((this.coefficient, this.item))
   
-  protected def isExpression = this.$v.contains($_+) || this.$v.contains($_-)
+   def isExpression = this.$v.contains($_+) || this.$v.contains($_-)
   
-  protected def isMetaAdd: Boolean = isMetaAdd(this.$v)
+   def isMetaAdd: Boolean = CN.isMetaAdd(this.$v)
   
-  protected def coefficient = // 3a2b -> 6
+   def isMetaMult: Boolean = CN.isMetaMult(this.$v)
+   
+   def isPureAdd: Boolean = CN.isPureAdd(this.$v)
+  
+   def coefficient = // 3a2b -> 6
     invokeWithRequire(() => this.isExpression, "Expression will not extrace coefficient.") { () => 
-      exCoefficient($v)
+      exMetaCoefficient($v)
     }
   
-  protected def item = // 3a2b2b -> ab
+   def item = // 3a2b2b -> ab
     invokeWithRequire(() => this.isExpression, "Expression will not extrace item.") { () => 
-      exItem($v)
+      exMetaItem($v)
     }
-  
-  /**
-   * 判断表达式是否仅为原子操作，操作符数仅一个
-   * a + b 				-> true
-   * a + b + c			-> false
-   * a + b - c			-> false
-   */
-  private def isMetaOperator(s: String) = 
-    1 == s.filter(o => o == $_+ || o == $_- || o == $_*).length()
-    
-  private def isMetaAdd(s: String) = 
-    isMetaOperator(s) && 1 == s.filter(o => o == $_+).length()
-  
-  private def isMetaSub(s: String) = 
-    isMetaOperator(s) && 1 == s.filter(o => o == $_-).length()
-    
-  private def isMetaMult(s: String) = 
-    isMetaOperator(s) && 1 == s.filter(o => o == $_*).length()
-    
-  /**
-   * 判断表达式是否为纯加法操作，操作符仅含+
-   */
-  private def isPureAdd(s: String) =
-    s.filter(o => o == $_+ || o == $_-).forall(o => o == $_+)
-  
-  private def exCoefficient(s: String) = {
-    val nums = extractNumbers(s)
-    if (nums isEmpty) // default coefficient
-      1
-    else
-      nums.reduce(_ * _)
-  }
-    
-  private def exItem(s: String) = 
-    extractNonNumbers(erase($v, $s)).distinct.reduce(_ + _) 
     
   // 2ab + 3a
   override def +(o: C): C = {
@@ -95,7 +73,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
     CharNumber(this.$v + " + " + o.$v)
   }
     
-  override def -(n: C): C = ???
+  override def -(n: C): this.type = ???
   override def *(n: C): C = ???
   override def /(n: C): C = ???
   override def ^(i: Int): C = ???
@@ -105,5 +83,61 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 }
 
 object CharNumber {
+
+  /**
+   * 判断表达式是否仅为原子操作，操作符数仅一个
+   * a + b 				-> true
+   * a + b + c			-> false
+   * a + b - c			-> false
+   */
+  private def isMetaOperator(s: String) =
+    1 == s.filter(o => o == $_+ || o == $_- || o == $_*).length()
+
+  private def isMetaAdd(s: String) =
+    isMetaOperator(s) && 1 == s.filter(o => o == $_+).length()
+
+  private def isMetaSub(s: String) =
+    isMetaOperator(s) && 1 == s.filter(o => o == $_-).length()
+
+  private def isMetaMult(s: String) =
+    isMetaOperator(s) && 1 == s.filter(o => o == $_*).length()
+
+  private def exMetaCoefficient(s: String) = {
+    val nums = extractNumbers(s)
+    if (nums isEmpty) // default coefficient
+      1
+    else
+      nums.reduce(_ * _)
+  }
+
+  private def exMetaItem(s: String) =
+    extractNonNumbers(erase(s, $s)).distinct.reduce(_ + _)
+
+  /**
+   * 判断表达式是否为纯加法操作，操作符仅含+
+   */
+  private def isPureAdd(s: String) =
+    s.filter(o => o == $_+ || o == $_-).forall(o => o == $_+)
+
   def apply($s: String) = new CharNumber($s)
+}
+
+object Main {
+    
+  def main(args: Array[String]): Unit = {
+    val n1 = new PureNumber(123)
+    val n2 = new PureNumber(2)
+    
+    val n3 = CharNumber("3ab + 2b + 2b + a +d")
+    val n4 = CharNumber("a")
+    val n5 = CharNumber("3a + 2b + 2b")
+    val n6 = CharNumber("3a * 2b * 2b")
+    
+    println {
+     // n1 + n2
+//     n3 + n4
+//      n3
+      n5
+    }
+  }
 }
