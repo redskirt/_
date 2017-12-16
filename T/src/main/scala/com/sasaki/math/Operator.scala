@@ -63,20 +63,26 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 
   /**
    * 3ab + 2b + 2b -> 4b + 3a + 3ab
+   * 
+   * 3ab + 2b - b
    */
-  def parse$V: Seq[Tuple2[Int, String]] = 
-    if (isExpression) {                                                 
-      val item___coefficient = $v.split($_+)                                // 3a + 2b + 2b
-        .map { o => (exItem(o), exCoefficient(o)) }                         // (a, 3) (b,2) (b,2)
-        .groupBy(o => o._1)                                                 // (a, [(a,3)]) (b, [(b,2), (b,2)])  
-        .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }      //
-        
+  def parse$V: Seq[Tuple2[Int, String]] =
+    if (isExpression) {
+      if (isMetaAdd) {
+        val item___coefficient = $v.split($_+) // 3a + 2b + 2b
+          .map { o => (exItem(o), exCoefficient(o)) } // (a, 3) (b,2) (b,2)
+          .groupBy(o => o._1) // (a, [(a,3)]) (b, [(b,2), (b,2)])  
+          .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) } //
+
         item___coefficient.values zip item___coefficient.keys toList
-      }
-    else                                                                    // 3a2b -> 6 
-      List((this.coefficient, this.item))
+      } else 
+        null
+    } else // 3a2b -> 6 
+        List((this.coefficient, this.item))
   
-  protected def isExpression = $v.contains($_+) || $v.contains($_-)
+  protected def isExpression = this.$v.contains($_+) || this.$v.contains($_-)
+  
+  protected def isMetaAdd: Boolean = isMetaAdd(this.$v)
   
   protected def coefficient = // 3a2b -> 6
     invokeWithRequire(() => this.isExpression, "Expression will not extrace coefficient.") { () => 
@@ -88,10 +94,33 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
       exItem($v)
     }
   
+  /**
+   * 判断表达式是否仅为原子操作，操作符数仅一个
+   * a + b 				-> true
+   * a + b + c			-> false
+   * a + b - c			-> false
+   */
+  private def isMetaOperator(s: String) = 
+    1 == s.filter(o => o == $_+ || o == $_- || o == $_*).length()
     
+  private def isMetaAdd(s: String) = 
+    isMetaOperator(s) && 1 == s.filter(o => o == $_+).length()
+  
+  private def isMetaSub(s: String) = 
+    isMetaOperator(s) && 1 == s.filter(o => o == $_-).length()
+    
+  private def isMetaMult(s: String) = 
+    isMetaOperator(s) && 1 == s.filter(o => o == $_*).length()
+    
+  /**
+   * 判断表达式是否为纯加法操作，操作符仅含+
+   */
+  private def isPureAdd(s: String) =
+    s.filter(o => o == $_+ || o == $_-).forall(o => o == $_+)
+  
   private def exCoefficient(s: String) = {
     val nums = extractNumbers(s)
-    if (nums isEmpty) // default coefficient is 1
+    if (nums isEmpty) // default coefficient
       1
     else
       nums.reduce(_ * _)
@@ -143,8 +172,9 @@ object Symbol extends Enumeration {
   val / = Value("/")  
   val ^ = Value("^")  
   
-  val $_+ = "\\+"
-  val $_- = "\\-"
+  val $_+ = '+'
+  val $_- = '-'
+  val $_* = '*'
 }
 
 object Main {
@@ -160,9 +190,11 @@ object Main {
     
     println {
      // n1 + n2
-     n3 + n4
+//     n3 + n4
 //      n3
 //      n5
+      
+      "a + b+c - c".filter(p => p == '+' || p =='-')
     }
     
   }
