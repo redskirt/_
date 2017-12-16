@@ -1,7 +1,6 @@
 import scala.collection.mutable.ListBuffer
 import java.util.regex.Matcher
 
-
 /**
  * @Author Sasaki
  * @Mail redskirt@outlook.com

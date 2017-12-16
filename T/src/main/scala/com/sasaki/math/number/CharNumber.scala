@@ -1,59 +1,10 @@
-package com.sasaki.math
+package com.sasaki.math.number
 
-import scala.math
 import independent._
 
 /**
- * @Author Sasaki
+ * 
  */
-
-sealed trait Number[T <: Number[_]] {
-  
-  def +(n: T): T
-  
-  def -(n: T): T
-  
-  def *(n: T): T
-  
-  def /(n: T): T
-  
-  def ^(n: Int): T
-  
-  protected def power(n: T, i: Int): T
-}
-
-abstract class AbstractNumber[T <: AbstractNumber[_]] extends Number[T] 
-
-class PureNumber(val $v: Int) extends AbstractNumber[PureNumber] {
-  type P = PureNumber
-  override def +(o: P): P = PureNumber($v + o.$v)
-  override def -(o: P): P = PureNumber($v - o.$v)
-  override def *(o: P): P = PureNumber($v * o.$v)
-  override def /(o: P): P = PureNumber($v / o.$v)
-  override def ^(i: Int): P = power(PureNumber($v), i)
-
-  protected override def power(num: P, n: Int): P = {
-    @annotation.tailrec
-    def loop(num_ :Int, n_ : Int, acc: Int): Int =
-      if (0 == n_)
-        1
-      else if (1 == n_)
-        acc
-      else
-        loop(num_ * acc, n_ - 1, num_ * num.$v)
-
-    val v = loop(num.$v, math.abs(n), 1)
-    PureNumber({ if (n >= 0) v else 1 / v })
-  }
-
-  //  implicit def Int2PureNumber(value: Int) = new PureNumber(value)
-  override def toString = $v.toString()
-}
-
-object PureNumber {
-  def apply($v: Int) = new PureNumber($v)
-}
-
 class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   
   import regex._
@@ -63,22 +14,22 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 
   /**
    * 3ab + 2b + 2b -> 4b + 3a + 3ab
-   * 
+   *
    * 3ab + 2b - b
    */
   def parse$V: Seq[Tuple2[Int, String]] =
     if (isExpression) {
       if (isMetaAdd) {
-        val item___coefficient = $v.split($_+) // 3a + 2b + 2b
-          .map { o => (exItem(o), exCoefficient(o)) } // (a, 3) (b,2) (b,2)
-          .groupBy(o => o._1) // (a, [(a,3)]) (b, [(b,2), (b,2)])  
-          .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) } //
+        val item___coefficient = $v.split($_+)                               // 3a + 2b + 2b
+          .map { o => (exItem(o), exCoefficient(o)) }                        // (a, 3) (b,2) (b,2)
+          .groupBy(o => o._1)                                                // (a, [(a,3)]) (b, [(b,2), (b,2)])  
+          .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }     //
 
         item___coefficient.values zip item___coefficient.keys toList
-      } else 
+      } else
         null
     } else // 3a2b -> 6 
-        List((this.coefficient, this.item))
+      List((this.coefficient, this.item))
   
   protected def isExpression = this.$v.contains($_+) || this.$v.contains($_-)
   
@@ -156,47 +107,3 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 object CharNumber {
   def apply($s: String) = new CharNumber($s)
 }
-
-//class CharNumber(s: String) extends Number
-//object ImplicitAdapter {
-//  implicit final class Int2StringAdd(private val self: Int) extends AnyVal {
-//    def +(other: String): String = String.valueOf(self) + other
-//  }
-//}
-
-object Symbol extends Enumeration {
-  type Symbol = Value
-  val + = Value("+")  
-  val - = Value("-")  
-  val * = Value("*")  
-  val / = Value("/")  
-  val ^ = Value("^")  
-  
-  val $_+ = '+'
-  val $_- = '-'
-  val $_* = '*'
-}
-
-object Main {
-  import scala.math
-    
-  def main(args: Array[String]): Unit = {
-    val n1 = new PureNumber(123)
-    val n2 = new PureNumber(2)
-    
-    val n3 = CharNumber("3ab + 2b + 2b + a +d")
-    val n4 = CharNumber("a")
-    val n5 = CharNumber("a + 3c + 2b + 2b")
-    
-    println {
-     // n1 + n2
-//     n3 + n4
-//      n3
-//      n5
-      
-      "a + b+c - c".filter(p => p == '+' || p =='-')
-    }
-    
-  }
-}
-
