@@ -60,45 +60,59 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   import Symbol._
   
   type C = CharNumber
+
+  /**
+   * 3ab + 2b + 2b -> 4b + 3a + 3ab
+   */
+  def parse$V: Seq[Tuple2[Int, String]] = 
+    if (isExpression) {                                                 
+      val item___coefficient = $v.split($_+)                                // 3a + 2b + 2b
+        .map { o => (exItem(o), exCoefficient(o)) }                         // (a, 3) (b,2) (b,2)
+        .groupBy(o => o._1)                                                 // (a, [(a,3)]) (b, [(b,2), (b,2)])  
+        .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }      //
+        
+        item___coefficient.values zip item___coefficient.keys toList
+      }
+    else                                                                    // 3a2b -> 6 
+      List((this.coefficient, this.item))
   
-    //      $v.split($_+).map { o =>
-//        extractNumbers(erase(o, $e)/*each $v*/).reduce(_ * _)
-//      }.reduce(_ + _)
+  protected def isExpression = $v.contains($_+) || $v.contains($_-)
   
-  def parse$V: Map[Int, String] = 
-        if($v.contains($_+)) {
-          // 3a + 2b + 2b -> (3, a) (4, b)
-         $v.split($_+).map { o =>
-            (extractNonNumbers(o).reduce(_ + _), extractNumbers(o).reduce(_ * _))
-          }.groupBy(o => o._1).map { case (k, ks_vs)=>
-            (ks_vs.map(_._2).reduce(_ + _) -> k)
-          }
-        }
-      else // 3a2b -> 6 
-      Map(extractNumbers($v).reduce(_ * _) -> extractNonNumbers($v).reduce(_ + _))
+  protected def coefficient = // 3a2b -> 6
+    invokeWithRequire(() => this.isExpression, "Expression will not extrace coefficient.") { () => 
+      exCoefficient($v)
+    }
   
-  protected val coefficient = 
-    if($v.contains($_+)) // 3a + 2b + 2b -> 0
-      0
-//      $v.split($_+).map { o =>
-//        extractNumbers(erase(o, $e)/*each $v*/).reduce(_ * _)
-//      }.reduce(_ + _)
-    else // 3a2b -> 6
-      extractNumbers($v).reduce(_ * _)
-      
-  protected val item = extractNonNumbers($v).distinct.reduce(_ + _) 
+  protected def item = // 3a2b2b -> ab
+    invokeWithRequire(() => this.isExpression, "Expression will not extrace item.") { () => 
+      exItem($v)
+    }
   
+    
+  private def exCoefficient(s: String) = {
+    val nums = extractNumbers(s)
+    if (nums isEmpty) // default coefficient is 1
+      1
+    else
+      nums.reduce(_ * _)
+  }
+    
+  private def exItem(s: String) = 
+    extractNonNumbers(erase($v, $s)).distinct.reduce(_ + _) 
+    
   // 2ab + 3a
   override def +(o: C): C = {
-    val coefficient_ = o.coefficient
-    val item_ = o.item
-    println(coefficient_ + " " + item_ + " "+ coefficient)
-    CharNumber({
-      if(item == item_) // 2a and 3a -> 5a
-        s"${coefficient + coefficient_}$item"
-      else // 2a and 3b -> 2a + 3b
-        s"${coefficient}$item + $coefficient_$item_"
-    })
+//    val coefficient_ = o.coefficient
+//    val item_ = o.item
+//    println(coefficient_ + " " + item_ + " "+ coefficient)
+      
+//      {
+//      if(item == item_) // 2a and 3a -> 5a
+//        s"${coefficient + coefficient_}$item"
+//      else // 2a and 3b -> 2a + 3b
+//        s"${coefficient}$item + $coefficient_$item_"
+//    }
+    CharNumber(this.$v + " + " + o.$v)
   }
     
   override def -(n: C): C = ???
@@ -107,7 +121,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   override def ^(i: Int): C = ???
   protected override def power(num: C, n: Int): C = ???
   
-  override def toString = parse$V.mkString(" + ") 
+  override def toString = parse$V.map(o => o._1 + o._2).mkString(" + ")
 }
 
 object CharNumber {
@@ -130,34 +144,25 @@ object Symbol extends Enumeration {
   val ^ = Value("^")  
   
   val $_+ = "\\+"
+  val $_- = "\\-"
 }
 
 object Main {
   import scala.math
-  def power(num: Int, n: Int) = {
-    val nAbs = math.abs(n)
-    @annotation.tailrec
-    def loop(num_ :Int, n_ : Int, acc: Int): Int =
-      if (0 == n_) 
-        1
-      else if(1 == n_)
-        acc
-      else 
-        loop(num_ * acc, n_ - 1, num_ * num)
-
-    loop(num, n, 1)
-  }
     
   def main(args: Array[String]): Unit = {
     val n1 = new PureNumber(123)
     val n2 = new PureNumber(2)
     
-    val n3 = CharNumber("3a + 2b + 2b")
-    val n4 = CharNumber("3a")
+    val n3 = CharNumber("3ab + 2b + 2b + a +d")
+    val n4 = CharNumber("a")
+    val n5 = CharNumber("a + 3c + 2b + 2b")
+    
     println {
      // n1 + n2
-//     n3 + n4
-      n3
+     n3 + n4
+//      n3
+//      n5
     }
     
   }
