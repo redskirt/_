@@ -11,4 +11,14 @@ object Symbol extends Enumeration {
   val $_+ = '+'
   val $_- = '-'
   val $_* = '*'
+  
+  val symbols = Array($_+, $_-, $_*)
+  
+  /**
+   * 判断字符是否为任意操作符类型  
+   */
+  def isOperator(o: Char) = 
+    o == $_+ || 
+    o == $_- || 
+    o == $_*
 }

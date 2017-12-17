@@ -13,16 +13,8 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   import CharNumber._
 
   val self = this
-  
-  /**
-   * 纯加法：
-   * 3ab + 2b + 2b 		-> 4b + 3a + 3ab
-   * 纯乘法：
-   * 3ab * 2b * 2b	 		-> 12abbb
-   *
-   * 3ab + 2b - b
-   */
-  def parse$V: Seq[META] =
+
+  def parse$V: Seq[U] =
     if (isExpression)
       valueOfExpression
     else // 3a2b -> 6 
@@ -35,9 +27,9 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
     $v.contains($_-) ||
     $v.contains($_*)
 
-  def isMetaAdd = CN.isMetaAdd($v)
+  def isUnitAdd = CN.isUnitAdd($v)
 
-  def isMetaMult = CN.isMetaMult($v)
+  def isUnitMult = CN.isUnitMult($v)
 
   def isPureAdd = CN.isPureAdd($v)
 
@@ -48,7 +40,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    */
    def coefficient =
     invokeWithRequire(() => isExpression, "Expression will not extrace coefficient.") { () => 
-      exMetaCoefficient($v)
+      exUnitCoefficient($v)
     }
   
   /**
@@ -56,7 +48,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    */
    def item =
     invokeWithRequire(() => isExpression, "Expression will not extrace item.") { () => 
-      exMetaItem($v)
+      exUnitItem($v)
     }
     
   /**
@@ -88,25 +80,58 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 object CharNumber {
   
   private[number] type C = CharNumber
-  private[number] type META = Tuple2[Int/*coefficient*/, String/*item*/]
-
-  private def parseExpression(self: C) =
+  private[number] type U = Tuple2[Int/*coefficient*/, String/*item*/]
+  private[number] type PIAR_OPERATOR = 
+    Tuple3[String/*item left*/, String/*operator*/, String/*item right*/]
+  
+  private val MUST_BE_WITCH_OPERATOR = (s: Symbol) => s"Express muse be unit $s operator!"
+  
+  /**
+   * 纯加法：
+   * 3ab + 2b + 2b 		-> 4b + 3a + 3ab
+   * 纯乘法：
+   * 3ab * 2b * 2b	 		-> 12abbb
+   *
+   * 3ab + 2b - b + ab - b
+   */
+  private def parseExpression(self: C): Seq[U] =
     if (self.isPureAdd) {
-        val item___coefficient = self.$v.split($_+)                               // 3a + 2b + 2b
-          // 倒序 项___系数，避免系数为key时map元素丢失
-          .map(o => (exMetaItem(o), exMetaCoefficient(o)))                        // (a, 3) (b,2) (b,2)
-          .groupBy(o => o._1)                                                     // (a, [(a,3)]) (b, [(b,2), (b,2)])  
-          .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }          //
+      val item___coefficient = self.$v.split($_+)                               // 3a + 2b + 2b
+        // 倒序 项___系数，避免系数为key时map元素丢失
+        .map(o => (exUnitItem(o), exUnitCoefficient(o)))                        // (a, 3) (b,2) (b,2)
+        .groupBy(_._1)                                                          // (a, [(a,3)]) (b, [(b,2), (b,2)])  
+        .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }          //
 
-        item___coefficient.values zip item___coefficient.keys toList
-      } else if(self.isPureMult) {                                                // 3a * 2b * 2b
-        val coefficient___item = self.$v.split($_*)                               // (a, 3) (b,2) (b,2)
-          .map(o => (exMetaItem(o), exMetaCoefficient(o)))                      
-          .reduce((_o, o_) => (_o._1 + o_._1, _o._2 * o_._2))
+      item___coefficient.values zip item___coefficient.keys toList
+    } else if(self.isPureMult) {                                                // 3a * 2b * 2b
+      val coefficient___item = self.$v.split($_*)                               // (a, 3) (b,2) (b,2)
+        .map(o => (exUnitItem(o), exUnitCoefficient(o)))                      
+        .reduce((_o, o_) => (_o._1 + o_._1, _o._2 * o_._2))
 
-        Seq((coefficient___item._2, coefficient___item._1))
-      } else 
-        ???
+      Seq((coefficient___item._2, coefficient___item._1))
+    } else {
+      val unitPair = exUnitPairOperator(self.$v) 
+      
+      def loop(pair: Seq[U], i: Int/*, buf: String*/): Seq[U] = {
+        if(i == pair.size - 1) {
+          
+        }
+        Seq()
+      }
+      
+      Seq()
+    }
+  
+  /**
+   * 3ab + 2b - b      
+   */
+   def exUnitPairOperator(s: String): Seq[PIAR_OPERATOR] = {
+    val numbers = s.split(symbols).map(trimSpace _)
+    val _numbers = body(numbers)
+    val numbers_ = numbers.tail
+    val operators = exOperator(s).split($e)
+    for(i <- 0 until operators.length) yield (_numbers(i), operators(i), numbers_(i))
+  }
         
   /**
    * 判断表达式是否仅为原子操作，操作符数仅一个
@@ -114,27 +139,36 @@ object CharNumber {
    * a + b + c			-> false
    * a + b - c			-> false
    */
-  private def isMetaOperator(s: String) =
-    1 == s.filter(o => o == $_+ || o == $_- || o == $_*).length()
-   
-  /**
-   * 判断字符是否为任意操作符类型  
-   */
-  private def isOperator(o: Char) = 
-    o == $_+ || 
-    o == $_- || 
-    o == $_*
+  private def isUnitOperator(s: String) = 1 == s.filter(isOperator _).length()
     
-  private def isMetaAdd(s: String) =
-    isMetaOperator(s) && 1 == s.filter(o => o == $_+).length()
+  private def isUnitAdd(s: String) =
+    isUnitOperator(s) && 1 == s.filter(o => o == $_+).length()
 
-  private def isMetaSub(s: String) =
-    isMetaOperator(s) && 1 == s.filter(o => o == $_-).length()
+  private def isUnitSub(s: String) =
+    isUnitOperator(s) && 1 == s.filter(o => o == $_-).length()
 
-  private def isMetaMult(s: String) =
-    isMetaOperator(s) && 1 == s.filter(o => o == $_*).length()
+  private def isUnitMult(s: String) =
+    isUnitOperator(s) && 1 == s.filter(o => o == $_*).length()
+    
+  /**
+   * 计算单位加法
+   * 3a + 2b 		= 3a + 2b
+   * 3a + 2a 		= 5a
+   * 3ab + ba 		= 4ab
+   */
+  private def unitAdd(_c_i: U, c_i: U): String = {
+    val _coefficient = _c_i._1
+    val coefficient_ = c_i._1
+    val _item = _c_i._2
+    val item_ = _c_i._2
 
-  private def exMetaCoefficient(s: String) = {
+    if (equalItem(_item, item_))
+      _coefficient + coefficient_ + _item
+    else
+      formatUnit(_c_i) + " + " + formatUnit(c_i)
+  }
+
+  private def exUnitCoefficient(s: String) = {
     val nums = extractNumbers(s)
     if (nums isEmpty) // default coefficient
       1
@@ -145,8 +179,8 @@ object CharNumber {
   /**
    * 
    */
-  private def exMetaItem(s: String) =
-    extractNonNumbers(erase(s, $s)).distinct.reduce(_ + _)
+  private def exUnitItem(s: String) =
+    extractNonNumbers(trimSpace(s)).distinct.reduce(_ + _)
     
   /**
    * 提取所有操作符  
@@ -175,11 +209,40 @@ object CharNumber {
    */
   private def isPureMult(s: String) = exOperator(s).forall(o => o == $_*)
 
+  private def trimSpace(s: String) = erase(s, $s)
+  
+  /**
+   * 格式化一个单位 系数_项 无组
+   * (1, "a")		-> a
+   * (2, "a")		-> 2a
+   */
+  private def formatUnit(u: U): String = if(1 == u._1) u._2 else u._1 + u._2
+  
+  /**
+   * 判断两个项等价
+   * ab && ab && ba 		-> true
+   * ab && b						-> false
+   */
+  private def equalItem(_s: String, s: String) = {
+    lazy val _ss = _s.split($e).distinct
+    lazy val ss = s.split($e).distinct
+    if ({
+      // 字符串长度
+      _s.length() != s.length() ||
+      // 去重后字符数组长度
+      _ss.size != ss.size
+    })
+      false
+    else
+      // _ss 中每个字符在 ss 中皆存在
+      _ss.forall(ss contains _)
+  }
+  
   def apply($s: String) = new CharNumber($s)
 }
 
 object Main {
-    
+  
   def main(args: Array[String]): Unit = {
     val n1 = new PureNumber(123)
     val n2 = new PureNumber(2)
@@ -193,7 +256,8 @@ object Main {
      // n1 + n2
 //     n3 + n4
 //      n3
-      n6
+      n5
+    
     }
   }
 }

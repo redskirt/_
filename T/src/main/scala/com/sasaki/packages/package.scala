@@ -50,6 +50,11 @@ package object independent {
    */
   def erase(o: String, s: String): String = o.replace(s, $e)
 
+  /**
+   * 去除序列最后一个元素
+   */
+  def body[T](l: Seq[T]) = l.slice(0, l.size - 1)
+  
   def eraseMultiple(o: String, ss: String*): String =
     invokeWithRequire(() => nonNull(ss), MUST_NOT_BE_NULL(s"Target character: $ss")) { () =>
       def loop(o: String, i: Int): String =
@@ -253,7 +258,7 @@ package object regex {
   }
 
   /**
-   * 判断一个字符串是否都为数字  
+   * 判断一个字符串是否全为数字  
    */
   def isDigit(s: String) = invokeNonNull(s)(() => s.matches("[0-9]{1,}"))
 
