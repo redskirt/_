@@ -27,13 +27,13 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
     $v.contains($_-) ||
     $v.contains($_*)
 
-  def isUnitAdd = CN.isUnitAdd($v)
+  def isUnit_+ = CN.isUnit_+($v)
 
-  def isUnitMult = CN.isUnitMult($v)
+  def isUnit_* = CN.isUnit_*($v)
 
-  def isPureAdd = CN.isPureAdd($v)
+  def isPure_+ = CN.isPure_+($v)
 
-  def isPureMult = CN.isPureMult($v)
+  def isPure_* = CN.isPure_*($v)
   
   /**
    *  3a2b -> 6
@@ -95,14 +95,14 @@ object CharNumber {
    * 3ab + 2b - b + ab - b
    */
   private def parseExpression(self: C): Seq[UN] =
-    if (self.isPureAdd) {
+    if (self.isPure_+) {
       self.$v.split($_+)                               // 3a + 2b + 2b
         // 倒序 项___系数，避免系数为key时map元素丢失
         .map(o => (exUnitItem(o), exUnitCoefficient(o)))                        // (a, 3) (b,2) (b,2)
         .groupBy(_._1)                                                          // (a, [(a,3)]) (b, [(b,2), (b,2)])  
         .map { case (k, ks_vs) => UN(ks_vs.map(_._2).reduce(_ + _), k) }          //
         .toList
-    } else if(self.isPureMult) {                                                // 3a * 2b * 2b
+    } else if(self.isPure_*) {                                                // 3a * 2b * 2b
       val singleU = self.$v.split($_*)                               // (a, 3) (b,2) (b,2)
         .map(o => UN(exUnitCoefficient(o), exUnitItem(o)))                      
         .reduce((_o, o_) => UN(_o.coefficient * o_.coefficient, _o.item + o_.item))
@@ -145,13 +145,13 @@ object CharNumber {
    */
   private def isUnitOperator(s: String) = 1 == s.filter(isOperator _).length()
     
-  private def isUnitAdd(s: String) =
+  private def isUnit_+(s: String) =
     isUnitOperator(s) && 1 == s.filter(o => o == $_+).length()
 
-  private def isUnitSub(s: String) =
+  private def isUnit_-(s: String) =
     isUnitOperator(s) && 1 == s.filter(o => o == $_-).length()
 
-  private def isUnitMult(s: String) =
+  private def isUnit_*(s: String) =
     isUnitOperator(s) && 1 == s.filter(o => o == $_*).length()
     
   /**
@@ -160,7 +160,7 @@ object CharNumber {
    * 3a + 2a 		= 5a
    * 3ab + ba 	= 4ab
    */
-   def unitAdd[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
+  def unit_+[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
     val _coefficient = _c_i.coefficient
     val coefficient_ = c_i.coefficient
     val _item = _c_i.item
@@ -171,11 +171,33 @@ object CharNumber {
     else
       UO(_c_i, Symbol.+, c_i).asInstanceOf[T]
   }
-  
+
   /**
-   * 由单位元组计算加法
+   * 计算单位减法
+   * 3a - 2b 		= 3a - 2b
+   * 3a - 2a 		= a
+   * 3ab - ba 	= 4ab
    */
-   def unitAdd[T <: AbstractUnitNumber](o: UO): T = unitAdd(o._1, o._2)
+  def unit_-[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
+    val _coefficient = _c_i.coefficient
+    val coefficient_ = c_i.coefficient
+    val _item = _c_i.item
+    val item_ = c_i.item
+
+    if (equalItem(_item, item_))
+      UN(_coefficient - coefficient_, _item).asInstanceOf[T]
+    else
+      UO(_c_i, Symbol.-, c_i).asInstanceOf[T]
+  }
+
+  /**
+   * 计算单位元组表达式的值
+   */
+  def valueOfOperate[T <: AbstractUnitNumber](o: UO): T = o.symbol match {
+    case + => unit_+(o._1, o._2)
+    case - => unit_-(o._1, o._2)
+    case _ => ???
+  }
   
   /**
    * 
@@ -216,12 +238,12 @@ object CharNumber {
   /**
    * 判断表达式是否为纯加法操作，操作符仅含+
    */
-  private def isPureAdd(s: String) = exOperator(s).forall(o => o == $_+)
+  private def isPure_+(s: String) = exOperator(s).forall(o => o == $_+)
     
   /**
    * 判断表达式是否为纯乘法操作，操作符仅含*
    */
-  private def isPureMult(s: String) = exOperator(s).forall(o => o == $_*)
+  private def isPure_*(s: String) = exOperator(s).forall(o => o == $_*)
 
   /**
    * 
@@ -291,13 +313,13 @@ object Main {
     val n5 = CN("3a + 3ab + 2b + 2b")
     val n6 = CN("3ab * 2b * 2b")
     
-    val n7 = UO(UN(3, "b"), Symbol.+, UN(1, "b"))
+    val n7 = UO(UN(3, "ab"), Symbol.+, UN(1, "ba"))
     
     println {
      // n1 + n2
 //     n3 + n4
 //      n3 
-      CN.unitAdd(n7)
+      CN.valueOfOperate(n7)
     
     }
   }
