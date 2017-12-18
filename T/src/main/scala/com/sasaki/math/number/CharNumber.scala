@@ -77,28 +77,6 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   override def toString = parse$V.map(o => o.coefficient + o.item).mkString(" + ")
 }
 
-abstract class AbstractUnitNumber(
- val coefficient: Int,
- val item: String
-)
-
-/**
- * 单位元组，表示一个 系数_项
- */
-case class UnitNumber(
-    override val coefficient: Int, 
-    override val item: String) 
-  extends AbstractUnitNumber(coefficient, item)
-
-/**
- * 单位操作，表示一个 数值1_符号_数值2
- */
-case class UnitOperator(
-    _1: UnitNumber, 
-    symbol: Symbol, 
-    _2: UnitNumber) 
-  extends AbstractUnitNumber(_1.coefficient, _1.item)
-
 object CharNumber {
   
   private[number] type C = CharNumber
@@ -182,22 +160,22 @@ object CharNumber {
    * 3a + 2a 		= 5a
    * 3ab + ba 	= 4ab
    */
-  private def unitAdd(_c_i: UN, c_i: UN): AbstractUnitNumber = {
+   def unitAdd[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
     val _coefficient = _c_i.coefficient
     val coefficient_ = c_i.coefficient
     val _item = _c_i.item
-    val item_ = _c_i.item
-
-    if (equalItem(_item, item_))
-      UN(_coefficient + coefficient_, _item)
+    val item_ = c_i.item
+    
+    if (equalItem(_item, item_)) 
+      UN(_coefficient + coefficient_, _item).asInstanceOf[T]
     else
-      UO(_c_i, Symbol.+, c_i)
+      UO(_c_i, Symbol.+, c_i).asInstanceOf[T]
   }
   
   /**
    * 由单位元组计算加法
    */
-  private def unitAdd(o: UO) = ??? //unitAdd(o._1, o._2)
+   def unitAdd[T <: AbstractUnitNumber](o: UO): T = unitAdd(o._1, o._2)
   
   /**
    * 
@@ -280,6 +258,28 @@ object CharNumber {
   def apply($s: String) = new CharNumber($s)
 }
 
+abstract class AbstractUnitNumber(
+ val coefficient: Int,
+ val item: String
+)
+
+/**
+ * 单位元组，表示一个 系数_项
+ */
+case class UnitNumber(
+    override val coefficient: Int, 
+    override val item: String) 
+  extends AbstractUnitNumber(coefficient, item)
+
+/**
+ * 单位操作，表示一个 数值1_符号_数值2
+ */
+case class UnitOperator(
+    _1: UnitNumber, 
+    symbol: Symbol, 
+    _2: UnitNumber) 
+  extends AbstractUnitNumber(_1.coefficient, _1.item)
+
 object Main {
   
   def main(args: Array[String]): Unit = {
@@ -291,11 +291,13 @@ object Main {
     val n5 = CN("3a + 3ab + 2b + 2b")
     val n6 = CN("3ab * 2b * 2b")
     
+    val n7 = UO(UN(3, "b"), Symbol.+, UN(1, "b"))
+    
     println {
      // n1 + n2
 //     n3 + n4
 //      n3 
-      n6
+      CN.unitAdd(n7)
     
     }
   }
