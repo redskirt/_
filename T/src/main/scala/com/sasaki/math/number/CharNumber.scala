@@ -14,15 +14,15 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 
   val self = this 
 
-  def parse$V: Seq[UN] =
-    if (isExpression)
-      valueOfExpression
-    else // 3a2b -> 6 
+  def parseValue: Seq[UN] =
+    if (isOperator)
+      valueOfOperator
+    else
       List(UN(coefficient, item))
   
-  def valueOfExpression = parseExpression(self)
+  def valueOfOperator = parseOperator(self)
 
-  def isExpression =
+  def isOperator =
     $v.contains($_+) ||
     $v.contains($_-) ||
     $v.contains($_*)
@@ -39,7 +39,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    *  3a2b -> 6
    */
    def coefficient =
-    invokeWithRequire(() => isExpression, "Expression will not extrace coefficient.") { () => 
+    invokeWithRequire(() => isOperator, "Operator will not extrace coefficient.") { () => 
       exUnitCoefficient($v)
     }
   
@@ -47,7 +47,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    * 3a2b2b -> ab
    */
    def item =
-    invokeWithRequire(() => isExpression, "Expression will not extrace item.") { () => 
+    invokeWithRequire(() => isOperator, "Operator will not extrace item.") { () => 
       exUnitItem($v)
     }
     
@@ -74,13 +74,14 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   override def ^(i: Int): C = ???
   protected override def power(num: C, n: Int): C = ???
   
-  override def toString = parse$V.map(o => o.coefficient + o.item).mkString(" + ")
+  override def toString = parseValue.map(o => o.coefficient + o.item).mkString(" + ")
 }
 
 object CharNumber {
   
   private[number] type C = CharNumber
-  private[number] type UN = UnitNumber //Tuple2[Int/*coefficient*/, String/*item*/]
+  private[number] type UN = UnitNumber 
+  //Tuple2[Int/*coefficient*/, String/*item*/]
   private[number] type UO = UnitOperator
 //    Tuple3[String/*item left*/, String/*operator*/, String/*item right*/]
   
@@ -94,7 +95,7 @@ object CharNumber {
    *
    * 3ab + 2b - b + ab - b
    */
-  private def parseExpression(self: C): Seq[UN] =
+  private def parseOperator(self: C): Seq[UN] =
     if (self.isPure_+) {
       self.$v.split($_+)                               // 3a + 2b + 2b
         // 倒序 项___系数，避免系数为key时map元素丢失
@@ -113,10 +114,11 @@ object CharNumber {
       // [(3ab, +, 2b), (2b, -, b), (b, +, ab), (ab - b)]
       val unitPair = exUnitPairOperator(self.$v) 
       
-      def loop(pair: Seq[UO], i: Int/*, buf: String*/): Seq[UO] = {
-        if(i == pair.size - 1) { // 仅 [(3ab, +, 2b)]
-          
-        }
+      def loop(unit: Seq[UO], i: Int/*, buf: String*/): Seq[UO] = {
+        if(0 == unit.size - 1) { // 仅 [(3ab, +, 2b)]
+          List(valueOfUnit(unit(i)))
+        }else
+        
         Seq()
       }
       
@@ -160,16 +162,16 @@ object CharNumber {
    * 3a + 2a 		= 5a
    * 3ab + ba 	= 4ab
    */
-  def unit_+[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
-    val _coefficient = _c_i.coefficient
-    val coefficient_ = c_i.coefficient
-    val _item = _c_i.item
-    val item_ = c_i.item
+  private def unit_+[T <: AbstractUnitNumber[T]](_o: UN, o: UN): T = {
+    val _coefficient = _o.coefficient
+    val coefficient_ = o.coefficient
+    val _item = _o.item
+    val item_ = o.item
     
     if (equalItem(_item, item_)) 
       UN(_coefficient + coefficient_, _item).asInstanceOf[T]
     else
-      UO(_c_i, Symbol.+, c_i).asInstanceOf[T]
+      UO(_o, Symbol.+, o).asInstanceOf[T]
   }
 
   /**
@@ -178,25 +180,50 @@ object CharNumber {
    * 3a - 2a 		= a
    * 3ab - ba 	= 4ab
    */
-  def unit_-[T <: AbstractUnitNumber](_c_i: UN, c_i: UN): T = {
-    val _coefficient = _c_i.coefficient
-    val coefficient_ = c_i.coefficient
-    val _item = _c_i.item
-    val item_ = c_i.item
+  private def unit_-[T <: AbstractUnitNumber[T]](_o: UN, o: UN): T = {
+    val _coefficient = _o.coefficient
+    val coefficient_ = o.coefficient
+    val _item = _o.item
+    val item_ = o.item
 
     if (equalItem(_item, item_))
       UN(_coefficient - coefficient_, _item).asInstanceOf[T]
     else
-      UO(_c_i, Symbol.-, c_i).asInstanceOf[T]
+      UO(_o, Symbol.-, o).asInstanceOf[T]
   }
 
   /**
    * 计算单位元组表达式的值
    */
-  def valueOfOperate[T <: AbstractUnitNumber](o: UO): T = o.symbol match {
+  private def valueOfUnit[T <: AbstractUnitNumber[T]](o: UO): T = o.symbol match {
     case + => unit_+(o._1, o._2)
     case - => unit_-(o._1, o._2)
     case _ => ???
+  }
+
+  /**
+   * 计算组合纯加法
+   * [3a] 					= [3a]
+   * [3a, 2a] 			= [5a] 
+   * [3a, 2b]	 		 	= [(3a, +, 2b)]
+   * [3a, 2b, 2c, b]	  = [(3a, +, 3b), (3b, +, 2c)]
+   */
+  def pure_+[T](uns: Seq[UnitNumber]): Seq[T] = {
+    require(uns.nonEmpty, "")
+    
+    if(1 == uns.size)
+      uns
+    else if(2 == uns.size) 
+      List(unit_+(uns.head, uns.last))
+    else {
+      // 倒序 项___系数，避免系数为key时map元素丢失
+     val l = uns.map(o => (o.item, o.coefficient))
+        .groupBy(_._1)
+        .map { case (k, ks_vs) => UN(ks_vs.map(_._2).reduce(_ + _), k) }
+        .toList
+    }
+    
+    Nil
   }
   
   /**
@@ -280,7 +307,7 @@ object CharNumber {
   def apply($s: String) = new CharNumber($s)
 }
 
-abstract class AbstractUnitNumber(
+abstract class AbstractUnitNumber[+T](
  val coefficient: Int,
  val item: String
 )
@@ -315,12 +342,14 @@ object Main {
     
     val n7 = UO(UN(3, "ab"), Symbol.+, UN(1, "ba"))
     
+    val ln3 = List(n3)
+    
     println {
      // n1 + n2
 //     n3 + n4
 //      n3 
-      CN.valueOfOperate(n7)
-    
+//    n3.parseValue
+//      ln3.isInstanceOf[List[]]
     }
   }
 }
