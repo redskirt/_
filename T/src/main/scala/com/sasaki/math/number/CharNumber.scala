@@ -3,22 +3,22 @@ package com.sasaki.math.number
 import independent._
 import regex._
 import Symbol._
+import com.sasaki.math.number.{ CharNumber => CN, UnitNumber => UN, UnitOperator => UO }
 
 /**
  * 
  */
 class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   
-  import com.sasaki.math.number.{ CharNumber => CN }
   import CharNumber._
 
-  val self = this
+  val self = this 
 
-  def parse$V: Seq[U] =
+  def parse$V: Seq[UN] =
     if (isExpression)
       valueOfExpression
     else // 3a2b -> 6 
-      List((coefficient, item))
+      List(UN(coefficient, item))
   
   def valueOfExpression = parseExpression(self)
 
@@ -74,15 +74,37 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
   override def ^(i: Int): C = ???
   protected override def power(num: C, n: Int): C = ???
   
-  override def toString = parse$V.map(o => o._1 + o._2).mkString(" + ")
+  override def toString = parse$V.map(o => o.coefficient + o.item).mkString(" + ")
 }
+
+abstract class AbstractUnitNumber(
+ val coefficient: Int,
+ val item: String
+)
+
+/**
+ * 单位元组，表示一个 系数_项
+ */
+case class UnitNumber(
+    override val coefficient: Int, 
+    override val item: String) 
+  extends AbstractUnitNumber(coefficient, item)
+
+/**
+ * 单位操作，表示一个 数值1_符号_数值2
+ */
+case class UnitOperator(
+    _1: UnitNumber, 
+    symbol: Symbol, 
+    _2: UnitNumber) 
+  extends AbstractUnitNumber(_1.coefficient, _1.item)
 
 object CharNumber {
   
   private[number] type C = CharNumber
-  private[number] type U = Tuple2[Int/*coefficient*/, String/*item*/]
-  private[number] type PIAR_OPERATOR = 
-    Tuple3[String/*item left*/, String/*operator*/, String/*item right*/]
+  private[number] type UN = UnitNumber //Tuple2[Int/*coefficient*/, String/*item*/]
+  private[number] type UO = UnitOperator
+//    Tuple3[String/*item left*/, String/*operator*/, String/*item right*/]
   
   private val MUST_BE_WITCH_OPERATOR = (s: Symbol) => s"Express muse be unit $s operator!"
   
@@ -94,30 +116,33 @@ object CharNumber {
    *
    * 3ab + 2b - b + ab - b
    */
-  private def parseExpression(self: C): Seq[U] =
+  private def parseExpression(self: C): Seq[UN] =
     if (self.isPureAdd) {
-      val item___coefficient = self.$v.split($_+)                               // 3a + 2b + 2b
+      self.$v.split($_+)                               // 3a + 2b + 2b
         // 倒序 项___系数，避免系数为key时map元素丢失
         .map(o => (exUnitItem(o), exUnitCoefficient(o)))                        // (a, 3) (b,2) (b,2)
         .groupBy(_._1)                                                          // (a, [(a,3)]) (b, [(b,2), (b,2)])  
-        .map { case (k, ks_vs) => (k, ks_vs.map(_._2).reduce(_ + _)) }          //
-
-      item___coefficient.values zip item___coefficient.keys toList
+        .map { case (k, ks_vs) => UN(ks_vs.map(_._2).reduce(_ + _), k) }          //
+        .toList
     } else if(self.isPureMult) {                                                // 3a * 2b * 2b
-      val coefficient___item = self.$v.split($_*)                               // (a, 3) (b,2) (b,2)
-        .map(o => (exUnitItem(o), exUnitCoefficient(o)))                      
-        .reduce((_o, o_) => (_o._1 + o_._1, _o._2 * o_._2))
+      val singleU = self.$v.split($_*)                               // (a, 3) (b,2) (b,2)
+        .map(o => UN(exUnitCoefficient(o), exUnitItem(o)))                      
+        .reduce((_o, o_) => UN(_o.coefficient * o_.coefficient, _o.item + o_.item))
 
-      Seq((coefficient___item._2, coefficient___item._1))
+      List(singleU)
     } else {
+      // 3ab + 2b - b + ab - b
+      // [(3ab, +, 2b), (2b, -, b), (b, +, ab), (ab - b)]
       val unitPair = exUnitPairOperator(self.$v) 
       
-      def loop(pair: Seq[U], i: Int/*, buf: String*/): Seq[U] = {
-        if(i == pair.size - 1) {
+      def loop(pair: Seq[UO], i: Int/*, buf: String*/): Seq[UO] = {
+        if(i == pair.size - 1) { // 仅 [(3ab, +, 2b)]
           
         }
         Seq()
       }
+      
+      loop(unitPair, 0)
       
       Seq()
     }
@@ -125,12 +150,13 @@ object CharNumber {
   /**
    * 3ab + 2b - b      
    */
-   def exUnitPairOperator(s: String): Seq[PIAR_OPERATOR] = {
+   def exUnitPairOperator(s: String): Seq[UO] = {
     val numbers = s.split(symbols).map(trimSpace _)
     val _numbers = body(numbers)
     val numbers_ = numbers.tail
     val operators = exOperator(s).split($e)
-    for(i <- 0 until operators.length) yield (_numbers(i), operators(i), numbers_(i))
+    for(i <- 0 until operators.length) yield 
+      UO(parseString2UnitNumber(_numbers(i)), withName(operators(i)), parseString2UnitNumber(numbers_(i)))
   }
         
   /**
@@ -154,19 +180,29 @@ object CharNumber {
    * 计算单位加法
    * 3a + 2b 		= 3a + 2b
    * 3a + 2a 		= 5a
-   * 3ab + ba 		= 4ab
+   * 3ab + ba 	= 4ab
    */
-  private def unitAdd(_c_i: U, c_i: U): String = {
-    val _coefficient = _c_i._1
-    val coefficient_ = c_i._1
-    val _item = _c_i._2
-    val item_ = _c_i._2
+  private def unitAdd(_c_i: UN, c_i: UN): AbstractUnitNumber = {
+    val _coefficient = _c_i.coefficient
+    val coefficient_ = c_i.coefficient
+    val _item = _c_i.item
+    val item_ = _c_i.item
 
     if (equalItem(_item, item_))
-      _coefficient + coefficient_ + _item
+      UN(_coefficient + coefficient_, _item)
     else
-      formatUnit(_c_i) + " + " + formatUnit(c_i)
+      UO(_c_i, Symbol.+, c_i)
   }
+  
+  /**
+   * 由单位元组计算加法
+   */
+  private def unitAdd(o: UO) = ??? //unitAdd(o._1, o._2)
+  
+  /**
+   * 
+   */
+  private def parseString2UnitNumber(s: String) = UN(exUnitCoefficient(s), exUnitItem(s))
 
   private def exUnitCoefficient(s: String) = {
     val nums = extractNumbers(s)
@@ -191,13 +227,13 @@ object CharNumber {
    * 12a*b*b -> 12ab^2
    */
   // TODO
-  private def mult2Power(s: String) = {  }
+  private def mult2Power(s: String) = ???
   
   /**
    * 12ab^2 -> 12a*b*b
    */
   // TODO
-  private def power2Mult(s: String) = {}
+  private def power2Mult(s: String) = ???
   
   /**
    * 判断表达式是否为纯加法操作，操作符仅含+
@@ -209,14 +245,17 @@ object CharNumber {
    */
   private def isPureMult(s: String) = exOperator(s).forall(o => o == $_*)
 
+  /**
+   * 
+   */
   private def trimSpace(s: String) = erase(s, $s)
   
   /**
-   * 格式化一个单位 系数_项 无组
+   * 格式化一个单位元组 系数_项
    * (1, "a")		-> a
    * (2, "a")		-> 2a
    */
-  private def formatUnit(u: U): String = if(1 == u._1) u._2 else u._1 + u._2
+  private def formatUnit(u: UN) = if(1 == u.coefficient) u.item else u.coefficient + u.item
   
   /**
    * 判断两个项等价
@@ -247,16 +286,16 @@ object Main {
     val n1 = new PureNumber(123)
     val n2 = new PureNumber(2)
     
-    val n3 = CharNumber("3ab + 2b + 2b + a +d")
-    val n4 = CharNumber("a")
-    val n5 = CharNumber("3a + 2b + 2b")
-    val n6 = CharNumber("3ab * 2b * 2b")
+    val n3 = CN("3ab + 2b + 2b + a +d")
+    val n4 = CN("a")
+    val n5 = CN("3a + 3ab + 2b + 2b")
+    val n6 = CN("3ab * 2b * 2b")
     
     println {
      // n1 + n2
 //     n3 + n4
-//      n3
-      n5
+//      n3 
+      n6
     
     }
   }
