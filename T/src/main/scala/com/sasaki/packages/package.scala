@@ -69,11 +69,25 @@ package object independent {
   def peek[T](o: Any): T = { println(o); o.asInstanceOf[T] }
 
   /**
-   * 返回不带$类简称
+   * 判断两个字符串等价，包含的每个字符数相等
+   *
+   * ab && ab && ba 		-> true
+   * ab && b						-> false
+   *
    */
-  def getSimpleName[T](t: T): String = {
-    val o = t.getClass().getSimpleName
-    if (o.contains("$")) o.replaceAll("\\$", $e) else o
+  def equalString(_s: String, s: String) = {
+    lazy val _ss = _s.split($e).distinct
+    lazy val ss = s.split($e).distinct
+    if ({
+      // 字符串长度
+      _s.length() != s.length() ||
+      // 去重后字符数组长度
+      _ss.size != ss.size
+    })
+      false
+    else
+      // _ss 中每个字符在 ss 中皆存在
+      _ss.forall(ss contains _)
   }
 
   def trimBothSide(s: String) =
@@ -91,10 +105,10 @@ package object independent {
    * JSON检验器
    * 仅检验字符串是否满足JSON标准
    */
-  def isJson(json: String) = scala.util.parsing.json.JSON.parseFull(json) match {
-    case Some(map: Map[_, Any]) => true
-    case _                      => println(s"Invalid json --> $json"); false
-  }
+//  def isJson(json: String) = scala.util.parsing.json.JSON.parseFull(json) match {
+//    case Some(map: Map[_, Any]) => true
+//    case _                      => println(s"Invalid json --> $json"); false
+//  }
 
   private type JTimestamp = java.sql.Timestamp
   private type JSimpleDateFormat = java.text.SimpleDateFormat
@@ -119,10 +133,10 @@ package object independent {
     new java.text.SimpleDateFormat("yyyy-MM-dd")
       .format(new JDate(currentTimeMillis))
 
-  def formatDuration(durationTimeMillis: Long) = 
-    org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
+//  def formatDuration(durationTimeMillis: Long) = 
+//    org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
     
-  def formatUntilDuration(lastTimeMillis: Long) = formatDuration(currentTimeMillis - lastTimeMillis)
+//  def formatUntilDuration(lastTimeMillis: Long) = formatDuration(currentTimeMillis - lastTimeMillis)
 
   /**
    * 平行映射
@@ -147,6 +161,14 @@ package object reflect {
   def clazz[T: Manifest] = symbolOf[T].asClass
   //  def mirror[T: Manifest] = runtimeMirror(getClass.getClassLoader)
 
+  /**
+   * 返回不带$类简称
+   */
+  def getSimpleName[T](t: T): String = {
+    val o = t.getClass().getSimpleName
+    if (o.contains("$")) o.replaceAll("\\$", independent.$e) else o
+  }
+  
   def buildInstance[T: Manifest](args: Any*) =
     runtimeMirror(getClass.getClassLoader)
       .reflectClass(clazz[T])
