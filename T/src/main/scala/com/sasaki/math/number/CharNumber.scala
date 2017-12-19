@@ -3,7 +3,8 @@ package com.sasaki.math.number
 import independent._
 import regex._
 import Symbol._
-import com.sasaki.math.number.{ CharNumber => CN, UnitNumber => UN, UnitOperator => UO }
+import com.sasaki.math.number.{ CharNumber => CN}
+import com.sasaki.math.number.CharNumber.{ UnitNumber => UN, UnitOperator => UO }
 
 /**
  * 
@@ -80,9 +81,9 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
 object CharNumber {
   
   private[number] type C = CharNumber
-  private[number] type UN = UnitNumber 
+  private[number] type UN = CharNumber.this.UnitNumber 
   //Tuple2[Int/*coefficient*/, String/*item*/]
-  private[number] type UO = UnitOperator
+  private[number] type UO = CharNumber.this.UnitOperator
 //    Tuple3[String/*item left*/, String/*operator*/, String/*item right*/]
   
   private val MUST_BE_WITCH_OPERATOR = (s: Symbol) => s"Express muse be unit $s operator!"
@@ -116,7 +117,8 @@ object CharNumber {
       
       def loop(unit: Seq[UO], i: Int/*, buf: String*/): Seq[UO] = {
         if(0 == unit.size - 1) { // 仅 [(3ab, +, 2b)]
-          List(valueOfUnit(unit(i)))
+//          List(valueOfUnit(unit(i)))
+          null
         }else
         
         Seq()
@@ -156,50 +158,6 @@ object CharNumber {
   private def isUnit_*(s: String) =
     isUnitOperator(s) && 1 == s.filter(o => o == $_*).length()
     
-  /**
-   * 计算单位加法
-   * 3a + 2b 		= 3a + 2b
-   * 3a + 2a 		= 5a
-   * 3ab + ba 	= 4ab
-   */
-  private def unit_+[T <: AbstractUnitNumber[T]](_o: UN, o: UN): T = {
-    val _coefficient = _o.coefficient
-    val coefficient_ = o.coefficient
-    val _item = _o.item
-    val item_ = o.item
-    
-    if (equalItem(_item, item_)) 
-      UN(_coefficient + coefficient_, _item).asInstanceOf[T]
-    else
-      UO(_o, Symbol.+, o).asInstanceOf[T]
-  }
-
-  /**
-   * 计算单位减法
-   * 3a - 2b 		= 3a - 2b
-   * 3a - 2a 		= a
-   * 3ab - ba 	= 4ab
-   */
-  private def unit_-[T <: AbstractUnitNumber[T]](_o: UN, o: UN): T = {
-    val _coefficient = _o.coefficient
-    val coefficient_ = o.coefficient
-    val _item = _o.item
-    val item_ = o.item
-
-    if (equalItem(_item, item_))
-      UN(_coefficient - coefficient_, _item).asInstanceOf[T]
-    else
-      UO(_o, Symbol.-, o).asInstanceOf[T]
-  }
-
-  /**
-   * 计算单位元组表达式的值
-   */
-  private def valueOfUnit[T <: AbstractUnitNumber[T]](o: UO): T = o.symbol match {
-    case + => unit_+(o._1, o._2)
-    case - => unit_-(o._1, o._2)
-    case _ => ???
-  }
 
   /**
    * 计算组合纯加法
@@ -208,13 +166,13 @@ object CharNumber {
    * [3a, 2b]	 		 	= [(3a, +, 2b)]
    * [3a, 2b, 2c, b]	  = [(3a, +, 3b), (3b, +, 2c)]
    */
-  def pure_+[T](uns: Seq[UnitNumber]): Seq[T] = {
+  def pure_+[T](uns: Seq[UO]): Seq[T] = {
     require(uns.nonEmpty, "")
     
     if(1 == uns.size)
       uns
     else if(2 == uns.size) 
-      List(unit_+(uns.head, uns.last))
+      List(UO(uns.head, Symbol.+, uns.last).valueOfUnit)
     else {
       // 倒序 项___系数，避免系数为key时map元素丢失
      val l = uns.map(o => (o.item, o.coefficient))
@@ -305,29 +263,92 @@ object CharNumber {
   }
   
   def apply($s: String) = new CharNumber($s)
+
+  abstract class AbstractUnitNumber(val coefficient: Int, val item: String)
+
+  /**
+   * 单位元组，表示一个 系数_项
+   */
+  class UnitNumber(override val coefficient: Int, override val item: String)
+    extends AbstractUnitNumber(coefficient, item) { }
+
+  object UnitNumber {
+    def apply(coefficient: Int, item: String) = new UN(coefficient, item)
+  }
+
+  /**
+   * 单位操作，表示一个 数值1_符号_数值2
+   */
+  class UnitOperator(val _1: UN, val symbol: Symbol, val _2: UN)
+    extends UN(_1.coefficient, _1.item) {
+    
+    def this(_1: UN) = this(_1, null, null)
+
+    val _coefficient = _1.coefficient
+    val coefficient_ = _2.coefficient
+    val _item = _1.item
+    val item_ = _2.item
+
+    /**
+     * 计算单位加法
+     * 3a + 2b 		= 3a + 2b
+     * 3a + 2a 		= 5a
+     * 3ab + ba 	= 4ab
+     */
+    def unit_+[T <: AbstractUnitNumber]: T = 
+      if (equalItem(_item, item_))
+        UnitNumber(_coefficient + coefficient_, _item).asInstanceOf[T]
+      else
+        UnitOperator(_1, Symbol.+, _2).asInstanceOf[T]
+
+    /**
+     * 计算单位减法
+     * 3a - 2b 		= 3a - 2b
+     * 3a - 2a 		= a
+     * 3ab - ba 	= 4ab
+     */
+    private def unit_-[T <: AbstractUnitNumber]: T =
+      if (equalItem(_item, item_))
+        UN(_coefficient - coefficient_, _item).asInstanceOf[T]
+      else
+        UO(_1, Symbol.-, _2).asInstanceOf[T]
+    
+  
+    /**
+     * 计算单位元组表达式的值
+     */
+    def valueOfUnit[T]: T = symbol match {
+      case + => unit_+
+      case - => unit_-
+      case _ => ???
+    }
+
+    /**
+     * 判断两个项等价
+     * ab && ab && ba 		-> true
+     * ab && b						-> false
+     */
+    private def equalItem(_s: String, s: String) = {
+      lazy val _ss = _s.split($e).distinct
+      lazy val ss = s.split($e).distinct
+      if ({
+        // 字符串长度
+        _s.length() != s.length() ||
+          // 去重后字符数组长度
+          _ss.size != ss.size
+      })
+        false
+      else
+        // _ss 中每个字符在 ss 中皆存在
+        _ss.forall(ss contains _)
+    }
+  }
+
+  object UnitOperator {
+    def apply(_1: UN, symbol: Symbol, _2: UN) = new UO(_1, symbol, _2)
+  }
+
 }
-
-abstract class AbstractUnitNumber[+T](
- val coefficient: Int,
- val item: String
-)
-
-/**
- * 单位元组，表示一个 系数_项
- */
-case class UnitNumber(
-    override val coefficient: Int, 
-    override val item: String) 
-  extends AbstractUnitNumber(coefficient, item)
-
-/**
- * 单位操作，表示一个 数值1_符号_数值2
- */
-case class UnitOperator(
-    _1: UnitNumber, 
-    symbol: Symbol, 
-    _2: UnitNumber) 
-  extends AbstractUnitNumber(_1.coefficient, _1.item)
 
 object Main {
   
