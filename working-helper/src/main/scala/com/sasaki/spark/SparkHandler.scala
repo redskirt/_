@@ -53,20 +53,3 @@ object SparkHandler {
     ("spark.serializer", "org.apache.spark.serializer.KryoSerializer"))
 }
 
-class A(name: String, ll: List[String], a: Int) {
-  val aaa : String = ""
-}
-case class OP(name: String, ll: List[String])
-
-object Main {
-  import reflect._
-  import scala.reflect.runtime.universe._
-    
-    def main(args: Array[String]): Unit = {
-    
-    println {
-      typeOf[OP].toString() 
-    }
-      
-    } 
-}
