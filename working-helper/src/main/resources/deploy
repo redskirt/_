@@ -1,0 +1,1 @@
+mvn deploy:deploy-file -DgroupId=com.sasaki -DartifactId=working-helper -Dversion=1.0.2 -Dpackaging=jar -Dfile=H:\git-repo\_\working-helper\target\working-helper-1.0.2-sources.jar -Durl=http://188.188.33.28:8080/nexus/content/repositories/2edparty/ -DrepositoryId=2edparty -X

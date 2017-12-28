@@ -13,7 +13,7 @@ package object independent {
   val $u = "_"       // underline
 
   // --------------------------- Java Type -------------------------------
-  import java.{ lang => Java }
+  import java.{ lang => Java, util => JUtil }
 
   type JInt                = Java.Integer
   type JLong               = Java.Long
@@ -21,7 +21,34 @@ package object independent {
   type JBoolean            = Java.Boolean
   type JTimestamp          = java.sql.Timestamp
   type JSimpleDateFormat   = java.text.SimpleDateFormat
-  type JDate               = java.util.Date
+  type JDate               = JUtil.Date
+
+  //  Java Collection
+  type JIterable[T]        = Java.Iterable[T]
+  type JCollection[T]      = JUtil.Collection[T]
+  type JList[T]            = JUtil.List[T]
+  type JSet[T]             = JUtil.Set[T]
+	type JMap[P, V]          = JUtil.Map[P, V]
+  type JProperties         = JUtil.Properties
+  
+  /** Mapping relations
+   *  
+   * scala.collection.Iterable 									<=> java.lang.Iterable
+   * scala.collection.Iterable 									<=> java.util.Collection
+   * scala.collection.Iterator 									<=> java.util.{ Iterator, Enumeration }
+   * scala.collection.mutable.Buffer  					<=> java.util.List
+   * scala.collection.mutable.Set 							<=> java.util.Set
+   * scala.collection.mutable.Map 							<=> java.util.{ Map, Dictionary }
+   * scala.collection.mutable.ConcurrentMap 		<=> java.util.concurrent.ConcurrentMap
+   * scala.collection.Seq  											 => java.util.List
+   * scala.collection.mutable.Seq 							 => java.util.List
+   * scala.collection.Set  											 => java.util.Set
+   * scala.collection.Map 											 => java.util.Map
+   * java.util.Properties 											 => scala.collection.mutable.Map[String, String]
+   * 
+   * Sample:
+   * val scalaList = scala.collection.JavaConversions.asScalaBuffer(javaList)
+   */
   // --------------------------- Java Type -------------------------------
   
   def isNull(o: Any) = null == o
@@ -151,12 +178,10 @@ package object independent {
      java.time.Clock.systemUTC().millis()
 
   def currentFormatTime = 
-    new JSimpleDateFormat(PATTERN_TIMESTAMP)
-      .format(new JDate(currentTimeMillis))
+    new JSimpleDateFormat(PATTERN_TIMESTAMP).format(new JDate(currentTimeMillis))
 
   def currentFormatDate = 
-    new java.text.SimpleDateFormat(PATTERN_DATE)
-      .format(new JDate(currentTimeMillis))
+    new java.text.SimpleDateFormat(PATTERN_DATE).format(new JDate(currentTimeMillis))
 
   def formatDuration(durationTimeMillis: Long) = 
     org.apache.commons.lang3.time.DurationFormatUtils.formatDuration(durationTimeMillis, "HH:mm:ss", true)
@@ -168,10 +193,10 @@ package object independent {
    * 对两组序列1->1 映射产出一组序列值
    */
   @deprecated
-  def paraSeq[R, S, T](r: Seq[R], s: Seq[S])(f_x: (R, S) => T): Seq[T] = {
-    require(r.size == s.size, "Seq[R] and Seq[S] must have equal size!")
-    for (i <- 0 until r.size) yield f_x(r(i), s(i))
-  }
+  def paraSeq[R, S, T](r: Seq[R], s: Seq[S])(f_x: (R, S) => T): Seq[T] =
+    invokeWithRequire(() => r.size == s.size, "Seq[R] and Seq[S] must have equal size!") { () =>
+      for (i <- 0 until r.size) yield f_x(r(i), s(i))
+    }
 }
 
 /**

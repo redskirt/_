@@ -10,9 +10,13 @@ import org.apache.spark.sql.SparkSession
  * @Description For Spark Call.
  */
 trait SparkHandler {
-  import SparkHandler._
   import com.sasaki.spark.enums._
   import com.sasaki.spark.enums.SparkType._
+  
+  val defaultSettings = Seq(
+    ("spark.serializer", "org.apache.spark.serializer.KryoSerializer"))
+    
+  type Mode = LaunchMode.Value
 
   def buildConf(appName: String, settings: Seq[(String, String)] = defaultSettings, master: String = Master.local_1) = 
     new SparkConf().setAppName(appName).setMaster(master).setAll(settings)
@@ -47,9 +51,3 @@ trait SparkHandler {
   def invokeStreamingHandler(f_x: () => Unit)(implicit ssc: Streaming) = try { f_x(); ssc.start(); ssc.awaitTermination() } finally ssc.stop()
   
 }
-
-object SparkHandler {
-   val defaultSettings = Seq(
-    ("spark.serializer", "org.apache.spark.serializer.KryoSerializer"))
-}
-
