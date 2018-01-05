@@ -3,7 +3,7 @@ package com.sasaki.spark
 import org.apache.spark.sql.SparkSession
 
 /**
- * @Author Wei Liu
+ * @Author Sasaki
  * @Mail wei.liu@suanhua.org
  * @Timestamp 2017-08-28 下午2:59:24
  * @Description
@@ -12,7 +12,7 @@ class Spark2Template {
   
 }
 
-object Spark2Template extends SparkHandler {
+object Spark2Template extends SparkHandler { 
   val settings = List(("_key_" -> "_value_"))
   val conf = buildConf(independent.getSimpleName(this), settings, "local[1]")
   

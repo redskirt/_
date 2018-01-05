@@ -74,11 +74,8 @@ package object independent {
     g_x()
   }
 
-  /**
-   * 该函数不保证泛型编译级别约束，慎用
-   */
-  @deprecated
-  def invokeNonNothing[E: reflect.TT, T/*return type of function*/](g_x: () => T) =
+  @deprecated("该函数不提供泛型编译级别约束，慎用。")
+  def invokeNonNothing[E: reflect.TT, T/*Which return type of function*/](g_x: () => T) =
     invokeWithRequire(() => !reflect.isNothing[E], MUST_NOT_BE_NOTHING)(g_x)
 
   def invokeNonNull[T](args: Any*)(g_x: () => T) =
@@ -95,7 +92,7 @@ package object independent {
   def body[T](l: Seq[T]) = l.slice(0, l.size - 1)
   
   /**
-   * 去除指定字符
+   * 去除指定字符，对""字符无效
    */
   def erase(o: String, s: String): String = o.replace(s, $e)
   

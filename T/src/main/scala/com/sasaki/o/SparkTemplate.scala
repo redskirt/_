@@ -1,9 +1,7 @@
-package com.sasaki.spark
-
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
+package com.sasaki.o
 
 import independent._
+import com.sasaki.spark.SparkHandler
 
 /**
  * @Author Wei Liu

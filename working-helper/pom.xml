@@ -6,21 +6,20 @@
 	
 	<groupId>com.sasaki</groupId>
 	<artifactId>working-helper</artifactId>
-	<version>1.0.3</version>
+	<version>${local.version}</version>
 	<packaging>jar</packaging>
 	
-	<name>working-helper</name>
+	<name>Working Helper</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
-		<local.version>0.0.1-SNAPSHOT</local.version>
+		<local.version>1.0.3</local.version>
 		<encoding>UTF-8</encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<scala.version>2.11</scala.version>
-		<scala.minor.version>2.11.8</scala.minor.version>
-		<scala.complete.version>${scala.version}.8</scala.complete.version>
+		<scala.minor.version>${scala.version}.8</scala.minor.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 
@@ -221,9 +220,6 @@
 				<configuration>
 					<useFile>false</useFile>
 					<disableXmlReport>true</disableXmlReport>
-					<!-- <useManifestOnlyJar>false</useManifestOnlyJar> -->
-					<!-- If you have classpath issue like NoDefClassError,... -->
-					<!-- useManifestOnlyJar>false</useManifestOnlyJar -->
 					<includes>
 						<include>**/*Test.*</include>
 						<include>**/*Suite.*</include>
@@ -240,7 +236,7 @@
 				</configuration>
 			</plugin>
 			<!-- 带源码打包，仅Java： mvn source:jar -->
-			<plugin>
+			<!-- <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.1.2</version>
@@ -254,7 +250,7 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin> -->
 		</plugins>
 	</build>
 	<distributionManagement>
