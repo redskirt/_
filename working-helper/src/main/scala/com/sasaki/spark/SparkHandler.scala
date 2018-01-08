@@ -17,12 +17,12 @@ trait SparkHandler {
     ("spark.serializer" -> "org.apache.spark.serializer.KryoSerializer"))
     
   import Master._
-  
+
   def buildConf(
-      appName:   String, 
-      settings:  Map[String, String] = defaultSettings, 
-      master:    String = Master.$(LOCAL_1)) = 
-    new SparkConf().setAppName(appName).setMaster(master).setAll(settings)
+    appName: String,
+    settings: Map[String, String] = defaultSettings,
+    master: Master = Master.LOCAL_1) =
+    new SparkConf().setAppName(appName).setMaster(Master.$(master)).setAll(settings)
     
   def buildSparkSession(conf: SparkConf, enableHive: Boolean = false) = {
     val builder = SparkSession.builder().config(conf)
@@ -38,7 +38,7 @@ trait SparkHandler {
   def initHandler(
       appName:   String, 
       settings:  Map[String, String], 
-      master:    String = Master.$(LOCAL_1), 
+      master:    Master = Master.LOCAL_1, 
       enableHive: Boolean = false) = 
     buildSparkSession(buildConf(appName, settings, master))
     
@@ -72,3 +72,6 @@ trait SparkHandler {
   
 }
 
+//class PrimitiveDevelopSparkHandler() extends SparkHandler {
+//  
+//}

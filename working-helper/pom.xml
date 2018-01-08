@@ -128,6 +128,22 @@
 		
 		<dependency>
 			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-hive_${scala.version}</artifactId>
+			<version>${spark.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-library</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.scala-lang</groupId>
+					<artifactId>scala-reflect</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>	
+		
+		<dependency>
+			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming_${scala.version}</artifactId>
 			<version>${spark.version}</version>
 			<exclusions>
@@ -163,12 +179,26 @@
 			<groupId>${hive.group}</groupId>
 			<artifactId>hive-metastore</artifactId>
 			<version>${hive.version}</version>
-		</dependency>
-
+			<scope>${hive.deps.scope}</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>${hive.group}</groupId>
+					<artifactId>spark-client</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency> 
+		
 		<dependency>
-			<groupId>${hive.group}</groupId>
-			<artifactId>hive-exec</artifactId>
-			<version>${hive.version}</version>
+		    <groupId>${hive.group}</groupId>
+		    <artifactId>hive-exec</artifactId>
+	        <version>${hive.version}</version>
+	        <scope>${hive.deps.scope}</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>${hive.group}</groupId>
+					<artifactId>spark-client</artifactId>
+				</exclusion>
+			</exclusions>	        
 		</dependency>
 
 		<dependency>
