@@ -2,6 +2,7 @@ package com.sasaki.spark
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
+import com.typesafe.scalalogging.slf4j.LazyLogging
 
 /**
  * @Author Sasaki
@@ -9,14 +10,19 @@ import org.apache.spark.sql.SparkSession
  * @Timestamp 2017-08-29 上午11:39:28
  * @Description 提供Spark初始化、模板调用
  */
-trait SparkHandler {
+trait SparkHandler extends LazyLogging {
   import com.sasaki.spark.enums._
   import com.sasaki.spark.enums.SparkType._
-  
-  val defaultSettings = Map(
-    ("spark.serializer" -> "org.apache.spark.serializer.KryoSerializer"))
-    
   import Master._
+
+  private val defaultSettings = Map(
+    ("spark.serializer"           -> "org.apache.spark.serializer.KryoSerializer"),
+    ("spark.executor.memory"      -> "2G"),
+    ("spark.driver.memory"        -> "1G"),
+    ("spark.driver.cores"         -> "2"),
+    ("spark.driver.maxResultSize" -> "10G"),
+    ("spark.total.executor.cores" -> "2")
+  )
 
   def buildConf(
     appName: String,
@@ -33,23 +39,12 @@ trait SparkHandler {
   def buildSparkContext(conf: SparkConf) = buildSparkSession(conf: SparkConf).sparkContext
   
   /**
-   * by Default Local
+   * 快速构造Spark，仅用于本地调试，生产项目慎用！
    */
-  def initHandler(
-      appName:   String, 
-      settings:  Map[String, String], 
-      master:    Master = Master.LOCAL_1, 
-      enableHive: Boolean = false) = 
-    buildSparkSession(buildConf(appName, settings, master))
-    
-  /**
-   * by Custom
-   */
-  def initHandler(conf: SparkConf, enableHive: Boolean) = 
-    if(enableHive) 
-      buildSparkSession(conf, enableHive) 
-    else 
-      buildSparkSession(conf)
+  def buildLocalSparkSession(enableHive: Boolean = false) = {
+    System.setProperty("hadoop.home.dir", "H:\\hadoop-common-2.2.0-bin-master" /*调试启用临时目录*/ )
+    buildSparkSession(buildConf("spark-local", defaultSettings, Master.LOCAL_*), enableHive)
+  }
       
   def initStreamingHandler = ???
 
@@ -59,6 +54,7 @@ trait SparkHandler {
   def invokeSessionHandler(f_x: () => Unit)(implicit spark: Spark) = 
     try f_x() finally spark.stop
     
+  @deprecated("For Spark-1.* version.")
   def invokeContextHandler(f_x: () => Unit)(implicit sc: SC) = 
     try f_x() finally sc.stop
     
@@ -71,7 +67,3 @@ trait SparkHandler {
     finally ssc.stop()
   
 }
-
-//class PrimitiveDevelopSparkHandler() extends SparkHandler {
-//  
-//}
