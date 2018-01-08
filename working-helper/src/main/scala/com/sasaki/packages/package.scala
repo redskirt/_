@@ -82,7 +82,7 @@ package object independent {
     invokeWithRequire(() => args.forall(nonNull _), MUST_NOT_BE_NULL(args))(g_x)
     
   def invokeNonEmpty[T](args: Any*)(g_x: () => T) =
-    invokeWithRequire(() => args.forall(nonEmpty _), MUST_NOT_BE_NULL(args))(g_x)
+    invokeWithRequire(() => args.forall(nonEmpty _), MUST_NOT_BE_EMPTY(args))(g_x)
     
   // -------------------------------------------------------------------------------------------------
 

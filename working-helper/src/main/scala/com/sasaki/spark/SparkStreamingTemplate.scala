@@ -15,8 +15,8 @@ class SparkStreamingTemplate(val duration: Duration) {
 
 object SparkStreamingTemplate extends SparkHandler {
   
-  val conf = buildConf(independent.getSimpleName(this), Map("_key_" -> "_value_"))
-
-  val ssc = new Streaming(conf, new SparkStreamingTemplate(Seconds(10)).duration)
+//  val conf = buildConf(independent.getSimpleName(this), Map("_key_" -> "_value_"))
+//
+//  val ssc = new Streaming(conf, new SparkStreamingTemplate(Seconds(10)).duration)
   
 }
