@@ -1,7 +1,7 @@
-package com.sasaki.spark
+package com.sasaki.spark.template
 
 import com.sasaki.spark.enums.SparkType._
-import com.sasaki.spark.enums.Master
+import com.sasaki.spark.SparkHandler
 
 /**
  * @Author Sasaki
@@ -14,7 +14,7 @@ object PrimitiveSparkTemplate extends SparkHandler {
   import logger._
   
   def main(args: Array[String]): Unit = {
-    val spark: Spark = buildLocalSparkSession(true)
+    val spark: Spark = buildLocalSparkSession(false)
     info("> --------------------------------- Spark will start by local model. ---------------------------------------------")
     
     invokeSparkHandler(spark) { () =>

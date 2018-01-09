@@ -1,7 +1,7 @@
-package com.sasaki.spark
+package com.sasaki.spark.template
 
 import com.sasaki.spark.enums.SparkType._
-import org.apache.spark.streaming.Seconds
+import com.sasaki.spark.SparkHandler
 
 /**
  * @Author Sasaki

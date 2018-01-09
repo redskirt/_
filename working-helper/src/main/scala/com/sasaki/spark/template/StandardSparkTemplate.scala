@@ -1,7 +1,8 @@
-package com.sasaki.spark
+package com.sasaki.spark.template
 
 import com.sasaki.spark.enums.LaunchMode
 import com.sasaki.spark.enums.SparkType._
+import com.sasaki.spark.SparkHandler
 
 /**
  * @Author Sasaki
@@ -10,7 +11,6 @@ import com.sasaki.spark.enums.SparkType._
  * @Description
  */
 object StandardSparkTemplate extends SparkHandler {
-  import logger._
 
   type M = LaunchMode.Value
 
@@ -19,11 +19,11 @@ object StandardSparkTemplate extends SparkHandler {
   lazy val spark = buildAutomaticOnYarnSparkSession(conf, _mode_, false)
   lazy val sc = spark.sparkContext
 
+  import logger._
   import spark._
   import spark.implicits._
 
   implicit var _mode_ : M = _
-  implicit val _spark_ = spark
   
   def main(args: Array[String]): Unit = {
     args match {
@@ -39,8 +39,14 @@ object StandardSparkTemplate extends SparkHandler {
         throw new IllegalArgumentException(s"Init args exception $args")
     }
 
+    /**
+     * _spark_ 必须在 _mode_ 之后初始化，避免提前触发 lazy spark 初始化
+     */
+//    implicit val _spark_ = spark
 //    invokeSessionHandler { () => ??? }
+    
     invokeSparkHandler(spark) { () => 
+      // 测试样例仅本地通过
       spark.read.textFile(s"${reflect.classpath}deploy").rdd
         .flatMap(_.split(independent.$s)).map((_, 1)).reduceByKey(_ + _) foreach println
     }
