@@ -35,9 +35,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
   def buildConfWithoutMaster(
     appName: String,
     settings: Map[String, String]): Conf =
-    new Conf()
-      .setAppName(appName)
-      .setAll(settings)
+    new Conf().setAppName(appName).setAll(settings)
 
   /**
    * @see def buildConfWithoutMaster(appName: String, settings: Map[String, String]): SparkConf
@@ -48,7 +46,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
   /**
    * 仅 LaunchMode DEVELOP 时构造SparkConf，生产项目慎用！
    */
-  def buildConfWithLocal(
+  def buildLocalConf(
     appName: String,
     settings: Map[String, String] = DEFAULT_SETTINGS) =
       buildConfWithoutMaster(appName, settings)
@@ -86,7 +84,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
   def buildLocalSparkSession(enableHive: Boolean = false) = {
     // 调试启用临时目录
     System.setProperty("hadoop.home.dir", s"${reflect.classpath}hadoop-common-2.2.0-bin-master")
-    buildSparkSession(buildConfWithLocal("spark-local", DEFAULT_SETTINGS), enableHive)
+    buildSparkSession(buildLocalConf("spark-local", DEFAULT_SETTINGS), enableHive)
   }
       
   def initStreamingHandler = ???

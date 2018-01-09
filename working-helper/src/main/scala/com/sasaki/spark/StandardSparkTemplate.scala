@@ -23,7 +23,7 @@ object StandardSparkTemplate extends SparkHandler {
   import spark.implicits._
 
   implicit var _mode_ : M = _
-  implicit var _spark_ : Spark = _
+  implicit val _spark_ = spark
   
   def main(args: Array[String]): Unit = {
     args match {
