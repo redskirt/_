@@ -1,9 +1,7 @@
 package com.sasaki.spark
 
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 import com.typesafe.scalalogging.slf4j.LazyLogging
-import org.apache.spark.SparkContext
+import com.sasaki.kit.ReflectHandler
 
 /**
  * @Author Sasaki
@@ -11,12 +9,13 @@ import org.apache.spark.SparkContext
  * @Timestamp 2017-08-29 上午11:39:28
  * @Description 提供Spark初始化、模板调用
  */
-trait SparkHandler extends LazyLogging {
+trait SparkHandler extends ReflectHandler with LazyLogging {
   import independent._
   import com.sasaki.spark.enums._
   import com.sasaki.spark.enums.SparkType._
   import Master._
 
+  private type Conf = org.apache.spark.SparkConf
   private val SPARK_MASTER = "spark.master"
   
   protected val DEFAULT_SETTINGS = Map(
@@ -27,18 +26,25 @@ trait SparkHandler extends LazyLogging {
     ("spark.driver.maxResultSize" -> "10G"),
     ("spark.total.executor.cores" -> "2")
   )
-  
+  import scala.reflect.runtime.universe._
+
   /**
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkConf。
-   * 特别注意：使用该方法后必须后续手动设置Master
+   * 特别注意：使用该方法后必须手动设置Master
    */
   def buildConfWithoutMaster(
     appName: String,
-    settings: Map[String, String]) =
-      new SparkConf()
-        .setAppName(appName)
-        .setAll(settings)
-      
+    settings: Map[String, String]): Conf =
+    new Conf()
+      .setAppName(appName)
+      .setAll(settings)
+
+  /**
+   * 同上。
+   */
+  def buildConfWithoutMaster(settings: Map[String, String]): Conf =
+    buildConfWithoutMaster(s"spark-job_$getSuccessorName", settings)
+  
   /**
    * 仅 LaunchMode DEVELOP 时构造SparkConf，生产项目慎用！
    */
@@ -52,15 +58,15 @@ trait SparkHandler extends LazyLogging {
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkSession。
    * 特别注意：该方法强制检查Master，不通过则异常
    */
-  def buildSparkSession(conf: SparkConf, enableHive: Boolean = false) =
+  def buildSparkSession(conf: Conf, enableHive: Boolean = false) =
     invokeNonEmpty(conf.get(SPARK_MASTER, $e)) { () =>
-      val builder = SparkSession.builder().config(conf)
+      val builder = org.apache.spark.sql.SparkSession.builder().config(conf)
       if (enableHive) builder.enableHiveSupport()
       builder.getOrCreate()
     }
   
   @deprecated("兼容 Spark-1.* 版本。")
-  def buildSparkContext(conf: SparkConf) = new SparkContext(conf)
+  def buildSparkContext(conf: Conf) = new org.apache.spark.SparkContext(conf)
   
   /**
    * 快速构造Spark，仅用于本地调试，生产项目慎用！

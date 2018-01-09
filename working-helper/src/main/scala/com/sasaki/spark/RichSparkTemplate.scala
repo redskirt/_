@@ -10,9 +10,10 @@ class RichSparkTemplate extends SparkHandler {
   
 }
 
-//object RichSparkTemplate extends SparkHandler {
-//
-//    val conf = new SparkConf().setMaster("local[*]")
+object RichSparkTemplate extends SparkHandler {
+//    val conf = 
+//      
+//      new SparkConf().setMaster("local[*]")
 //    .setAppName("XFiredParseProcess")
 //    .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 //
@@ -49,5 +50,12 @@ class RichSparkTemplate extends SparkHandler {
 //        println("Init args exception " + (args.foreach(o => print(o + " "))) + ", expect input: <data_dt[_ | yyyyMMdd]>")
 //        throw new IllegalArgumentException(s"Init args exception $args")
 //    }
-//  
-//}
+  
+  def main(args: Array[String]): Unit = {
+    println {
+    	buildConfWithoutMaster(Map("" -> "ss")).get("spark.app.name")
+      
+    }
+  }
+  
+}

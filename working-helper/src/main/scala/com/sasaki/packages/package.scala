@@ -226,7 +226,7 @@ package object reflect {
   def typeEqual[E: TT, T: TT]: Boolean = typeOf[E] =:= typeOf[T]
 
   /**
-   * 仅case class
+   * 仅适用case class
    */
   def extractFieldNames[T: TT]: Seq[String] =
     typeOf[T].members.collect {
