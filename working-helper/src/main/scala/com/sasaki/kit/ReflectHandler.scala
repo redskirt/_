@@ -32,4 +32,6 @@ object Main extends App {
   val rh = new ReflectHandlerImpl("test", 111)
   println(rh.getSuccessorName)
   rh.getSuccessorPrimaryConstructorArgs foreach println
+  
+  println(this.getClass.getClassLoader.getResource(""))
 }

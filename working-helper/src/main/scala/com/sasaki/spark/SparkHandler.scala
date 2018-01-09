@@ -2,6 +2,7 @@ package com.sasaki.spark
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
 import com.sasaki.kit.ReflectHandler
+import com.sasaki.spark.enums.LaunchMode
 
 /**
  * @Author Sasaki
@@ -26,7 +27,6 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
     ("spark.driver.maxResultSize" -> "10G"),
     ("spark.total.executor.cores" -> "2")
   )
-  import scala.reflect.runtime.universe._
 
   /**
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkConf。
@@ -40,7 +40,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
       .setAll(settings)
 
   /**
-   * 同上。
+   * @see def buildConfWithoutMaster(appName: String, settings: Map[String, String]): SparkConf
    */
   def buildConfWithoutMaster(settings: Map[String, String]): Conf =
     buildConfWithoutMaster(s"spark-job_$getSuccessorName", settings)
@@ -52,7 +52,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
     appName: String,
     settings: Map[String, String] = DEFAULT_SETTINGS) =
       buildConfWithoutMaster(appName, settings)
-        .setMaster(Master.$(Master.LOCAL_1))
+        .setMaster(Master.LOCAL_*.toString)
 
   /**
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkSession。
@@ -64,6 +64,18 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
       if (enableHive) builder.enableHiveSupport()
       builder.getOrCreate()
     }
+
+  /**
+   * @see def buildSparkSession(conf: SparkConf, enableHive: Boolean): SparkSession
+   */
+  def buildAutomaticOnYarnSparkSession(conf: Conf, mode: LaunchMode.Value, enableHive: Boolean = false) =
+    buildSparkSession({
+      if (LaunchMode.isDevelop(mode))
+        conf.setMaster(Master.LOCAL_*.toString)
+      else
+        conf.setMaster(Master.YARN.toString)
+    }, enableHive)
+  
   
   @deprecated("兼容 Spark-1.* 版本。")
   def buildSparkContext(conf: Conf) = new org.apache.spark.SparkContext(conf)
@@ -73,7 +85,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
    */
   def buildLocalSparkSession(enableHive: Boolean = false) = {
     // 调试启用临时目录
-    System.setProperty("hadoop.home.dir", "H:\\hadoop-common-2.2.0-bin-master")
+    System.setProperty("hadoop.home.dir", s"${reflect.classpath}hadoop-common-2.2.0-bin-master")
     buildSparkSession(buildConfWithLocal("spark-local", DEFAULT_SETTINGS), enableHive)
   }
       
@@ -96,5 +108,4 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
       ssc.awaitTermination()
     } //
     finally ssc.stop()
-  
 }

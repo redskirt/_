@@ -206,7 +206,12 @@ package object reflect {
   type SA = scala.annotation.StaticAnnotation
   type CT[T] = scala.reflect.ClassTag[T]
   type TT[T] = scala.reflect.runtime.universe.TypeTag[T]
-
+  
+  /**
+   * file:/H:/git-repo/_/working-helper/target/classes/
+   */
+  def classpath = getClass.getClassLoader.getResource(independent.$e).toString
+  
   def clazz[T: TT]: ClassSymbol = symbolOf[T].asClass
 
   def buildInstance[T: TT](args: Any*): T =
