@@ -1,11 +1,16 @@
+import scala.reflect.runtime.universe._
+
 /**
  * @Author Sasaki
  * @Mail redskirt@outlook.com
  * @Timestamp 2017-09-08 上午11:31:46
- * @Description 工具类
+ * @Description 二方引入库
+ */
+/**
+ * 工具方法
  */
 package object independent {
-
+  
   val $e = ""        // empty
   val $s = " "       // space
   val $p = '.'       // point
@@ -54,13 +59,13 @@ package object independent {
   def isNull(o: Any) = null == o
   
   def nonNull(o: Any) = !isNull(o)
-  
-  @deprecated
-  def nonEmpty(o: Any) =
-    nonNull(o) && (o.getClass().getSimpleName match {
-      case "String" => o != $e
-      //      case "???" =>
-      case _        => false
+
+  def nonEmpty[T: TypeTag](o: T) =
+    nonNull(o) && (typeOf[T] match {
+      case t if t =:= typeOf[String]    => o.asInstanceOf[String] nonEmpty
+      case t if t <:< typeOf[Seq[_]]    => o.asInstanceOf[Seq[_]] nonEmpty
+      case t if t <:< typeOf[Map[_, _]] => o.asInstanceOf[Map[_, _]] nonEmpty
+      case _                            => throw new IllegalArgumentException(s"Unknowed type ${typeOf[T]}.")
     })
     
   // ------------------------------------ Invoke Template --------------------------------------------
@@ -201,11 +206,9 @@ package object independent {
  */
 package object reflect {
 
-  import scala.reflect.runtime.universe._
-
   type SA = scala.annotation.StaticAnnotation
   type CT[T] = scala.reflect.ClassTag[T]
-  type TT[T] = scala.reflect.runtime.universe.TypeTag[T]
+  type TT[T] = TypeTag[T]
   
   /**
    * file:/H:/git-repo/_/working-helper/target/classes/
