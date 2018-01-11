@@ -11,6 +11,8 @@ import scala.reflect.runtime.universe._
  */
 package object independent {
   
+  import reflect._
+  
   val $e = ""        // empty
   val $s = " "       // space
   val $p = '.'       // point
@@ -60,12 +62,12 @@ package object independent {
   
   def nonNull(o: Any) = !isNull(o)
 
-  def nonEmpty[T: TypeTag](o: T) =
+  def nonEmpty[T: TT](o: T) =
     nonNull(o) && (typeOf[T] match {
       case t if t =:= typeOf[String]    => o.asInstanceOf[String] nonEmpty
       case t if t <:< typeOf[Seq[_]]    => o.asInstanceOf[Seq[_]] nonEmpty
       case t if t <:< typeOf[Map[_, _]] => o.asInstanceOf[Map[_, _]] nonEmpty
-      case _                            => throw new IllegalArgumentException(s"Unknowed type ${typeOf[T]}.")
+      case _                            => throw new IllegalArgumentException(s"$$independent$$nonEmpty$$ Unknowed type ${typeOf[T]}.")
     })
     
   // ------------------------------------ Invoke Template --------------------------------------------
@@ -80,13 +82,13 @@ package object independent {
   }
 
   @deprecated("该函数不提供泛型编译级别约束，慎用。")
-  def invokeNonNothing[E: reflect.TT, T/*Which return type of function*/](g_x: () => T) =
-    invokeWithRequire(() => !reflect.isNothing[E], MUST_NOT_BE_NOTHING)(g_x)
+  def invokeNonNothing[E: TT, T/*Which return type of function*/](g_x: () => T) =
+    invokeWithRequire(() => !isNothing[E], MUST_NOT_BE_NOTHING)(g_x)
 
-  def invokeNonNull[T](args: Any*)(g_x: () => T) =
+  def invokeNonNull[E: TT, T](args: E*)(g_x: () => T) =
     invokeWithRequire(() => args.forall(nonNull _), MUST_NOT_BE_NULL(args))(g_x)
     
-  def invokeNonEmpty[T](args: Any*)(g_x: () => T) =
+  def invokeNonEmpty[E: TT, T](args: E*)(g_x: () => T) =
     invokeWithRequire(() => args.forall(nonEmpty _), MUST_NOT_BE_EMPTY(args))(g_x)
     
   // -------------------------------------------------------------------------------------------------

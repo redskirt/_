@@ -30,7 +30,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
 
   /**
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkConf。
-   * 特别注意：使用该方法后必须手动设置Master
+   * @note 使用该方法后必须手动设置Master
    */
   def buildConfWithoutMaster(
     appName: String,
@@ -54,7 +54,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
 
   /**
    * 兼容 LaunchMode DEVELOP/DEPLOY 同时存在时构造SparkSession。
-   * 特别注意：该方法强制检查Master，不通过则异常
+   * @note 该方法以制造异常方式强制检查Master
    */
   def buildSparkSession(conf: Conf, enableHive: Boolean = false) =
     invokeNonEmpty(conf.get(SPARK_MASTER, $e)) { () =>
