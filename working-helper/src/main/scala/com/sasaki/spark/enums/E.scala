@@ -43,6 +43,5 @@ object Master extends Enumeration {
   val LOCAL_* = Value("local[*]")
   val YARN    = Value("yarn")
   // val MESOS    = Value("mesos")
-  
-  def $(that: Master.Value) = that.toString()
+
 }
