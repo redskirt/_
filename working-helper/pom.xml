@@ -11,7 +11,7 @@
 	
 	<name>Working Helper</name>
 	<url>http://maven.apache.org</url>
-
+ 
 	<properties>
 		<local.version>1.0.3</local.version>
 		<encoding>UTF-8</encoding>
@@ -46,7 +46,7 @@
 	</properties>
 
 	<repositories>
-		<repository>
+		<!-- <repository>
 			<id>releases</id>
 			<name>local private release</name>
 			<url>http://188.188.33.28:8080/nexus/content/repositories/releases/</url>
@@ -55,9 +55,9 @@
 			<id>snapshots</id>
 			<name>local private snapshot</name>
 			<url>http://188.188.33.28:8080/nexus/content/repositories/snapshots/</url>
-		</repository>
+		</repository> -->
 		<repository>
-			<id>cdh-releases</id>
+			<id>cdh-releases</id> 
 			<name>Cloudera</name>
 			<url>https://repository.cloudera.com/content/repositories/releases/</url>
 		</repository>	

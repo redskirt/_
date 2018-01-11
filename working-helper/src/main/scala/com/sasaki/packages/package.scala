@@ -14,7 +14,7 @@ package object independent {
 
   // --------------------------- Java Type -------------------------------
   import java.{ lang => Java, util => JUtil }
-
+ 
   type JInt                = Java.Integer
   type JLong               = Java.Long
   type JDouble             = Java.Double

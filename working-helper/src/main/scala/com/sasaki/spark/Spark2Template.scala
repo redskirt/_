@@ -13,7 +13,7 @@ class Spark2Template {
 }
 
 object Spark2Template extends SparkHandler { 
-  val settings = List(("_key_" -> "_value_"))
+  val settings = Map("_key_" -> "_value_")
   val conf = buildConf(independent.getSimpleName(this), settings, "local[1]")
   
   val spark: SparkSession = buildSparkSession(conf, true)

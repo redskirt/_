@@ -31,7 +31,7 @@
 	</properties>
 
 	<repositories>
-		<repository>
+		<!-- <repository>
 			<id>releases</id>
 			<name>local private release</name>
 			<url>http://188.188.33.28:8080/nexus/content/repositories/releases/</url>
@@ -40,17 +40,17 @@
 			<id>snapshots</id>
 			<name>local private snapshot</name>
 			<url>http://188.188.33.28:8080/nexus/content/repositories/snapshots/</url>
-		</repository>
+		</repository> -->
 		<repository>
 			<id>cdh-releases</id>
 			<name>Cloudera</name>
 			<url>https://repository.cloudera.com/content/repositories/releases/</url>
 		</repository>
-		<repository>
+		<!-- <repository>
 			<id>nexus-2edparty</id>
 			<name>local private release</name>
 			<url>http://188.188.33.28:8080/nexus/content/repositories/2edparty/</url>
-		</repository>
+		</repository> -->
 	</repositories>
 	
 	<dependencies>
