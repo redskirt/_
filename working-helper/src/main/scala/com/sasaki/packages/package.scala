@@ -81,7 +81,7 @@ package object independent {
 
   @deprecated("该函数不提供泛型编译级别约束，慎用。")
   def invokeNonNothing[E: reflect.TT, T/*Which return type of function*/](g_x: () => T) =
-    invokeWithRequire(() => !reflect.isNothing[E], MUST_NOT_BE_NOTHING)(g_x)
+    invokeWithRequire(() => !reflect.typeNothing[E], MUST_NOT_BE_NOTHING)(g_x)
 
   def invokeNonNull[T](args: Any*)(g_x: () => T) =
     invokeWithRequire(() => args.forall(nonNull _), MUST_NOT_BE_NULL(args))(g_x)
@@ -99,8 +99,12 @@ package object independent {
   /**
    * 去除指定字符，对""字符无效
    */
-  def erase(o: String, s: String): String = o.replace(s, $e)
+  def erase(that: String, specify: String): String = 
+    invokeNonNull(that, specify)(() => that.replace(specify, $e))
   
+  /**
+   * @see def erase(o: String, s: String): String
+   */
   def eraseMultiple(o: String, ss: String*): String =
     invokeWithRequire(() => nonNull(ss), MUST_NOT_BE_NULL(s"Target character: $ss")) { () =>
       def loop(o: String, i: Int): String =
@@ -112,7 +116,7 @@ package object independent {
       loop(o, 0)
     }
   
-  def peek[T](o: Any): T = { println(o); o.asInstanceOf[T] }
+  def peek[T: reflect.TT](o: T): T = { println(o); o }
   
   /**
    * 判断两个字符串等价，包含的每个字符数相等
@@ -211,7 +215,7 @@ package object reflect {
   type TT[T] = TypeTag[T]
   
   /**
-   * file:/H:/git-repo/_/working-helper/target/classes/
+   * 示例：file:/H:/git-repo/_/working-helper/target/classes/
    */
   def classpath = getClass.getClassLoader.getResource(independent.$e).toString
   
@@ -227,11 +231,13 @@ package object reflect {
   def extractConstructor[T: TT]: MethodSymbol = 
     typeOf[T].decl(termNames.CONSTRUCTOR).asMethod
 
-  def isNothing[T: TT]: Boolean = typeEqual[T, Nothing]
+  def typeNothing[T: TT]: Boolean = typeEqual[T, Nothing]
   
   def typeIs[T: TT](t: Type): Boolean = t =:= typeOf[T]
   
   def typeEqual[E: TT, T: TT]: Boolean = typeOf[E] =:= typeOf[T]
+  
+  def typeFrom[E: TT, T: TT]: Boolean = typeOf[E] <:< typeOf[T]
 
   /**
    * 仅适用case class
@@ -293,7 +299,7 @@ package object reflect {
 package object regex {
   import independent._
 
-  protected val buildMatcher = (s: String, regex: String) =>
+  protected lazy val buildMatcher = (s: String, regex: String) =>
     java.util.regex.Pattern.compile(regex).matcher(s)
 
   def extractMatched(s: String, regex: String): String = {
@@ -314,7 +320,7 @@ package object regex {
     //    					
     //    		loop(0)
 
-    var i: java.lang.Integer = 0
+    var i: JInt = 0
     i.synchronized {
       while (matcher.find()) {
         list.append(matcher.group(i))
