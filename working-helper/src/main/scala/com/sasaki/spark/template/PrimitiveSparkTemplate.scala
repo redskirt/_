@@ -21,5 +21,7 @@ object PrimitiveSparkTemplate extends SparkHandler {
       val arr = Seq(1 to 10)
       spark.sparkContext.parallelize(arr) foreach println
     }
+    
+    re
   }
 } 
