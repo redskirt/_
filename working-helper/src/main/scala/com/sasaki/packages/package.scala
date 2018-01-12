@@ -181,7 +181,8 @@ package object reflect {
   import constant.original._
   
   /**
-   * 示例：file:/H:/git-repo/_/working-helper/target/classes/
+   * 示例：
+   * H:/git-repo/_/working-helper/target/classes/
    */
   def classpath = 
     independent.erase(getClass.getClassLoader.getResource($e).toString, "file:/")
