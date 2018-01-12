@@ -1,6 +1,7 @@
 package com.sasaki.spark
 
 import com.typesafe.scalalogging.slf4j.LazyLogging
+import com.sasaki.{packages => p}
 import com.sasaki.kit.ReflectHandler
 import com.sasaki.spark.enums.LaunchMode
 
@@ -11,7 +12,8 @@ import com.sasaki.spark.enums.LaunchMode
  * @Description 提供Spark初始化、模板调用
  */
 trait SparkHandler extends ReflectHandler with LazyLogging {
-  import independent._
+  import p.constant._
+  import p.independent._
   import com.sasaki.spark.enums._
   import com.sasaki.spark.enums.SparkType._
   import Master._
@@ -57,7 +59,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
    * @note 该方法以制造异常方式强制检查Master
    */
   def buildSparkSession(conf: Conf, enableHive: Boolean = false) =
-    invokeNonEmpty(conf.get(SPARK_MASTER, $e)) { () =>
+    invokeNonEmpty(conf.get(SPARK_MASTER, $e)) { () => 
       val builder = org.apache.spark.sql.SparkSession.builder().config(conf)
       if (enableHive) builder.enableHiveSupport()
       builder.getOrCreate()
@@ -83,7 +85,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
    */
   def buildLocalSparkSession(enableHive: Boolean = false) = {
     // 调试启用临时目录
-    System.setProperty("hadoop.home.dir", s"${reflect.classpath}hadoop-common-2.2.0-bin-master")
+    System.setProperty("hadoop.home.dir", s"${p.reflect.classpath}hadoop-common-2.2.0-bin-master")
     buildSparkSession(buildLocalConf("spark-local", DEFAULT_SETTINGS), enableHive)
   }
       

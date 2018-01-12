@@ -1,3 +1,5 @@
+package com.sasaki.packages
+
 import scala.reflect.runtime.universe._
 
 /**
@@ -7,88 +9,51 @@ import scala.reflect.runtime.universe._
  * @Description 二方引入库
  */
 /**
- * 工具方法
+ * 工具
  */
 package object independent {
   
   import reflect._
+  import constant._
+  import constant.original._
   
-  val $e = ""        // empty
-  val $s = " "       // space
-  val $p = '.'       // point
-  val $n = null      // null
-  val $u = "_"       // underline
-
-  // --------------------------- Java Type -------------------------------
-  import java.{ lang => Java, util => JUtil }
- 
-  type JInt                = Java.Integer
-  type JLong               = Java.Long
-  type JDouble             = Java.Double
-  type JBoolean            = Java.Boolean
-  type JTimestamp          = java.sql.Timestamp
-  type JSimpleDateFormat   = java.text.SimpleDateFormat
-  type JDate               = JUtil.Date
-
-  //  Java Collection
-  type JIterable[T]        = Java.Iterable[T]
-  type JCollection[T]      = JUtil.Collection[T]
-  type JList[T]            = JUtil.List[T]
-  type JSet[T]             = JUtil.Set[T]
-	type JMap[P, V]          = JUtil.Map[P, V]
-  type JProperties         = JUtil.Properties
+  def isNull(o: A) = null == o
   
-  /** Mapping relations
-   *  
-   * scala.collection.Iterable 									<=> java.lang.Iterable
-   * scala.collection.Iterable 									<=> java.util.Collection
-   * scala.collection.Iterator 									<=> java.util.{ Iterator, Enumeration }
-   * scala.collection.mutable.Buffer  						<=> java.util.List
-   * scala.collection.mutable.Set 								<=> java.util.Set
-   * scala.collection.mutable.Map 								<=> java.util.{ Map, Dictionary }
-   * scala.collection.mutable.ConcurrentMap 			<=> java.util.concurrent.ConcurrentMap
-   * scala.collection.Seq  											 => java.util.List
-   * scala.collection.mutable.Seq 							 	 => java.util.List
-   * scala.collection.Set  											 => java.util.Set
-   * scala.collection.Map 											 	 => java.util.Map
-   * java.util.Properties 											 	 => scala.collection.mutable.Map[String, String]
-   * 
-   * Sample:
-   * val scalaList = scala.collection.JavaConversions.asScalaBuffer(javaList)
-   */
-  // --------------------------- Java Type -------------------------------
-  
-  def isNull(o: Any) = null == o
-  
-  def nonNull(o: Any) = !isNull(o)
+  def nonNull(o: A) = !isNull(o)
 
   def nonEmpty[T: TT](o: T) =
     nonNull(o) && (typeOf[T] match {
       case t if t =:= typeOf[String]    => o.asInstanceOf[String] nonEmpty
       case t if t <:< typeOf[Seq[_]]    => o.asInstanceOf[Seq[_]] nonEmpty
       case t if t <:< typeOf[Map[_, _]] => o.asInstanceOf[Map[_, _]] nonEmpty
-      case _                            => throw new IllegalArgumentException(s"$$independent$$nonEmpty$$ Unknowed type ${typeOf[T]}.")
+      case _                            => throw new IllegalArgumentException(s"$$independent$$nonEmpty$$ Unknown type ${typeOf[T]}.")
     })
     
   // ------------------------------------ Invoke Template --------------------------------------------
     
   def MUST_NOT_BE_NOTHING = "Type parameters must not be Nothing!"
-  def MUST_NOT_BE_NULL(s: AnyRef = "Argument") = s"$s must not be null!"
-  def MUST_NOT_BE_EMPTY(s: AnyRef = "Argument") = s"$s must not be empty!"
+  def MUST_NOT_BE_NULL(s: R = "Argument") = s"$s must not be null!"
+  def MUST_NOT_BE_EMPTY(s: R = "Argument") = s"$s must not be empty!"
   
   def invokeVerify[T](f_x: () => Boolean, slogan: String)(g_x: () => T) = {
     require(f_x(), slogan)
     g_x()
   }
 
-  @deprecated("该函数不提供泛型编译级别约束，慎用。")
-  def invokeNonNothing[E: reflect.TT, T/*Which return type of function*/](g_x: () => T) =
-    invokeVerify(() => !reflect.typeNothing[E], MUST_NOT_BE_NOTHING)(g_x)
-
-  def invokeNonNull[E: TT, T](args: E*)(g_x: () => T) =
+  @deprecated("该函数编译时非类型安全，慎用。")
+  def invokeNonNothing[E: TT, T/*Which return type of function*/](g_x: () => T) =
+    invokeVerify(() => !typeNothing[E], MUST_NOT_BE_NOTHING)(g_x)
+ 
+  /**
+   * 该函数对目标检验值仅提供一个泛型约束，所以多参数检验时，仅适用可变参数列表类型一致的情况。  
+   */
+  def invokeNonNull[E <: R: TT, T](args: E*)(g_x: () => T) =
     invokeVerify(() => args.forall(nonNull _), MUST_NOT_BE_NULL(args))(g_x)
-    
-  def invokeNonEmpty[E: TT, T](args: E*)(g_x: () => T) =
+   
+  /**
+   * @see Above.
+   */
+  def invokeNonEmpty[E <: R: TT, T](args: E*)(g_x: () => T) =
     invokeVerify(() => args.forall(nonEmpty _), MUST_NOT_BE_EMPTY(args))(g_x)
     
   // -------------------------------------------------------------------------------------------------
@@ -118,7 +83,7 @@ package object independent {
       loop(o, 0)
     }
   
-  def peek[T: reflect.TT](o: T): T = { println(o); o }
+  def peek[T: TT](o: T): T = { println(o); o }
   
   /**
    * 判断两个字符串等价，包含的每个字符数相等
@@ -166,7 +131,7 @@ package object independent {
    * 仅检验字符串是否满足JSON标准
    */
   def isJson(json: String) = scala.util.parsing.json.JSON.parseFull(json) match {
-    case Some(map: Map[_, Any]) => true
+    case Some(map: Map[_, A]) => true
     case _                      => println(s"Invalid json --> $json"); false
   }
 
@@ -211,19 +176,18 @@ package object independent {
  * 反射
  */
 package object reflect {
-
-  type SA = scala.annotation.StaticAnnotation
-  type CT[T] = scala.reflect.ClassTag[T]
-  type TT[T] = TypeTag[T]
+  
+  import constant._
+  import constant.original._
   
   /**
    * 示例：file:/H:/git-repo/_/working-helper/target/classes/
    */
-  def classpath = getClass.getClassLoader.getResource(independent.$e).toString
+  def classpath = getClass.getClassLoader.getResource($e).toString
   
   def clazz[T: TT]: ClassSymbol = symbolOf[T].asClass
 
-  def buildInstance[T: TT](args: Any*): T =
+  def buildInstance[T: TT](args: A*): T =
     runtimeMirror(getClass.getClassLoader)
       .reflectClass(clazz[T])
       .reflectConstructor(extractConstructor[T])
@@ -251,14 +215,14 @@ package object reflect {
 
   def extractSimpleName[T: TT](t: Class[T]): String = t.getSimpleName
   
-  def extractSimpleName[T: TT]: String = extractFullName[T].split(independent.$p).last
+  def extractSimpleName[T: TT]: String = extractFullName[T].split($p).last
 
   def extractFullName[T: TT](t: Class[T]): String = t.getName
   
   def extractFullName[T: TT]: String = typeOf[T].toString()
 
   def extractTypes[T: TT]: List[Type] =
-    extractSymbolList[T].head.map(_.typeSignature)
+    extractSymbolList[T].head.map(_ typeSignature)
 
   private def extractSymbolList[T: TT]: List[List[Symbol]] =
     symbolOf[T].asClass.primaryConstructor.typeSignature.paramLists
@@ -275,21 +239,21 @@ package object reflect {
   def extractField2Type[T: TT]: Seq[(String, Type)] =
     extractFieldNames[T] zip extractTypes[T]
 
-  def extractSingleFieldWhileAnnotation[T: TT, A <: SA: TT]: Option[String] =
+  def extractSingleFieldWhileAnnotation[T: TT, E <: SA: TT]: Option[String] =
     extractField2Annotations[T]
-      .find(_._2.exists(o => typeIs[A](o.tree.tpe)))
+      .find(_._2.exists(o => typeIs[E](o.tree.tpe)))
       .map(_._1)
 
-  def extractListFieldWhileAnnotation[T: TT, A <: SA: TT] = ???
+  def extractListFieldWhileAnnotation[T: TT, E <: SA: TT] = ???
 
-  def existsAnnotationFromType[T: TT, A <: SA: TT]: Boolean =
+  def existsAnnotationFromType[T: TT, E <: SA: TT]: Boolean =
     extractClassAnnotations[T]
-      .exists(o => typeIs[A](o.tree.tpe))
+      .exists(o => typeIs[E](o.tree.tpe))
 
-  def existsAnnotationFromField[T: TT, A <: SA: TT](f: String): Boolean = {
+  def existsAnnotationFromField[T: TT, E <: SA: TT](f: String): Boolean = {
     val opField___Annotations = extractField2Annotations[T].find(_._1 == f)
     opField___Annotations match {
-      case Some(_) => opField___Annotations.get._2.exists(o => typeIs[A](o.tree.tpe))
+      case Some(_) => opField___Annotations.get._2.exists(o => typeIs[E](o.tree.tpe))
       case None    => false
     }
   }
@@ -299,14 +263,13 @@ package object reflect {
  * 正则
  */
 package object regex {
-  import independent._
 
   protected lazy val buildMatcher = (s: String, regex: String) =>
     java.util.regex.Pattern.compile(regex).matcher(s)
 
   def extractMatched(s: String, regex: String): String = {
     val matcher = buildMatcher(s, regex)
-    if (matcher.find()) matcher.group(1) else independent.$e
+    if (matcher.find()) matcher.group(1) else constant.$e
   }
 
   def extractMatchedMultiple(s: String, regex: String): Seq[String] = {
@@ -322,7 +285,7 @@ package object regex {
     //    					
     //    		loop(0)
 
-    var i: JInt = 0
+    var i: constant.JInt = 0
     i.synchronized {
       while (matcher.find()) {
         list.append(matcher.group(i))
@@ -335,7 +298,7 @@ package object regex {
   /**
    * 判断一个字符串是否全为数字  
    */
-  def isDigit(s: String) = invokeNonNull(s)(() => s.matches("[0-9]{1,}"))
+  def isDigit(s: String) = independent.invokeNonNull(s)(() => s.matches("[0-9]{1,}"))
 
   /**
    * 提取数字  
@@ -346,5 +309,69 @@ package object regex {
    * 提取非数字  
    */
   def extractNonNumbers(s: String) = extractMatchedMultiple(s, "\\D+")
+}
+
+/**
+ * 常量
+ */
+package constant {
+  
+  object original {
+    
+    private[packages] type A     = Any
+    private[packages] type R     = AnyRef
+                      type SA    = scala.annotation.StaticAnnotation
+                      type CT[T] = scala.reflect.ClassTag[T]
+                      type TT[T] = TypeTag[T]
+  }
+}
+
+package object constant {
+  
+  val $e = ""        // empty
+  val $s = " "       // space
+  val $p = '.'       // point
+  val $n = null      // null
+  val $u = "_"       // underline
+
+  // --------------------------- Java Type -------------------------------
+  import java.{ lang => Java, util => JUtil }
+ 
+  type JInt                = Java.Integer
+  type JLong               = Java.Long
+  type JDouble             = Java.Double
+  type JBoolean            = Java.Boolean
+  type JTimestamp          = java.sql.Timestamp
+  type JSimpleDateFormat   = java.text.SimpleDateFormat
+  type JDate               = JUtil.Date
+
+  //  Java Collection
+  type JIterable[T]        = Java.Iterable[T]
+  type JCollection[T]      = JUtil.Collection[T]
+  type JList[T]            = JUtil.List[T]
+  type JSet[T]             = JUtil.Set[T]
+	type JMap[P, V]          = JUtil.Map[P, V]
+  type JProperties         = JUtil.Properties
+  
+  /** Mapping relations
+   *  
+   * scala.collection.Iterable 										<=> java.lang.Iterable
+   * scala.collection.Iterable 										<=> java.util.Collection
+   * scala.collection.Iterator 										<=> java.util.{ Iterator, Enumeration }
+   * scala.collection.mutable.Buffer  						<=> java.util.List
+   * scala.collection.mutable.Set 								<=> java.util.Set
+   * scala.collection.mutable.Map 								<=> java.util.{ Map, Dictionary }
+   * scala.collection.mutable.ConcurrentMap 			<=> java.util.concurrent.ConcurrentMap
+   * scala.collection.Seq  											 	 => java.util.List
+   * scala.collection.mutable.Seq 							 	 => java.util.List
+   * scala.collection.Set  											   => java.util.Set
+   * scala.collection.Map 											 	 => java.util.Map
+   * java.util.Properties 											 	 => scala.collection.mutable.Map[String, String]
+   * 
+   * Sample:
+   * val scalaList = scala.collection.JavaConversions.asScalaBuffer(javaList)
+   */
+  // --------------------------- Java Type -------------------------------
+
 }
 

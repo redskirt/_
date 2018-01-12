@@ -22,6 +22,5 @@ object PrimitiveSparkTemplate extends SparkHandler {
       spark.sparkContext.parallelize(arr) foreach println
     }
     
-    re
   }
 } 
