@@ -18,7 +18,7 @@ object SparkDataModelTransformingCase extends com.sasaki.spark.SparkHandler {
     invokeSessionHandler { () =>
       val dfJson = spark.read.json("src/main/resources/sample/people.json")
       dfJson.show()
-
+ 
     }
   }
 }

@@ -13,14 +13,24 @@ object PrimitiveSparkTemplate extends SparkHandler {
   
   import logger._
   
+  lazy val spark: Spark = buildLocalSparkSession(false)
+  
   def main(args: Array[String]): Unit = {
-    val spark: Spark = buildLocalSparkSession(false)
     info("> --------------------------------- Spark will start by local model. ---------------------------------------------")
-    
-    invokeSparkHandler(spark) { () =>
-      val arr = Seq(1 to 10)
-      spark.sparkContext.parallelize(arr) foreach println
+
+    /**
+     * Option 1
+     */
+    implicit val _spark_ = spark
+    invokeSessionHandler { () =>
+      spark.sparkContext.parallelize(Seq(1 to 10)) foreach println
     }
     
+    /**
+     * Option 2
+     */
+    invokeSparkHandler(spark) { () =>
+      spark.sparkContext.parallelize(Seq(1 to 10)) foreach println
+    }
   }
 } 

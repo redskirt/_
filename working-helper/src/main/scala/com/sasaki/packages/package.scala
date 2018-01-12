@@ -183,7 +183,8 @@ package object reflect {
   /**
    * 示例：file:/H:/git-repo/_/working-helper/target/classes/
    */
-  def classpath = getClass.getClassLoader.getResource($e).toString
+  def classpath = 
+    independent.erase(getClass.getClassLoader.getResource($e).toString, "file:/")
   
   def clazz[T: TT]: ClassSymbol = symbolOf[T].asClass
 

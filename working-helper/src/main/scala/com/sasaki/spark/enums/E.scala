@@ -8,17 +8,19 @@ package com.sasaki.spark.enums
  */
 object SparkType {
   
-  import org.apache.spark.sql.{ SparkSession, DataFrame, Dataset}
+  import org.apache.spark._
+  import sql.{ SparkSession, DataFrame, Dataset}
   
+  type Conf           = SparkConf
   type Spark          = SparkSession
-  type SC             = org.apache.spark.SparkContext
-  type RDD[T]         = org.apache.spark.rdd.RDD[T]
+  type SC             = SparkContext
+  type RDD[T]         = rdd.RDD[T]
   type DF             = DataFrame
   type DS[T]          = Dataset[T]
-  type Row            = org.apache.spark.sql.Row
+  type Row            = sql.Row
   
-  type Streaming      = org.apache.spark.streaming.StreamingContext
-  type Duration       = org.apache.spark.streaming.Duration
+  type Streaming      = streaming.StreamingContext
+  type Duration       = streaming.Duration
 }
 
 object LaunchMode extends Enumeration {

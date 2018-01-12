@@ -18,7 +18,6 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
   import com.sasaki.spark.enums.SparkType._
   import Master._
 
-  private type Conf = org.apache.spark.SparkConf
   private val SPARK_MASTER = "spark.master"
   
   protected val DEFAULT_SETTINGS = Map(

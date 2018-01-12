@@ -18,6 +18,8 @@ object StandardSparkTemplate extends SparkHandler {
   val conf = buildConfWithoutMaster(DEFAULT_SETTINGS)
 
   lazy val spark = buildAutomaticOnYarnSparkSession(conf, _mode_, false)
+  
+  @deprecated("Spark-1.* Version.")
   lazy val sc = spark.sparkContext
 
   import logger._
