@@ -1,6 +1,6 @@
 package com.sasaki
 
-import independent._
+import com.sasaki.packages.independent._
 
 object T {
   def main(args: Array[String]): Unit = {

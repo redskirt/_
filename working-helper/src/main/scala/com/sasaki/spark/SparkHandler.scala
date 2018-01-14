@@ -20,6 +20,8 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
 
   private val SPARK_MASTER = "spark.master"
   
+  protected[spark] type Mode = LaunchMode.Value
+  
   protected val DEFAULT_SETTINGS = Map(
     ("spark.serializer"           -> "org.apache.spark.serializer.KryoSerializer"),
     ("spark.executor.memory"      -> "2G"),
@@ -67,7 +69,7 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
   /**
    * @see def buildSparkSession(conf: SparkConf, enableHive: Boolean): SparkSession
    */
-  def buildAutomaticOnYarnSparkSession(conf: Conf, mode: LaunchMode.Value, enableHive: Boolean = false) =
+  def buildAutomaticOnYarnSparkSession(conf: Conf, mode: Mode, enableHive: Boolean = false) =
     buildSparkSession({
       if (LaunchMode.isDevelop(mode))
         conf.setMaster(Master.LOCAL_*.toString)
@@ -95,6 +97,11 @@ trait SparkHandler extends ReflectHandler with LazyLogging {
      
   def invokeSessionHandler(f_x: () => Unit)(implicit spark: Spark) = 
     try f_x() finally spark.stop
+
+  def invokeMultipleSessionHandler(f_x: () => Unit)(implicit spark: Spark, mode: Mode) =
+    try {
+      f_x()
+    } finally spark.stop
     
   @deprecated("兼容 Spark-1.* 版本。")
   def invokeContextHandler(f_x: () => Unit)(implicit sc: SC) = 
