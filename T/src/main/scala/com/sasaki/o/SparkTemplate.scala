@@ -1,6 +1,6 @@
 package com.sasaki.o
 
-import independent._
+import com.sasaki.packages.independent._
 import com.sasaki.spark.SparkHandler
 
 /**
@@ -9,17 +9,10 @@ import com.sasaki.spark.SparkHandler
  * @Timestamp 2017-08*28 下午2:59:24
  * @Description
  */
-class SparkTemplate {
-
-}
-
-object SparkTemplate extends Object with SparkHandler {
-  val conf = buildConf(getSimpleName(this), List(("_key_" -> "_value_")))
+object SparkTemplate extends SparkHandler {
 
   def main(args: Array[String]): Unit = {
-    implicit val spark = buildSparkSession(conf, false)
-
-    invokeSessionHandler { () => ??? }
+    val spark = buildLocalSparkSession(false)
 
     val logs = List(
       Aggregator(Seq(1, 1, 3, 4)),

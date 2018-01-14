@@ -5,7 +5,7 @@ import com.sasaki.spark.SparkHandler
 
 /**
  * @Author Sasaki
- * @Mail wei.liu@suanhua.org
+ * @Mail redskirt@outlook.com
  * @Timestamp 2018-01-08 下午5:07:47
  * @Description 产生Spark实例，仅本地任务使用
  */

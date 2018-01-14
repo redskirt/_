@@ -1,7 +1,9 @@
 package com.sasaki.math.number
 
-import independent._
-import regex._
+import com.sasaki.packages.independent._
+import com.sasaki.packages.regex._
+import com.sasaki.packages.constant._
+
 import Symbol._
 import com.sasaki.math.number.{ CharNumber => CN}
 import com.sasaki.math.number.{ UnitNumber => UN, UnitOperator => UO }
@@ -37,7 +39,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    *  3a2b -> 6
    */
    def coefficient =
-    invokeWithRequire(() => isOperator, "Operator will not extrace coefficient.") { () => 
+    invokeVerify(() => isOperator, "Operator will not extrace coefficient.") { () => 
       exUnitCoefficient($v)
     }
   
@@ -45,7 +47,7 @@ class CharNumber(val $v: String) extends AbstractNumber[CharNumber] {
    * 3a2b2b -> ab
    */
    def item =
-    invokeWithRequire(() => isOperator, "Operator will not extrace item.") { () => 
+    invokeVerify(() => isOperator, "Operator will not extrace item.") { () => 
       exUnitItem($v)
     }
     
