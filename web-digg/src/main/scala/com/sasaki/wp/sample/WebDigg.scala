@@ -1,18 +1,13 @@
 package com.sasaki.wp.sample
 
+
+
 import org.apache.http.Consts
 import org.apache.http.HttpResponse
-import org.apache.http.HttpStatus
 import org.apache.http.client.CookieStore
-import org.apache.http.client.config.CookieSpecs
-import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.protocol.HttpClientContext
-import org.apache.http.config.Registry
-import org.apache.http.config.RegistryBuilder
-import org.apache.http.cookie.CookieSpecProvider
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.BasicCookieStore
@@ -20,9 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.cookie.BasicClientCookie
 import org.apache.http.impl.cookie.BasicClientCookie2
-import org.apache.http.impl.cookie.DefaultCookieSpecProvider
 import org.apache.http.message.BasicNameValuePair
-import org.apache.http.protocol.HttpContext
 import org.json4s.DefaultFormats
 import org.json4s.JsonMethods
 import org.json4s.jackson.JsonMethods
@@ -31,10 +24,9 @@ import org.json4s.jvalue2monadic
 import org.json4s.string2JsonInput
 
 import com.sasaki.wp.enums.E.&
-import com.sasaki.wp.persistence.Metadata
 import com.sasaki.wp.persistence.QueryHelper
+import com.sasaki.wp.persistence.poso.Metadata
 import com.sasaki.wp.util.Util
-import scala.util.Try
 
 
 /**
@@ -47,7 +39,7 @@ class WebDigg {
 
 }
 
-object WebDigg {
+object WebDigg extends QueryHelper {
   import com.sasaki.wp.enums.E._
   
   implicit val formats = DefaultFormats
@@ -111,7 +103,7 @@ sso_login_status=1; toutiao_sso_user=da7d4c3fa2702da32e5fc33548ac1716; Domain=ss
 //    println(doDiggService(paramDiggStr, cookieStr))
     
     // 执行所有用户点赞
-    val cookies = QueryHelper.listMetadata.map(_.cookie)
+    val cookies = listMetadata.map(_.cookie)
     cookies.foreach { __ =>
       val client = HttpClients.createDefault()
       println("userInfo --> " + doUserInfoService(client, __))
@@ -200,7 +192,7 @@ sso_login_status=1; toutiao_sso_user=da7d4c3fa2702da32e5fc33548ac1716; Domain=ss
    */
   @deprecated
   def doLoadContextService(account: String, _type: String) {
-    val cookieStr = QueryHelper.queryCookie(account, _type)
+    val cookieStr = queryCookie(account, _type)
     val store = parseCookie(cookieStr)
 //    context.setCookieStore(store)
   }
@@ -268,7 +260,7 @@ sso_login_status=1; toutiao_sso_user=da7d4c3fa2702da32e5fc33548ac1716; Domain=ss
           // CookieStr 插入数据库
           println("responseStr --> " + response)
           val metadata = Metadata(account, cookieStr).setType(init)
-          QueryHelper.saveMetadata(metadata)
+          saveMetadata(metadata)
 
           println(s"login success. account: $account --> 执行登陆成功，Cookie设置成功。")
           client.close()
@@ -487,7 +479,7 @@ sso_login_status=1; toutiao_sso_user=da7d4c3fa2702da32e5fc33548ac1716; Domain=ss
    * 解析出登陆返回Cookie字符串，用于存数据库持久使用
    */
   def parseCookie(response: HttpResponse): String = {
-    val builder = new StringBuilder
+    val builder = new StringBuffer
     response.getAllHeaders.foreach { o => if (o.getName.equalsIgnoreCase(SET_COOKIE)) builder.append(o.getValue) }
     builder.toString()
   }

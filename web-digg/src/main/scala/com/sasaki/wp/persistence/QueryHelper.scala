@@ -6,13 +6,13 @@ import org.squeryl.Schema
 import org.squeryl.Session
 import org.squeryl.SessionFactory
 import org.squeryl.adapters.MySQLAdapter
-import org.squeryl.annotations.Column
 import org.squeryl.PrimitiveTypeMode._
 
 import com.sasaki.wp.util.Util
 import java.sql.Timestamp
+import com.sasaki.wp.persistence.poso._
 
-object QueryHelper {
+trait QueryHelper {
 
   def getSession(): Option[() => Session] = {
     import org.squeryl.SessionFactory
@@ -34,7 +34,7 @@ object QueryHelper {
    * 查询接口
    */
   import com.sasaki.wp.persistence.WebDiggSchema._
-  implicit val sf = new SessionFactory { def newSession: Session = QueryHelper.getSession().get() }
+  implicit val sf = new SessionFactory { def newSession: Session = getSession().get() }
 
   /**
    * 保存新元数据，带Cookie信息
@@ -60,7 +60,15 @@ object QueryHelper {
   
   def listAccount = inTransaction(sf)(from(t_account)(select(_)).toList)
   def listMetadata = inTransaction(sf)(from(t_metadata)(select(_)).toList)
-
+  
+  
+  // --------------------------------------  以上是WebDigg项目的查询接口，以下为VirtualSH  -------------------------------
+  
+  import com.sasaki.wp.persistence.VshSchema._
+  
+  def saveSource(source: Source) = inTransaction(sf) {
+    vsh_source.insert(source);
+  }
 }
 
 object WebDiggSchema extends Schema {
@@ -68,48 +76,34 @@ object WebDiggSchema extends Schema {
   val t_metadata = table[Metadata]("t_metadata")
 }
 
-class Base {
-  @Column("id")
-  var id: Long = _
+object VshSchema extends Schema {
+  val vsh_source = table[Source]("vsh_source")
 }
 
-case class Account(val account: String, val password: String) extends Base {
-  var status: String = _
-}
+object Sample extends QueryHelper with App {
+//  import com.sasaki.wp.persistence.WebDiggSchema._
+  import com.sasaki.wp.persistence.VshSchema._
 
-case class Metadata(val account: String, val cookie: String) extends Base {
-  @Column("type")
-  var _type: String = _
-  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
-  
-  def setType(_type: String): Metadata = { this._type = _type; this }
-}
+  override val sf = new SessionFactory { def newSession: Session = getSession().get() }
 
-object Sample extends App {
-  import com.sasaki.wp.persistence.WebDiggSchema._
+  //  val accounts: List[Account] = scala.io.Source.fromFile("""H:\_\a.scala""")
+  //    .getLines()
+  //    .map { __ =>
+  //      val account = new Account(__.split(':')(0), __.split(':')(1))
+  //      account.status_=("0")
+  //      account
+  //    } // foreach println
+  //    .toList
 
-  val sf = new SessionFactory { def newSession: Session = QueryHelper.getSession().get() }
+  //  inTransaction(sf) {
+  //    t_account.insert(accounts);
+  //  }
 
-  import scala.io.Source
+  //    QueryHelper.saveMetadata(Metadata("t", "t").setType("type"))
+  //    println(QueryHelper.queryCookie("t", "type"))
+  //    QueryHelper.updateCookie(Metadata("t", "sssss").setType("typew"))
+  //    QueryHelper.listMetadata.foreach(println)
+  //    listAccount.foreach(println)
 
-//  val accounts: List[Account] = Source.fromFile("""H:\_\a.scala""")
-//    .getLines()
-//    .map { __ =>
-//      val account = new Account(__.split(':')(0), __.split(':')(1))
-//      account.status_=("0")
-//      account
-//    } // foreach println
-//    .toList
-
-//  inTransaction(sf) {
-//    t_account.insert(accounts);
-//  }
-    
-//    QueryHelper.saveMetadata(Metadata("t", "t").setType("type"))
-//    println(QueryHelper.queryCookie("t", "type"))
-//    QueryHelper.updateCookie(Metadata("t", "sssss").setType("typew"))
-//    QueryHelper.listMetadata.foreach(println)
-    QueryHelper.listAccount.foreach(println)
-    
 }
 

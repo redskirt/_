@@ -23,9 +23,5 @@ trait DBFactory {
       })
     } else None
   }
-  
-  def main(args: Array[String]): Unit = {
-    
-  }
 
 }
