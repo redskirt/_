@@ -69,6 +69,14 @@ trait QueryHelper {
   def saveSource(source: Source) = inTransaction(sf) {
     vsh_source.insert(source);
   }
+  
+  def listPageId = inTransaction(sf)(from(vsh_source)(o => select(o.pageId)).toList)
+  
+  def updateContent(source: Source) = inTransaction(sf) {
+    update(vsh_source)(o =>
+      where(source.pageId === o.pageId)
+        set (o.content := source.content))
+  }
 }
 
 object WebDiggSchema extends Schema {
@@ -105,5 +113,7 @@ object Sample extends QueryHelper with App {
   //    QueryHelper.listMetadata.foreach(println)
   //    listAccount.foreach(println)
 
+//  listPageId.take(10).foreach(println)
+  updateContent(Source(1, "1ssserwe", "234"))
 }
 
