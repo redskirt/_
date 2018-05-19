@@ -15,33 +15,53 @@ import java.util.concurrent.Executors
  * @Description
  */
 
-object VirtualShanghaiWebDigg {
+object VirtualShanghaiWebDigg extends QueryHelper {
 
   val threadPool = Executors.newFixedThreadPool(1)
 
   def main(args: Array[String]): Unit = {
     try {
-      // DOTO 13200 ~ 30000
+      /**
+       * 图片抓取
+       */
 //      for (i <- 23326 to 30000) 
 //        threadPool.execute(new ImageFetchProcess(i))
-      threadPool.execute(new ContentFetchProcess())
+      
+      /**
+       * 页面抓取
+       */
+      /**
+       * 0 1 2 3 4 5 6 7
+       * 1 2 3 4 5 7 6 8
+       */
+      val pageIds = listPageId
+      for (i <- 6 to 100)
+        threadPool.execute(new ContentFetchProcess(pageIds(i)))
     } finally 
       threadPool.shutdown() 
   }
 }
 
-class ContentFetchProcess() extends Runnable with QueryHelper {
+class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
   import ProcessUtil._
-  
+  import com.sasaki.wp.persistence.poso._
+
   override def run() {
-    val get = new HttpGet(urlContent)
+    val get = new HttpGet(urlContent(pageId))
     val response: HttpResponse = client.execute(get)
     
     try {
       val pageHtml = parseResponse(response)
-      println(pageHtml)
+//      println(pageHtml)
+      updateContent(Source(pageId, pageHtml, ""))    
+        println(
+          s"""
+  Done!
+  Request: ${urlContent(pageId)}
+  Thread name: ${Thread.currentThread().getName}, process id: $pageId
+""")      
     } catch {
-      case t: Throwable => t.printStackTrace() // TODO: handle error
+      case t: Throwable => t.printStackTrace()
     } finally {
       if(null != get)
         get.releaseConnection()
@@ -128,7 +148,7 @@ object ProcessUtil {
   val client = HttpClients.createDefault()
 
   val basePath = "http://www.virtualshanghai.net/"
-  val urlContent = "http://www.virtualshanghai.net/Photos/Images?ID=1"
+  val urlContent = (id: Long) => s"http://www.virtualshanghai.net/Photos/Images?ID=$id"
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-1.jpeg"
   val urlImage = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"

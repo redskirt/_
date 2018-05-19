@@ -70,12 +70,12 @@ trait QueryHelper {
     vsh_source.insert(source);
   }
   
-  def listPageId = inTransaction(sf)(from(vsh_source)(o => select(o.pageId)).toList)
+  def listPageId = inTransaction(sf)(from(vsh_source)(o => select(o.pageId)).toArray)
   
   def updateContent(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
       where(source.pageId === o.pageId)
-        set (o.content := source.content))
+        set (o.content := source.content, o.base64Image := source.base64Image))
   }
 }
 
@@ -113,7 +113,7 @@ object Sample extends QueryHelper with App {
   //    QueryHelper.listMetadata.foreach(println)
   //    listAccount.foreach(println)
 
-//  listPageId.take(10).foreach(println)
-  updateContent(Source(1, "1ssserwe", "234"))
+  listPageId.take(10).foreach(println)
+//  updateContent(Source(2, "1111", "11112要遥是3234"))
 }
 

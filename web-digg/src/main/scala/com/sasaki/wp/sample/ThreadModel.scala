@@ -15,7 +15,6 @@ object ThreadModel {
     val threadPool: ExecutorService = Executors.newFixedThreadPool(5)
     try {
       for (i <- 1 to 500) {
-        
         threadPool.execute(new Process(i))
       }
     } finally {

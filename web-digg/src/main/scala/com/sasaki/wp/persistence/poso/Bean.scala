@@ -31,10 +31,10 @@ case class Metadata(val account: String, val cookie: String) extends Bean {
 
 case class Source(
   @Column("page_id")
-  val pageId:                               Long,
-  val content:                             String,
-  @Column("base64_image") 
-  val base64Image: String) extends Bean {
+  val pageId:                                Long,
+  val content:                               String,
+  @Column("base64_image")   
+  val base64Image:                           String) extends Bean {
   @Column("image_name")
   var imageName: String = _
   var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
