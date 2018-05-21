@@ -72,11 +72,15 @@ trait QueryHelper {
   
   def listPageId = inTransaction(sf)(from(vsh_source)(o => select(o.pageId)).toArray)
   
+  def listContent = inTransaction(sf)(from(vsh_source)(o => select(o.pageId, o.content)).toArray)
+  
   def updateContent(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
       where(source.pageId === o.pageId)
         set (o.content := source.content, o.base64Image := source.base64Image))
   }
+  
+  def saveShView(shView: ShView) = inTransaction(sf)(vsh_sh_view.insert(shView))
 }
 
 object WebDiggSchema extends Schema {
@@ -86,6 +90,7 @@ object WebDiggSchema extends Schema {
 
 object VshSchema extends Schema {
   val vsh_source = table[Source]("vsh_source")
+  val vsh_sh_view = table[ShView]("vsh_sh_view")
 }
 
 object Sample extends QueryHelper with App {

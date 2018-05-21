@@ -25,7 +25,7 @@ object Util {
   def nonNull(o: Any) = null != o
 
   def getMatched(str: String, regex: String): String = {
-    val pattern = Pattern.compile(regex)
+    val pattern = Pattern.compile(regex, Pattern.DOTALL)
     val matcher = pattern.matcher(str)
     
     if (matcher.find())
