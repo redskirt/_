@@ -5,9 +5,9 @@ import org.apache.http.client.methods.HttpGet
 import org.jsoup.Jsoup
 
 import com.sasaki.wp.persistence.QueryHelper
-import scala.util.control.Breaks
 import com.sasaki.wp.util.NetStreamIOHandler
 import java.net.URL
+import java.io.File
 
 /**
  * @Author Sasaki
@@ -18,6 +18,8 @@ import java.net.URL
 
 object VirtualShanghaiWebDigg extends QueryHelper {
 //  val threadPool = Executors.newFixedThreadPool(1)
+  
+  import ProcessUtil._
   
   def main(args: Array[String]): Unit = {
     /**
@@ -48,22 +50,34 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * => 常规任务
      */
-    import ProcessUtil._
 
     /**
      * 页面清洗
      */
     //      source2ViewProcess
 
-    /**
-     * 指定单个微信页面，抓取当前页面所有图片
-     */
-    val urls = fetchImageUrl("https://mp.weixin.qq.com/s/xXkoCjVp8gg4dr5NjkkA_w")
-        for(i <- 0 until urls.size)  {
-          println("url: " + i + ", " + urls(i))
-          NetStreamIOHandler(urls(i), s"/Users/sasaki/KJ/wx/1/$i.jpeg").download
-        }
+    val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
+    
   }  
+  
+  
+  
+  /**
+   * 指定单个微信页面，抓取当前页面所有图片
+   */
+  def downloadFileFromPageProcess(url: String) = {
+    val result = fetchImageUrlFromPage(url)
+    val title = result._1
+    val urls = result._2
+    val dir = s"/Users/sasaki/KJ/wx/$title"
+    val file = new File(dir)
+    if(!file.exists())
+      file.mkdir()
+    for(i <- 0 until urls.size)  {
+      println("url: " + i + ", " + urls(i))
+      NetStreamIOHandler(urls(i), s"$dir/$i.jpeg").download
+    }
+  }
 
   def source2ViewProcess = {
     val contents = listContent
@@ -210,17 +224,32 @@ object ProcessUtil {
     builder.toString()
   }
 
-  def fetchImageUrl(url: String) = {
+  /**
+   * 抓取当前页面图片地址
+   * 仅适用微信公众号页面
+   */
+  def fetchImageUrlFromPage(url: String) = {
     val get = new HttpGet(url)
     try {
       val document = Jsoup.parse(new URL(url), 10000)
       val imgs = document.select("img[data-src]")
       val response: HttpResponse = ProcessUtil.client.execute(get)
-      for (i <- 0 until imgs.size()) yield imgs.get(i).attr("data-src")
+      val urls = for (i <- 0 until imgs.size()) yield imgs.get(i).attr("data-src")
+      val line = document.html().lines.filter(_.contains("msg_title")).toArray.head
+      val title = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""))
+      (title, urls)
     } finally {
       if (null != get)
         get.releaseConnection()
     }
+  }
+  
+  /**
+   * 抓取当前页面列表地址
+   * 仅适用微信公众号页面
+   */
+  def fetchPageUrlFromListPage() = {
+    
   }
 }
 
