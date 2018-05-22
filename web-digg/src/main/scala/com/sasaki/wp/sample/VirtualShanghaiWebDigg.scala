@@ -1,14 +1,13 @@
 package com.sasaki.wp.sample
 
-import java.io._
-import java.net.URL
-
 import org.apache.http.HttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.jsoup.Jsoup
 
 import com.sasaki.wp.persistence.QueryHelper
 import scala.util.control.Breaks
+import com.sasaki.wp.util.NetStreamIOHandler
+import java.net.URL
 
 /**
  * @Author Sasaki
@@ -16,42 +15,6 @@ import scala.util.control.Breaks
  * @Timestamp May 13, 2018 10:30:32 PM
  * @Description
  */
-
-
-class VirtualShanghaiWebDigg {
-  private var inputStream: InputStream = null
-  private var byteArrayOutputStream: ByteArrayOutputStream = null
-  private var bufferedInputStream: BufferedInputStream = null
-
-  import ProcessUtil._
-
-  def downloadImage(url: String, pathWithFileName: String) = {
-    var inputStream: InputStream = null
-    var byteArrayOutputStream: ByteArrayOutputStream = null
-    var bufferedInputStream: BufferedInputStream = null
-    val get = new HttpGet(url)
-
-    try {
-      val response: HttpResponse = client.execute(get)
-      inputStream = response.getEntity.getContent
-      val streamLength = response.getEntity.getContentLength.toInt
-      
-      byteArrayOutputStream = new ByteArrayOutputStream()
-
-      val outputStream = new BufferedOutputStream(new FileOutputStream(pathWithFileName.substring(22, pathWithFileName.length())))
-      buildStream2LocalFile(inputStream, byteArrayOutputStream, streamLength, pathWithFileName)
-    } finally {
-      if (null != get)
-        get.releaseConnection()
-      if (null != inputStream)
-        inputStream.close()
-      if (null != byteArrayOutputStream)
-        byteArrayOutputStream.close()
-      if (null != bufferedInputStream)
-        bufferedInputStream.close()
-    }
-  }
-}
 
 object VirtualShanghaiWebDigg extends QueryHelper {
 //  val threadPool = Executors.newFixedThreadPool(1)
@@ -95,12 +58,11 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * 指定单个微信页面，抓取当前页面所有图片
      */
-    val urls = fetchImageUrl("https://mp.weixin.qq.com/s/9Cqj7asWPrP1tXj7L6juFQ")
+    val urls = fetchImageUrl("https://mp.weixin.qq.com/s/xXkoCjVp8gg4dr5NjkkA_w")
         for(i <- 0 until urls.size)  {
           println("url: " + i + ", " + urls(i))
-          	new VirtualShanghaiWebDigg().downloadImage(urls(i), s"/Users/sasaki/KJ/wx/2/$i.jpeg")
+          NetStreamIOHandler(urls(i), s"/Users/sasaki/KJ/wx/1/$i.jpeg").download
         }
-
   }  
 
   def source2ViewProcess = {
@@ -199,19 +161,9 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
 
   import ProcessUtil._
 
-  var inputStream: InputStream = null
-  var byteArrayOutputStream: ByteArrayOutputStream = null
-  var bufferedInputStream: BufferedInputStream = null
-
   override def run() {
-    val get = new HttpGet(urlImage(id))
-    val response = client.execute(get)
     try {
-      inputStream = response.getEntity.getContent
-      bufferedInputStream = new BufferedInputStream(inputStream)
-      byteArrayOutputStream = new ByteArrayOutputStream()
-
-//      buildStream2LocalFile(inputStream, bufferedInputStream, byteArrayOutputStream, fileName(id))
+      NetStreamIOHandler(urlImage(id), fileName(id)).download
 
       // 仅创建带page_id记录，与照片名page_id一致
       val source = com.sasaki.wp.persistence.poso.Source(id, "", "")
@@ -228,13 +180,6 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
       case t: Throwable => println(s"process error occur $id.\n" + t.printStackTrace())
     } finally {
       println(s"process $id get finally.\n ----------------------------------------------------")
-      get.releaseConnection()
-      if (null != inputStream)
-        inputStream.close()
-      if (null != byteArrayOutputStream)
-        byteArrayOutputStream.close()
-      if (null != bufferedInputStream)
-        bufferedInputStream.close()
     }
   }
 }
@@ -265,41 +210,6 @@ object ProcessUtil {
     builder.toString()
   }
 
-  def buildStream2LocalFile(
-    inputStream:           InputStream,
-    byteArrayOutputStream: ByteArrayOutputStream,
-    streamLength:       Int,
-    pathWithFileName:              String) = {
-
-    val bufferedInputStream = new BufferedInputStream(inputStream, streamLength)
-
-    var outputStream: OutputStream = null
-    val bytes = new Array[Byte](streamLength)
-    try {
-      var receivedCount = -1
-      while ({
-        receivedCount = inputStream.read(bytes, 0, streamLength)
-        receivedCount != -1
-      }) {
-        byteArrayOutputStream.write(bytes, 0, receivedCount)
-      }
-      val bytesOut = byteArrayOutputStream.toByteArray()
-
-      if (bytesOut.size > 0) {
-        outputStream = new BufferedOutputStream(new FileOutputStream(pathWithFileName))
-        outputStream.write(bytesOut, 0, bytesOut.length)
-        outputStream.flush()
-        println(s"Generated file $pathWithFileName.\n>----------------------------------------------------")
-      } else {
-        println("error .......")
-      }
-
-    } finally {
-      if (null != outputStream)
-        outputStream.close()
-    }
-  }
-  
   def fetchImageUrl(url: String) = {
     val get = new HttpGet(url)
     try {
