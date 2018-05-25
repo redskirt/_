@@ -56,8 +56,8 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      */
     //      source2ViewProcess
 
-    val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
-    
+//    val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
+    downloadFileFromPageProcess("https://mp.weixin.qq.com/s/TNGlUoE_SzIeWX70mC7zRA")
   }  
   
   
@@ -204,8 +204,9 @@ object ProcessUtil {
   val urlContent = (id: Long) => s"http://www.virtualshanghai.net/Photos/Images?ID=$id"
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-1.jpeg"
-  val urlImage = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
-  //  val url = "http://img6.3lian.com/c23/desk4/05/77/d/01.jpg"
+  
+//  val urlImage = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
+  val urlImage = (id: Long) => s"http://beijing.virtualcities.fr/Photos/Images?ID=${imageName(id)}"
   //  val url = "http://www.virtualshanghai.net/Asset/Preview/dbImage_ID-5_No-1.jpeg"
   val fileName = (id: Long) => s"/Users/sasaki/vsh/sh/${imageName(id)}"
 
@@ -244,13 +245,6 @@ object ProcessUtil {
     }
   }
   
-  /**
-   * 抓取当前页面列表地址
-   * 仅适用微信公众号页面
-   */
-  def fetchPageUrlFromListPage() = {
-    
-  }
 }
 
 
