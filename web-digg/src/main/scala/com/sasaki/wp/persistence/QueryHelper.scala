@@ -91,6 +91,7 @@ object WebDiggSchema extends Schema {
 object VshSchema extends Schema {
   val vsh_source = table[Source]("vsh_source")
   val vsh_sh_view = table[ShView]("vsh_sh_view")
+  val vsh_bj_view = table[BjView]("vsh_bj_view")
 }
 
 object Sample extends QueryHelper with App {

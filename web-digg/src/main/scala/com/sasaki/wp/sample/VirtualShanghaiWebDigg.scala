@@ -8,6 +8,7 @@ import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.util.NetStreamIOHandler
 import java.net.URL
 import java.io.File
+import com.sasaki.wp.persistence.poso.Source
 
 /**
  * @Author Sasaki
@@ -57,10 +58,36 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     //      source2ViewProcess
 
 //    val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
-    downloadFileFromPageProcess("https://mp.weixin.qq.com/s/TNGlUoE_SzIeWX70mC7zRA")
+//    downloadFileFromPageProcess("https://mp.weixin.qq.com/s/TNGlUoE_SzIeWX70mC7zRA")
+    
+    /**
+     * 获取列表页面所有Image Id
+     */
+    for(i <- 1 to 2)
+      saveListPageSource(i, "sz")
   }  
   
-  
+  def saveListPageSource(page: Int, `type`: String) = {
+    val document = Jsoup.parse(new URL(urlLisSz(page)), 30000)
+    val table = document.getElementsContainingText("Estimated date")
+    val trs = table.select("tr")
+    println("page: " + page + ", size: " + trs.size()) // 204
+
+    if(trs.size() > 2)
+    {
+      for (i <- 1 until trs.size()) yield {
+        val td = trs.get(i).select("td")
+        if (!td.isEmpty() && null != td && td.size() > 1) {
+          val id = td.get(1).text()
+          if ("" != id) id.toLong else 0
+        } else
+          0
+      }
+    } filter(_ != 0) foreach { o => 
+      saveSource(Source(o, "", `type`))
+      println(s"saved: $o")
+    }
+  }
   
   /**
    * 指定单个微信页面，抓取当前页面所有图片
@@ -154,7 +181,7 @@ class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
 
     try {
       val pageHtml = parseResponse(response)
-      updateContent(Source(pageId, pageHtml, ""))
+//      updateContent(Source(pageId, pageHtml, "bj")) 
       println(
         s"""
   Done!
@@ -177,7 +204,7 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
 
   override def run() {
     try {
-      NetStreamIOHandler(urlImage(id), fileName(id)).download
+      NetStreamIOHandler(urlImageSh(id), fileName(id)).download
 
       // 仅创建带page_id记录，与照片名page_id一致
       val source = com.sasaki.wp.persistence.poso.Source(id, "", "")
@@ -187,7 +214,7 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
       println(
         s"""
   Done!
-  Request: ${urlImage(id)}
+  Request: ${urlImageSh(id)}
   Thread name: ${Thread.currentThread().getName}, process id: $id
 """)
     } catch {
@@ -204,11 +231,15 @@ object ProcessUtil {
   val urlContent = (id: Long) => s"http://www.virtualshanghai.net/Photos/Images?ID=$id"
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-1.jpeg"
-  
-//  val urlImage = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
-  val urlImage = (id: Long) => s"http://beijing.virtualcities.fr/Photos/Images?ID=${imageName(id)}"
-  //  val url = "http://www.virtualshanghai.net/Asset/Preview/dbImage_ID-5_No-1.jpeg"
   val fileName = (id: Long) => s"/Users/sasaki/vsh/sh/${imageName(id)}"
+  
+  val urlImageSh = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
+  val urlImageBj = (id: Long) => s"http://beijing.virtualcities.fr/Photos/Images?ID=${imageName(id)}"
+  
+  // 列表页面
+  val urlLisBj = (page: Int) => s"http://beijing.virtualcities.fr/Photos/Images?pn=$page&rp=100"
+  val urlLisHk = (page: Int) => s"http://hankou.virtualcities.fr/Photos/Images?pn=$page&rp=100"
+  val urlLisSz = (page: Int) => s"http://suzhou.virtualcities.fr/Photos/Images?pn=$page&rp=100"
 
   /**
    * 解析Response，即Content
