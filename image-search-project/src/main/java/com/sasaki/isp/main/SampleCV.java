@@ -1,4 +1,4 @@
-package org.sasaki.isp.main;
+package com.sasaki.isp.main;
 
 import java.util.ArrayList;
 import java.util.List;

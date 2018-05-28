@@ -75,5 +75,59 @@ object NetStreamIOHandler {
     }
   }
   
+  def parseBase64Code2File(base64: String, pathWithName: String) = 
+    new FileOutputStream(pathWithName).write(parseBase64Code(base64))
+  
+  def parseBase64Code(base64: String): Array[Byte] = 
+    new sun.misc.BASE64Decoder().decodeBuffer(base64)
+  
+  def compileBase64Code(file: File): String = compileBase64Code(new FileInputStream(file))
+  
+  def compileBase64Code(stream: InputStream): String = {
+    val length = stream.available()
+    val byteArrayOutputStream = new ByteArrayOutputStream()
+    val bytes = new Array[Byte](length)
+    var receivedCount = -1
+      while ({
+        receivedCount = stream.read(bytes, 0, length)
+        receivedCount != -1
+      }) {
+        byteArrayOutputStream.write(bytes, 0, receivedCount)
+      }
+      val bytesOut = byteArrayOutputStream.toByteArray()
+      new sun.misc.BASE64Encoder().encode(bytesOut).replace("\n", "")
+  }
+  
   def apply(url: String, pathWithFileName: String) = new NetStreamIOHandler(url, pathWithFileName)
+}
+
+class TryResource[E <: AutoCloseable](protected val resource: E) {
+  
+}
+
+class TryMultResource[E <: AutoCloseable](protected val resources: List[E]) {
+  
+}
+
+object TryResource {
+  def close[E <: AutoCloseable, T](resource: E*)(fx: Seq[E] => T): T = {
+    try {
+      fx(resource)
+    } finally {
+      resource foreach(o => o.close())
+    }
+  }
+  
+  def main(args: Array[String]): Unit = {
+//    var inputStream: InputStream = null
+//     val byteArrayOutputStream = new ByteArrayOutputStream()
+//    close(inputStream, byteArrayOutputStream){ o =>
+//      val a:InputStream = o(1).asInstanceOf[InputStream]
+//    }
+    
+    println {
+      NetStreamIOHandler.compileBase64Code(new File("/Users/sasaki/vsh/hk/dbImage_ID-15869_No-1.jpeg")).replace("\n", "")
+    }
+    
+  }
 }

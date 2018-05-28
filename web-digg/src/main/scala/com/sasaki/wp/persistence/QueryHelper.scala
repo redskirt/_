@@ -70,14 +70,26 @@ trait QueryHelper {
     vsh_source.insert(source);
   }
   
-  def listPageId = inTransaction(sf)(from(vsh_source)(o => select(o.pageId)).toArray)
+  def listPageId(`type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.`type` === `type`) select(o.pageId)).toArray)
   
   def listContent = inTransaction(sf)(from(vsh_source)(o => select(o.pageId, o.content)).toArray)
   
-  def updateContent(source: Source) = inTransaction(sf) {
+  def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
-      where(source.pageId === o.pageId)
-        set (o.content := source.content, o.base64Image := source.base64Image))
+      where(source.pageId === o.pageId and source.`type` === o.`type`)
+        set (o.content := source.content
+//        {
+//          if (null == o.content || o.content.isEmpty || 0 == o.content.length())
+//            source.content
+//          else
+//            o.content
+//        }
+        , o.base64Image := {
+          if (null == o.base64Image || o.base64Image.isEmpty)
+            source.base64Image
+          else
+            o.base64Image
+        }))
   }
   
   def saveShView(shView: ShView) = inTransaction(sf)(vsh_sh_view.insert(shView))
@@ -119,7 +131,7 @@ object Sample extends QueryHelper with App {
   //    QueryHelper.listMetadata.foreach(println)
   //    listAccount.foreach(println)
 
-  listPageId.take(10).foreach(println)
-//  updateContent(Source(2, "1111", "11112要遥是3234"))
+//  listPageId("bj").take(10).foreach(println)
+  updateSource(Source(66, "3324", "hk"))
 }
 

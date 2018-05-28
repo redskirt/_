@@ -1,4 +1,4 @@
-package org.sasaki.isp;
+package com.sasaki.isp;
 
 /**
  * Hello world!

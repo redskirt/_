@@ -41,10 +41,34 @@ object Util {
     })
   
   
+  import java.io.File
+  def listFiles(url: String) = {
+    val t = new File(url)
+    if(t.isDirectory()) 
+      t.listFiles().filterNot(_.isDirectory())
+    else
+      Array(t)
+  }
+    
   def main(args: Array[String]): Unit = {
 //    println(Util.prop("kafka.metadata.broker.list"))
-    println(hasConstants("jdbc.url", "" ))
+//    println(hasConstants("jdbc.url", "" ))
 //    println(_prop_.containsKey("jdbc.url"))
+    // 北京缺 dbImage_ID-19023_No-1.jpeg
+    listFiles("/Users/sasaki/vsh/bj")
+    .filter(_.getName.contains("dbImage"))
+//    .foreach { o => 
+//      val name = o.getName
+//      println(name)
+//      println(name.substring(11, name.lastIndexOf("_")))
+//    }
+    .foreach { o =>
+      if(200 > o.length()) {
+        println(o.getName)
+        o.delete()
+      }
+    }
+    
   }
   
   
