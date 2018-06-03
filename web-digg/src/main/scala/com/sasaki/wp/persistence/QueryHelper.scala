@@ -77,19 +77,8 @@ trait QueryHelper {
   def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
       where(source.pageId === o.pageId and source.`type` === o.`type`)
-        set (o.content := source.content
-//        {
-//          if (null == o.content || o.content.isEmpty || 0 == o.content.length())
-//            source.content
-//          else
-//            o.content
-//        }
-        , o.base64Image := {
-          if (null == o.base64Image || o.base64Image.isEmpty)
-            source.base64Image
-          else
-            o.base64Image
-        }))
+        set (/*o.content := source.content, */o.base64Image := source.base64Image)
+    )
   }
   
   def saveShView(shView: ShView) = inTransaction(sf)(vsh_sh_view.insert(shView))
@@ -132,6 +121,10 @@ object Sample extends QueryHelper with App {
   //    listAccount.foreach(println)
 
 //  listPageId("bj").take(10).foreach(println)
-  updateSource(Source(66, "3324", "hk"))
+  
+  var source = Source(17787, "", "bj_")
+  source.base64Image = "11111"
+  println(source.base64Image)
+  updateSource(source)
 }
 

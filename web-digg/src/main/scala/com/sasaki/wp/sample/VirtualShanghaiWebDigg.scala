@@ -20,7 +20,7 @@ import com.sasaki.wp.util.Util
  */
 
 object VirtualShanghaiWebDigg extends QueryHelper {
-  val threadPool = Executors.newFixedThreadPool(10)
+  val threadPool = Executors.newFixedThreadPool(5)
   
   import ProcessUtil._
   
@@ -44,9 +44,6 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //              val pages = listPageId("bj").toSet
 //              val pages_ = pages -- pageExists
 
-                  val pages_ = Array(
-                  20028, 20031
-                  )
 //              for(i <- 0 until pages_.size)
 //                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
     
@@ -57,10 +54,19 @@ object VirtualShanghaiWebDigg extends QueryHelper {
                    * 0 1 2 3 4 5 6 7
                    * 1 2 3 4 5 7 6 8
                    */
-                        val pageIds = pages_ // listPageId("sz")
-                        for (i <- 0 until pageIds.size)
-                          threadPool.execute(new ContentFetchProcess(pageIds(i)))
+//                        val pageIds = pages_ // listPageId("sz")
+//                        for (i <- 0 until pageIds.size)
+//                          threadPool.execute(new ContentFetchProcess(pageIds(i)))
     
+                   /**
+     * 更新Base64至Source表
+     */
+        val files = Util.listFiles("/Users/sasaki/vsh/bj")
+        .filter(_.getName.contains("dbImage"))
+        
+        for(i <- 1100 until files.size) 
+          threadPool.execute(new File2Base64Process(files(i), "bj"))
+                
                 } finally
                   threadPool.shutdown()
 
@@ -79,41 +85,28 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 下载指定微信页面所有图片
      * downloadFileFromPageProcess("")
      */
-//    downloadFileFromPageProcess("https://mp.weixin.qq.com/s/rvcfbLSsvPLFhVhW-kD7fg")
-
+//    downloadFileFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzI2MTM2MTIwOQ==&mid=2247487927&idx=1&sn=b11265bfc624e5702d88e9289e48d3f1&chksm=ea5acae1dd2d43f73b85738fab51789c18accadd6c3bbd0ca360ac2e212518388b5e30a38e73&scene=21#wechat_redirect")
+    
     /**
      * 获取列表页面所有Image Id
      */
 //        for(i <- 3 to 58)
 //          saveListPageSource(i, "sh_")
 
-    /**
-     * 更新Base64至Source表
-     */
-    //    Util.listFiles("/Users/sasaki/vsh/sz")
-    //    .filter(_.getName.contains("dbImage"))
-    //    .foreach { o =>
-    //      val name = o.getName
-    //      val id = name.substring(11, name.lastIndexOf("_")).toLong
-    //      val base64 = NetStreamIOHandler.compileBase64Code(o)
-    //      val source = Source(id, "", "sz")
-    //      source.base64Image = base64
-    //      updateSource(source)
-    //      println(s"$id done!")
-    //    }
+   
 
     /**
      * 删除废照片
      * 
      */
-    Util.listFiles("/Users/sasaki/vsh/sh")
-      .filter(_.getName.contains("dbImage"))
-      .foreach { o =>
-        if (200 > o.length()) {
-          println(o.getName)
-          o.delete()
-        }
-      }
+//    Util.listFiles("/Users/sasaki/vsh/sh")
+//      .filter(_.getName.contains("dbImage"))
+//      .foreach { o =>
+//        if (200 > o.length()) {
+//          println(o.getName)
+//          o.delete()
+//        }
+//      }
 
   }  
   
@@ -218,6 +211,24 @@ object VirtualShanghaiWebDigg extends QueryHelper {
         map.getOrElse("Related Image", ""))
       saveShView(shView)
     }
+  }
+}
+
+class File2Base64Process(file: File, `type`: String) extends Runnable with QueryHelper {
+
+  override def run() {
+    val name = file.getName
+    val id = name.substring(11, name.lastIndexOf("_")).toLong
+    val base64 = NetStreamIOHandler.compileBase64Code(file)
+    val source = Source(id, "", `type`)
+    source.base64Image = base64
+    updateSource(source)
+    println(
+    s"""
+  Done!
+  Thread name: ${Thread.currentThread().getName}, process id: $name
+  """    
+    )
   }
 }
 
