@@ -72,12 +72,12 @@ trait QueryHelper {
   
   def listPageId(`type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.`type` === `type`) select(o.pageId)).toArray)
   
-  def listContent = inTransaction(sf)(from(vsh_source)(o => select(o.pageId, o.content)).toArray)
+  def listContent(`type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.`type` === `type`) select(o.pageId, o.content)).toArray)
   
   def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
       where(source.pageId === o.pageId and source.`type` === o.`type`)
-        set (/*o.content := source.content, */o.base64Image := source.base64Image)
+        set ( o.content := source.content/*o.imageId := source.imageId,, o.base64Image := source.base64Image*/)
     )
   }
   
@@ -122,9 +122,8 @@ object Sample extends QueryHelper with App {
 
 //  listPageId("bj").take(10).foreach(println)
   
-  var source = Source(17787, "", "bj_")
-  source.base64Image = "11111"
-  println(source.base64Image)
+  var source = Source(11787, "bj")
+  source.content = "324"
   updateSource(source)
 }
 

@@ -26,7 +26,7 @@ object Base64Sample extends QueryHelper {
 
     import com.sasaki.wp.persistence.poso._
 
-    saveSource(Source(1, "", base64Image))
+    saveSource(Source(1, ""))
 
   }
 }

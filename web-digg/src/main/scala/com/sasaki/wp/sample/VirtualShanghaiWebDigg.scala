@@ -28,48 +28,47 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * => 多线程任务
      */
-                try {
-              /**
-               * 图片抓取
-               */
-//              val pageExists = Util.listFiles("/Users/sasaki/vsh/sh")
-//                .filter(_.getName.contains("dbImage"))
-//                .map { o =>
-//                  val name = o.getName
-//                  println(name)
-//                  println(name.substring(11, name.lastIndexOf("_")))
-//                  name.substring(11, name.lastIndexOf("_")).toLong
-//                }.toSet
-//    
-//              val pages = listPageId("bj").toSet
-//              val pages_ = pages -- pageExists
-
-//              for(i <- 0 until pages_.size)
-//                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
-    
-                  /**
-                   * 页面抓取
-                   */
-                  /**
-                   * 0 1 2 3 4 5 6 7
-                   * 1 2 3 4 5 7 6 8
-                   */
-//                        val pageIds = pages_ // listPageId("sz")
-//                        for (i <- 0 until pageIds.size)
-//                          threadPool.execute(new ContentFetchProcess(pageIds(i)))
-    
-                   /**
-     * 更新Base64至Source表
-     */
-        val files = Util.listFiles("/Users/sasaki/vsh/bj")
-        .filter(_.getName.contains("dbImage"))
-        
-        for(i <- 1100 until files.size) 
-          threadPool.execute(new File2Base64Process(files(i), "bj"))
-                
-                } finally
-                  threadPool.shutdown()
-
+		                  try {
+		        /**
+		         * 图片抓取
+		         */
+		        //              val pageExists = Util.listFiles("/Users/sasaki/vsh/sh")
+		        //                .filter(_.getName.contains("dbImage"))
+		        //                .map { o =>
+		        //                  val name = o.getName
+		        //                  println(name)
+		        //                  println(name.substring(11, name.lastIndexOf("_")))
+		        //                  name.substring(11, name.lastIndexOf("_")).toLong
+		        //                }.toSet
+		        //
+		        //              val pages = listPageId("bj").toSet
+		        //              val pages_ = pages -- pageExists
+		        //              for(i <- 0 until pages_.size)
+		        //                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
+		  
+		        /**
+		         * 页面抓取
+		         */
+		        /**
+		         * 0 1 2 3 4 5 6 7
+		         * 1 2 3 4 5 7 6 8
+		         */
+//            val pageIds = pages_ // listPageId("sz")
+//            for (i <- 0 until pageIds.size)
+//              threadPool.execute(new ContentFetchProcess(pageIds(i)))
+		  
+		        /**
+		         * @Deprecated
+		         * 更新Base64至Source表
+		         */
+		  //      val files = Util.listFiles("/Users/sasaki/vsh/bj")
+		  //        .filter(_.getName.contains("dbImage"))
+		  //
+		  //      for (i <- 1100 until files.size)
+		  //        threadPool.execute(new File2Base64Process(files(i), "bj"))
+		  
+		                  } finally
+		                    threadPool.shutdown()
     /**
      * => 常规任务
      */
@@ -77,36 +76,60 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * 页面清洗
      */
-    //      source2ViewProcess
+          source2ViewProcess("sh")
 
-    //    val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
+//        val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
 
     /**
      * 下载指定微信页面所有图片
      * downloadFileFromPageProcess("")
      */
-//    downloadFileFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzI2MTM2MTIwOQ==&mid=2247487927&idx=1&sn=b11265bfc624e5702d88e9289e48d3f1&chksm=ea5acae1dd2d43f73b85738fab51789c18accadd6c3bbd0ca360ac2e212518388b5e30a38e73&scene=21#wechat_redirect")
-    
+    //    downloadFileFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzI2MTM2MTIwOQ==&mid=2247487927&idx=1&sn=b11265bfc624e5702d88e9289e48d3f1&chksm=ea5acae1dd2d43f73b85738fab51789c18accadd6c3bbd0ca360ac2e212518388b5e30a38e73&scene=21#wechat_redirect")
+
     /**
      * 获取列表页面所有Image Id
      */
-//        for(i <- 3 to 58)
-//          saveListPageSource(i, "sh_")
-
-   
+    //        for(i <- 3 to 58)
+    //          saveListPageSource(i, "sh_")
 
     /**
      * 删除废照片
-     * 
+     *
      */
-//    Util.listFiles("/Users/sasaki/vsh/sh")
+    //    Util.listFiles("/Users/sasaki/vsh/sh")
+    //      .filter(_.getName.contains("dbImage"))
+    //      .foreach { o =>
+    //        if (200 > o.length()) {
+    //          println(o.getName)
+    //          o.delete()
+    //        }
+    //      }
+
+    /**
+     * 图片重新编号
+     */
+    
+//    val `type` = "sh"
+//    val list = Util.listFiles(s"/Users/sasaki/vsh/${`type`}")
 //      .filter(_.getName.contains("dbImage"))
-//      .foreach { o =>
-//        if (200 > o.length()) {
-//          println(o.getName)
-//          o.delete()
-//        }
-//      }
+//      .map { o =>
+//        val name = o.getName
+//        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
+//        (imageId, o)
+//      }.sortBy(o => o._1)
+//      
+//      println(list.size)
+//      
+//    for (i <- 5100 until list.size) {
+//      val imageId = list(i)._1
+//  		  val file = list(i)._2
+//      val imageId_ = "SHG" + String.format("%04d", (i + 1).asInstanceOf[Integer])
+//      val source = Source(imageId, `type`)
+//      source.imageId = imageId_
+////      updateSource(source)
+//      println((imageId, source.imageId))
+//      file.renameTo(new File(s"/Users/sasaki/vsh/${`type`}_/$imageId_.jpeg"))
+//    }
 
   }  
   
@@ -127,7 +150,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
           0
       }
     } filter(_ != 0) foreach { o => 
-      saveSource(Source(o, "", `type`))
+      saveSource(Source(o, `type`))
       println(s"saved: $o")
     }
   }
@@ -149,8 +172,8 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     }
   }
 
-  def source2ViewProcess = {
-    val contents = listContent
+  def source2ViewProcess(`type`: String) = {
+    val contents = listContent(`type`) take(10)
     contents.foreach { o =>
       val pageId = o._1
       val html = o._2
@@ -192,7 +215,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 
       val shView = com.sasaki.wp.persistence.poso.ShView(
         pageId,
-        pageId,
+        "",
         map.getOrElse("Title", ""),
         map.getOrElse("Collection", ""),
         map.getOrElse("Location", ""),
@@ -220,7 +243,7 @@ class File2Base64Process(file: File, `type`: String) extends Runnable with Query
     val name = file.getName
     val id = name.substring(11, name.lastIndexOf("_")).toLong
     val base64 = NetStreamIOHandler.compileBase64Code(file)
-    val source = Source(id, "", `type`)
+    val source = Source(id, `type`)
     source.base64Image = base64
     updateSource(source)
     println(
@@ -237,17 +260,19 @@ class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
   import com.sasaki.wp.persistence.poso._
 
   override def run() {
-    val get = new HttpGet(urlContentSh(pageId))
+    val get = new HttpGet(urlContentBj(pageId))
     val response = client.execute(get)
 
     try {
       val pageHtml = parseResponse(response)
 //      println(Source(pageId, pageHtml, "bj"))
-      updateSource(Source(pageId, pageHtml, "sh")) 
+      val source = Source(pageId, "bj")
+      source.content = pageHtml
+      updateSource(source) 
       println(
         s"""
   Done!
-  Request: ${urlContentSh(pageId)}
+  Request: ${urlContentBj(pageId)}
   Thread name: ${Thread.currentThread().getName}, process id: $pageId
 """)
     } catch {
@@ -271,7 +296,7 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
       NetStreamIOHandler(url, fileName(id, "sh")).download
 
       // 仅创建带page_id记录，与照片名page_id一致
-      val source = Source(id, "", "")
+      val source = Source(id, "")
       source.imageName = imageName(id)
       saveSource(source)
 

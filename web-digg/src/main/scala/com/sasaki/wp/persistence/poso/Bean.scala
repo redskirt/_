@@ -31,17 +31,18 @@ case class Metadata(val account: String, val cookie: String) extends Bean {
 
 case class Source(
   @Column("page_id") val pageId:           Long,
-  val content:                             String,
   val `type`:                              String) extends Bean {
-  @Column("image_name")
-  var imageName: String = _
+  var content:                             String = _
+  @Column("source_image_name") var sourceImageName: String = _
   @Column("base64_image") var base64Image: String = _
+  @Column("image_name") var imageName: String = _
+  @Column("image_id") var imageId: String = _
   var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
 case class ShView(
   @Column("page_id") val pageId:                             Long,
-  @Column("image_id") val imageId:                           Long,
+  @Column("image_id") val imageId:                           String,
   val title:                                                 String,
   val collection:                                            String,
   val location:                                              String,
