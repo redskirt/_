@@ -70,18 +70,18 @@ trait QueryHelper {
     vsh_source.insert(source);
   }
   
-  def listPageId(`type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.`type` === `type`) select(o.pageId)).toArray)
+  def listPageId(city: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city) select(o.pageId)).toArray)
   
-  def listContent(`type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.`type` === `type`) select(o.pageId, o.content)).toArray)
+  def listContent(city: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city) select(o.pageId, o.content, o.imageId)).toArray)
   
   def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
-      where(source.pageId === o.pageId and source.`type` === o.`type`)
+      where(source.pageId === o.pageId and source.city === o.city)
         set ( o.content := source.content/*o.imageId := source.imageId,, o.base64Image := source.base64Image*/)
     )
   }
   
-  def saveShView(shView: ShView) = inTransaction(sf)(vsh_sh_view.insert(shView))
+  def saveView(view: View) = inTransaction(sf)(vsh_view.insert(view))
 }
 
 object WebDiggSchema extends Schema {
@@ -91,8 +91,7 @@ object WebDiggSchema extends Schema {
 
 object VshSchema extends Schema {
   val vsh_source = table[Source]("vsh_source")
-  val vsh_sh_view = table[ShView]("vsh_sh_view")
-  val vsh_bj_view = table[BjView]("vsh_bj_view")
+  val vsh_view = table[View]("vsh_view")
 }
 
 object Sample extends QueryHelper with App {
@@ -122,8 +121,10 @@ object Sample extends QueryHelper with App {
 
 //  listPageId("bj").take(10).foreach(println)
   
-  var source = Source(11787, "bj")
-  source.content = "324"
-  updateSource(source)
+//  var source = Source(11787, "bj")
+//  source.content = "324"
+//  updateSource(source)
+  
+  println(listContent("BJG").size)
 }
 

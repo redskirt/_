@@ -30,61 +30,56 @@ case class Metadata(val account: String, val cookie: String) extends Bean {
 // --------------------------------------  以上是WebDigg项目的查询接口，以下为VirtualSH  -------------------------------
 
 case class Source(
-  @Column("page_id") val pageId:           Long,
-  val `type`:                              String) extends Bean {
-  var content:                             String = _
-  @Column("source_image_name") var sourceImageName: String = _
-  @Column("base64_image") var base64Image: String = _
-  @Column("image_name") var imageName: String = _
-  @Column("image_id") var imageId: String = _
+  @Column("page_id") 
+  val pageId:           Long,
+  
+  val city: String) extends Bean {
+  var content: String = _
+  @Column("source_image_name") 
+  var sourceImageName: String = _
+  @Column("base64_image") 
+  var base64Image: String = _
+  @Column("image_name") 
+  var imageName: String = _
+  @Column("image_id") 
+  var imageId: String = _
   var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
-case class ShView(
-  @Column("page_id") val pageId:                             Long,
-  @Column("image_id") val imageId:                           String,
-  val title:                                                 String,
-  val collection:                                            String,
-  val location:                                              String,
-  val year:                                                  String,
-  val date:                                                  String,
-  @Column("estimated_date") val estimatedDate:               String,
-  @Column("image_type") val imageType:                       String,
-  @Column("material_form_of_image") val materialFormOfImage: String,
-  @Column("private_repository") val privateRepository:       String,
-  val notes:                                                 String,
-  @Column("keywords_en") val keywordsEn:                     String,
-  @Column("keywords_fr") val keywordsFr:                     String,
-  @Column("street_name") val streetName:                     String,
-  val repository:                                            String,
-  val building:                                              String,
-  @Column("related_image") val relatedImage:                 String) extends Bean {
-  @Column("image_name") var imageName: String = _
-  @Column("base64_image") var base64Image: String = _
-  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+class View extends Bean {
+  @Column("page_id")
+  var pageId: Long = _ // 仅VSH来源的照片
+  @Column("image_id")
+  var imageId: String = _
+  @Column("image_name")
+  var imageName: String = _
+  var city: String = _
+  var title: String = _
+  var collection: String = _
+  var location: String = _
+  var extent: String = _
+  var year: String = _
+  var date: String = _
+  var photographer: String = _
+  @Column("estimated_date")
+  var estimatedDate: String = _
+  @Column("image_type")
+  var imageType: String = _
+  @Column("material_form_of_image")
+  var materialFormOfImage: String = _
+  @Column("private_repository")
+  var privateRepository: String = _
+  var notes: String = _
+  @Column("keywords_en")
+  var keywordsEn: String = _
+  @Column("keywords_fr")
+  var keywordsFr: String = _
+  @Column("street_name")
+  var streetName: String = _
+  var repository: String = _
+  var building: String = _
+  @Column("related_image")
+  var relatedImage: String = _
+  val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
-case class BjView(
-  @Column("page_id") val pageId:                             Long,
-  @Column("image_id") val imageId:                           Long,
-  val title:                                                 String,
-  val collection:                                            String,
-  val location:                                              String,
-  val extent:                                                String,
-  val year:                                                  String,
-  val date:                                                  String,
-  @Column("estimated_date") val estimatedDate:               String,
-  @Column("image_type") val imageType:                       String,
-  @Column("material_form_of_image") val materialFormOfImage: String,
-  @Column("private_repository") val privateRepository:       String,
-  val notes:                                                 String,
-  @Column("keywords_en") val keywordsEn:                     String,
-  @Column("keywords_fr") val keywordsFr:                     String,
-  @Column("street_name") val streetName:                     String,
-  val repository:                                            String,
-  val building:                                              String,
-  @Column("related_image") val relatedImage:                 String) extends Bean {
-  @Column("image_name") var imageName: String = _
-  @Column("base64_image") var base64Image: String = _
-  var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
-}

@@ -76,7 +76,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * 页面清洗
      */
-          source2ViewProcess("sh")
+//          source2ViewProcess("SHI")
 
 //        val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
 
@@ -84,7 +84,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 下载指定微信页面所有图片
      * downloadFileFromPageProcess("")
      */
-    //    downloadFileFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzI2MTM2MTIwOQ==&mid=2247487927&idx=1&sn=b11265bfc624e5702d88e9289e48d3f1&chksm=ea5acae1dd2d43f73b85738fab51789c18accadd6c3bbd0ca360ac2e212518388b5e30a38e73&scene=21#wechat_redirect")
+        downloadFileFromPageProcess("https://mp.weixin.qq.com/s/UDYXMQJi1ZrcDESLKoMR2g")
 
     /**
      * 获取列表页面所有Image Id
@@ -109,8 +109,8 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 图片重新编号
      */
     
-//    val `type` = "sh"
-//    val list = Util.listFiles(s"/Users/sasaki/vsh/${`type`}")
+//    val `city` = "SHI"
+//    val list = Util.listFiles(s"/Users/sasaki/vsh/${`city`}")
 //      .filter(_.getName.contains("dbImage"))
 //      .map { o =>
 //        val name = o.getName
@@ -120,20 +120,19 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //      
 //      println(list.size)
 //      
-//    for (i <- 5100 until list.size) {
+//    for (i <- 0 until list.size) {
 //      val imageId = list(i)._1
 //  		  val file = list(i)._2
-//      val imageId_ = "SHG" + String.format("%04d", (i + 1).asInstanceOf[Integer])
-//      val source = Source(imageId, `type`)
+//      val imageId_ = "SHI" + String.format("%04d", (i + 1).asInstanceOf[Integer])
+//      val source = Source(imageId, `city`)
 //      source.imageId = imageId_
 ////      updateSource(source)
 //      println((imageId, source.imageId))
-//      file.renameTo(new File(s"/Users/sasaki/vsh/${`type`}_/$imageId_.jpeg"))
+//      file.renameTo(new File(s"/Users/sasaki/vsh/${`city`}_/$imageId_.jpeg"))
 //    }
-
   }  
   
-  def saveListPageSource(page: Int, `type`: String) = {
+  def saveListPageSource(page: Int, `city`: String) = {
     val document = Jsoup.parse(new URL(urlLisSh(page)), 30000)
     val table = document.getElementsContainingText("Estimated date")
     val trs = table.select("tr")
@@ -150,7 +149,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
           0
       }
     } filter(_ != 0) foreach { o => 
-      saveSource(Source(o, `type`))
+      saveSource(Source(o, `city`))
       println(s"saved: $o")
     }
   }
@@ -172,15 +171,18 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     }
   }
 
-  def source2ViewProcess(`type`: String) = {
-    val contents = listContent(`type`) take(10)
+  def source2ViewProcess(city: String) = {
+    val contents = listContent(city) //take(10)
     contents.foreach { o =>
       val pageId = o._1
       val html = o._2
+      val imageId = o._3
       val document = Jsoup.parse(html)
       val table = document.getElementsByClass("defaultDocTable")
       val trs = table.select("tr")
 
+      var photographer: String = ""
+      
       val map = {
         for (i <- 0 until trs.size()) yield {
           val tr = trs.get(i)
@@ -188,14 +190,20 @@ object VirtualShanghaiWebDigg extends QueryHelper {
           val columnName = tds.first().text()
           val columnText = tds.last().getElementsByClass("defaultDocTableContent")
 
+          if("Photographer" == columnName) {
+            val href_text = columnText.select("a[href]").first()
+            val href = ProcessUtil.basePath + href_text.attr("href")
+            val text = href_text.text()
+            photographer = s"$text, Reference: $href"
+          } 
+            
           val ul = columnText.select("ul")
           val textOrUl =
             if (ul.isEmpty())
               columnText.text()
             else {
               val lis = ul.select("li")
-              if (!lis.isEmpty())
-                { //
+              if (!lis.isEmpty()) { //
                   for (j <- 0 until lis.size()) yield {
                     val li = lis.get(j)
                     val href_text = li.selectFirst("a[href]")
@@ -212,38 +220,42 @@ object VirtualShanghaiWebDigg extends QueryHelper {
           (columnName, textOrUl)
         }
       } toMap
-
-      val shView = com.sasaki.wp.persistence.poso.ShView(
-        pageId,
-        "",
-        map.getOrElse("Title", ""),
-        map.getOrElse("Collection", ""),
-        map.getOrElse("Location", ""),
-        map.getOrElse("Year", ""),
-        map.getOrElse("Date", ""),
-        map.getOrElse("Estimated date", ""),
-        map.getOrElse("Image type", ""),
-        map.getOrElse("Material form of image", ""),
-        map.getOrElse("Private Repository", ""),
-        map.getOrElse("Note(s)", ""),
-        map.getOrElse("Keyword(s) [en]", ""),
-        map.getOrElse("Keyword(s) [fr]", ""),
-        map.getOrElse("Street name", ""),
-        map.getOrElse("Repository", ""),
-        map.getOrElse("Building", ""),
-        map.getOrElse("Related Image", ""))
-      saveShView(shView)
+      
+      val view = new com.sasaki.wp.persistence.poso.View
+      view.pageId = pageId
+      view.imageId = imageId
+      view.city = city
+      view.title = map.getOrElse("Title", "")
+      view.collection = map.getOrElse("Collection", "")
+      view.location = map.getOrElse("Location", "") 
+      view.extent = map.getOrElse("Extent", "")
+      view.year = map.getOrElse("Year", "")
+      view.date = map.getOrElse("Date", "")
+      view.photographer = photographer
+      view.estimatedDate = map.getOrElse("Estimated date", "")
+      view.imageType = map.getOrElse("Image type", "")
+      view.materialFormOfImage = map.getOrElse("Material form of image", "")
+      view.privateRepository = map.getOrElse("Private Repository", "")
+      view.notes = map.getOrElse("Note(s)", "")
+      view.keywordsEn = map.getOrElse("Keyword(s) [en]", "")
+      view.keywordsFr = map.getOrElse("Keyword(s) [fr]", "")
+      view.streetName = map.getOrElse("Street name", "")
+      view.repository = map.getOrElse("Repository", "")
+      view.building = map.getOrElse("Building", "")
+      view.relatedImage = map.getOrElse("Related Image", "")
+      
+      saveView(view)
     }
   }
 }
 
-class File2Base64Process(file: File, `type`: String) extends Runnable with QueryHelper {
+class File2Base64Process(file: File, `city`: String) extends Runnable with QueryHelper {
 
   override def run() {
     val name = file.getName
     val id = name.substring(11, name.lastIndexOf("_")).toLong
     val base64 = NetStreamIOHandler.compileBase64Code(file)
-    val source = Source(id, `type`)
+    val source = Source(id, `city`)
     source.base64Image = base64
     updateSource(source)
     println(
@@ -326,7 +338,7 @@ object ProcessUtil {
 
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-2.jpeg"
-  val fileName = (id: Long, `type`: String) => s"/Users/sasaki/vsh/${`type`}/${imageName(id)}"
+  val fileName = (id: Long, `city`: String) => s"/Users/sasaki/vsh/${`city`}/${imageName(id)}"
   
   val urlImageSh = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
   val urlImageBj = (id: Long) => s"http://beijing.virtualcities.fr/Asset/Preview/${imageName(id)}"

@@ -1,4 +1,4 @@
-package com.sasaki.wp.util
+package com.sasaki.isp.util
 
 import java.util.regex.Pattern
 
@@ -7,20 +7,6 @@ import java.util.regex.Pattern
  */
 object Util {
   
-  private val _prop_ = new java.util.Properties()
-  try {
-	  _prop_.load(this.getClass.getClassLoader.getResourceAsStream("runtime.properties"))
-  } catch { case t: Throwable => t.printStackTrace() }
-    
-  def prop(key: String) = Option(_prop_.getProperty(key)).getOrElse("Missing key --> " + key)
-  
-  val propInt = (key: String) => Integer.valueOf(prop(key))
-
-  def hasConstants(keys: String*): Boolean = {
-    var f = true
-    keys.foreach(__ => if(!_prop_.containsKey(__)) f = false)
-    f
-  }
   
   def nonNull(o: Any) = null != o
 
@@ -54,7 +40,10 @@ object Util {
   def writeFile(fileNameWithPath: String, content: String) = {
     import java.io.{ File, FileWriter, BufferedWriter }
     
-    val writer = new BufferedWriter(new FileWriter(new File(fileNameWithPath)))
+    val file = new File(fileNameWithPath)
+    if(file.exists())
+      file.delete()
+    val writer = new BufferedWriter(new FileWriter(file))
     writer.write(content)
     writer.close()
   }
