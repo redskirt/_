@@ -17,6 +17,7 @@ import org.opencv.core.Size
 import org.opencv.imgcodecs.Imgcodecs
 import org.opencv.imgproc.Imgproc
 import com.sasaki.isp.util.Util
+import scala.io.Source
 
 /**
  * @Author Sasaki
@@ -38,7 +39,7 @@ class ImageColorDescriptor {
   // 3D直方图的“直方”数
   var bins: Int = _
   
-  def describe(mat: Mat): Array[Mat] = {
+  def calcFeatures(mat: Mat): Array[Mat] = {
     val features = ArrayBuffer[Mat]()
 
     Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2HSV)
@@ -210,26 +211,58 @@ object ImageColorDescriptor {
 //    gui.imshow()
 //    ImageGui.waitKey(0)
     
-     val descriptor = new ImageColorDescriptor()
-     val srcPath = "/Users/sasaki/vsh/SZU"
-     val destnation = "/Users/sasaki/Desktop/t.csv"
-
-   val destContent = Util.listFiles(srcPath)
+//     val descriptor = new ImageColorDescriptor()
+//     val srcPath = "/Users/sasaki/vsh/SZU"
+     val destination = "/Users/sasaki/Desktop/t.csv"
+//
+//   val destContent = Util.listFiles(srcPath)
 //    .take(10)
-    .map { o =>
-      val name = o.getName
-      val srcMat = Imgcodecs.imread(s"$srcPath/$name")
-      val vectors = descriptor.describe(srcMat)
-      val formatContent = (s: String) => s.replace("[", "").replace("]", "").replace(";", "").replace("\n", "")
-      val recorder = vectors.map(t => formatContent(t.dump())).reduce(_ + ", " + _)
-      
-      s"$name, $recorder"
-    }
-    .map(_ + "\n")
-    .reduce(_ + _)
+//    .map { o =>
+//      val name = o.getName
+//      val srcMat = Imgcodecs.imread(s"$srcPath/$name")
+//      val vectors = descriptor.describe(srcMat)
+//      val formatContent = (s: String) => s.replace("[", "").replace("]", "").replace(";", "").replace("\n", ", ")
+//      val recorder = vectors.map(t => formatContent(t.dump())).reduce(_ + ", " + _)
+//
+//      s"$name, $recorder"
+//    }
+//    .map(_ + "\n")
+//    .reduce(_ + _)
+//    
+//    Util.writeFile(destination, destContent)
     
-    Util.writeFile(destnation, destContent)
-    
+    /**
+     * 
+     */
+//    Imgproc.compareHist(H1, H2, method)
+  import org.opencv.utils.Converters 
+  
+  val result = Source.fromFile(destination)
+  .getLines()
+  .take(5)
+  .map { o =>
+    import scala.collection.JavaConverters._
+
+    val array = o.split(",")
+    val name = array.head
+    val vector = array.tail.map(_.toDouble.asInstanceOf[java.lang.Double]).toList.asJava
+    val mat = Converters.vector_double_to_Mat(vector)
+    // 原图转换深度为5，否则计算相似度时异常
+    val matDepth5 = new Mat(mat.size(), CvType.CV_32F)
+    mat.convertTo(matDepth5, CvType.CV_32F)
+    (name, matDepth5)
+  }
+//  .foreach(println)
+//  println(c)
+  val result2 = result.take(2).toArray
+  val h1 = result2(0)._2
+  val h2 = result2(1)._2
+
+  // 卡方相似度为零的图片表示完全相同。相似度数值越高，表示两幅图像差别越大。
+  val value = Imgproc.compareHist(h1, h2, Imgproc.CV_COMP_CHISQR/*卡方相似度*/)
+
+  println(value)
+  
   }
 }
 
