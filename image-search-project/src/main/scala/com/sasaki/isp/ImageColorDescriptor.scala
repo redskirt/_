@@ -26,12 +26,12 @@ object ImageColorDescriptor {
   // 3D直方图的“直方”数
   var bins: Int = _
 
-  def calcHistogramFeatures(mat: Mat): Array[Mat] = {
+  def calcHistogramFeatures($mat: Mat): Array[Mat] = {
     val features = ArrayBuffer[Mat]()
 
-    Imgproc.cvtColor(mat, mat, Imgproc.COLOR_BGR2HSV)
+    Imgproc.cvtColor($mat, $mat, Imgproc.COLOR_BGR2HSV)
     // 获取图像大小和中心点
-    val size = new Size(mat.width(), mat.height())
+    val size = new Size($mat.width(), $mat.height())
     val centre = new Point(size.width * 0.5, size.height * 0.5)
 
     implicit def doubou2int(double: Double) = double toInt
@@ -45,12 +45,12 @@ object ImageColorDescriptor {
     )
 
     // 椭圆遮罩背景层
-    val maskEllipseBack = Mat.zeros(mat.size(), CvType.CV_8UC1)
+    val maskEllipseBack = Mat.zeros($mat.size(), CvType.CV_8UC1)
     // 在背景层上绘制椭圆
     Imgproc.ellipse(
       maskEllipseBack, //
       centre, // 中心点
-      new Size(mat.width() * 0.75 / 2, mat.height() * 0.75 / 2), // 大小
+      new Size($mat.width() * 0.75 / 2, $mat.height() * 0.75 / 2), // 大小
       0, // 旋转角度
       0, // 起始角
       360, // 终止角
@@ -60,14 +60,14 @@ object ImageColorDescriptor {
 
     // 椭圆遮罩图像
     val matEllipseMask = new Mat
-    mat.copyTo(matEllipseMask, maskEllipseBack)
+    $mat.copyTo(matEllipseMask, maskEllipseBack)
 
     val histEllipseMask = histogram(matEllipseMask, maskEllipseBack)
     features += histEllipseMask
 
     segments.foreach { o =>
       // 矩形遮罩背景层
-      val maskRectBack = Mat.zeros(mat.size(), CvType.CV_8UC1)
+      val maskRectBack = Mat.zeros($mat.size(), CvType.CV_8UC1)
       // 矩形区域
       val pointRect = (o._1, o._2)
       // 在背景层上绘制矩形区域
@@ -76,8 +76,8 @@ object ImageColorDescriptor {
       val maskRectWithEllipseBack = new Mat
       Core.subtract(maskRectBack, maskEllipseBack, maskRectWithEllipseBack)
       // 矩形+椭圆遮罩图像
-      val matRectWithEllipseBack = new Mat(mat.size(), CvType.CV_8UC1)
-      mat.copyTo(matRectWithEllipseBack, maskRectWithEllipseBack)
+      val matRectWithEllipseBack = new Mat($mat.size(), CvType.CV_8UC1)
+      $mat.copyTo(matRectWithEllipseBack, maskRectWithEllipseBack)
 
       val histRectWithEllipseBack = histogram(matRectWithEllipseBack, maskRectWithEllipseBack)
       features += histRectWithEllipseBack
@@ -95,34 +95,42 @@ object ImageColorDescriptor {
 
     import scala.collection.JavaConverters._
 
-    Imgproc.calcHist(
+//    Imgproc.calcHist(
+//      List(mat).asJava, // 图像
+//      new MatOfInt(0, 1), // 图像通道，数组表示。灰度图：Array(1)，彩色图Array(0, 1, 2)
+//      mask, // 遮罩，图像参与计算的部分，不用遮罩可传入Mat()空图像
+//      histogram, // 目标直方图
+//      new MatOfInt(50, 60), // 直方图坐标区间数，会统计落在每个区间的像素点总和
+//      new MatOfFloat(0f, 180f, 0f, 256f) // 二维数组，每个区间的范围
+//    )
+    
+        Imgproc.calcHist(
       List(mat).asJava, // 图像
-      new MatOfInt(0, 1), // 图像通道，数组表示。灰度图：Array(1)，彩色图Array(0, 1, 2)
+      new MatOfInt(0), // 图像通道，数组表示。灰度图：Array(1)，彩色图Array(0, 1, 2)
       mask, // 遮罩，图像参与计算的部分，不用遮罩可传入Mat()空图像
       histogram, // 目标直方图
-      new MatOfInt(50, 60), // 直方图坐标区间数，会统计落在每个区间的像素点总和
-      new MatOfFloat(0f, 180f, 0f, 256f) // 二维数组，每个区间的范围
+      new MatOfInt(256), // 
+      new MatOfFloat(0f, 256f) // 二维数组，每个区间的范围
     )
 
     val normalHistogram = new Mat(mat.size(), CvType.CV_8UC1)
-    Core.normalize(histogram, normalHistogram, 0, histogram.rows(), Core.NORM_MINMAX, -1, new Mat())
+    Core.normalize(histogram, normalHistogram, 0, histogram.height() / 2, Core.NORM_MINMAX, -1, new Mat())
 
     normalHistogram
   }
 
-  val FEATURES_DIR_PATH = "/Users/sasaki/Desktop/t.csv"
-  def calcMultiSimilarity(destHistogram: Mat, topN: Int): Array[Tuple2[String, Double]] = 
-    Source.fromFile(FEATURES_DIR_PATH)
-      .getLines()
+  val FEATURES_FILE_PATH = "/Users/sasaki/Desktop/t.csv"
+  def calcMultiSimilarity(destImage: Mat, topN: Int): Array[Tuple2[String, Double]] = 
+      Util.readTextFile(FEATURES_FILE_PATH)
       .map { o =>
         val array = o.split(",")
         val name = array.head
         val mat = csvRecorde2Vector(array.tail)
         
-        // TODO ...
-        val destHistogram_ = histogram(destHistogram, new Mat())
+        val destRecorder = image2CsvRecorde(destImage)
+        val destHistogram = csvRecorde2Vector(destRecorder.split(","))
         
-        val similarity = calcSimilarity(mat, destHistogram_)
+        val similarity = calcSimilarity(mat, destHistogram)
         
         (name, similarity)
       }
@@ -130,13 +138,13 @@ object ImageColorDescriptor {
       .sortBy(-/*sorted desc*/_._2)
       .take(topN)
       
-   def vector2CsvRecorde(mat: Mat): String = {
-    val vectors = ImageColorDescriptor.calcHistogramFeatures(mat)
+  def image2CsvRecorde(mat: Mat): String = {
+    val vectors = calcHistogramFeatures(mat)
     val formatContent = (s: String) => s.replace("[", "").replace("]", "").replace(";", "").replace("\n", ", ")
     vectors.map(t => formatContent(t.dump())).reduce(_ + ", " + _)
   }
     
-  def csvRecorde2Vector(recorder: Array[String]): Mat = {
+  def csvRecorde2Vector(recorder: Seq[String]): Mat = {
     import scala.collection.JavaConverters._
     import java.lang.{ Double => JDouble }
 
@@ -147,22 +155,19 @@ object ImageColorDescriptor {
   def calcSimilarity(histogram_1: Mat, histogram_2: Mat): Double = {
     val histogram_1_Depth5 = new Mat(histogram_1.size(), CvType.CV_32F)
     val histogram_2_Depth5 = new Mat(histogram_2.size(), CvType.CV_32F)
-    histogram_1_Depth5.convertTo(histogram_1, CvType.CV_32F)
-    histogram_2_Depth5.convertTo(histogram_2, CvType.CV_32F)
+//    histogram_1_Depth5.convertTo(histogram_1, CvType.CV_32F)
+//    histogram_2_Depth5.convertTo(histogram_2, CvType.CV_32F)
 
     // 卡方相似度为零的图片表示完全相同。相似度数值越高，表示两幅图像差别越大。
-    Imgproc.compareHist(histogram_1_Depth5, histogram_2_Depth5, Imgproc.CV_COMP_CHISQR /*卡方相似度*/ )
+    Imgproc.compareHist(histogram_1_Depth5, histogram_2_Depth5, Imgproc.CV_COMP_CORREL)
   }
-      
 }
 
-
 object Sample {
-  
   val native_library = "/opt/local/share/OpenCV/java/libopencv_java341.dylib"
   System.load(native_library)
   
-  val path = "/Users/sasaki/Desktop/refer3.jpeg"
+  val path = "/Users/sasaki/Desktop/refer2.jpeg"
   
   val WHITE = new Scalar(255)
   val BLACK = new Scalar(0)
@@ -246,25 +251,48 @@ object Sample {
     /**
      * 源目标的所有图的特征向量，得源特征向量数据集，输出csv
      */
-   val srcPath = "/Users/sasaki/vsh/SZU"
+   import ImageColorDescriptor._
+   
+   val srcPath = "/Users/sasaki/Downloads/vacation-image-search-engine/dataset"
    val destContent = Util.listFiles(srcPath)
-    .take(10)
+    .take(5)
+    .filter { o => 
+      val name = o.getName
+      name.contains(".jpeg") || name.contains(".jpg") || name.contains(".png")
+    }
     .map { o =>
       val name = o.getName
       val srcMat = Imgcodecs.imread(s"$srcPath/$name")
-      val recorder = ImageColorDescriptor.vector2CsvRecorde(srcMat)
+      val recorder = image2CsvRecorde(srcMat)
 
       s"$name, $recorder"
-    }
+    } 
+//    .foreach(println)
     .map(_ + "\n")
     .reduce(_ + _)
     
-//    Util.writeFile(destination, destContent)
+    Util.writeFile(FEATURES_FILE_PATH, destContent)
     
-    println{
-      ImageColorDescriptor.calcSimilarity(mat, mat)
-    }
-//    ImageColorDescriptor.calcMultiSimilarity(mat, 5) foreach println
+//    val recorde = image2CsvRecorde(mat)
+//    val recorde2 = Util.readTextFile(FEATURES_FILE_PATH)
+//      .filter(_.contains("SZU0002.jpeg"))
+//      .head
+//    val vector_1 = csvRecorde2Vector(recorde.split(","))
+//    val vector_2 = csvRecorde2Vector(recorde2.split(",").tail)
+    
+//    println(recorde)
+//    val recorde2_ = recorde2.substring(14, recorde2.length)
+//    println(recorde2_)
+//    println(recorde == recorde2_)
+//    println(
+//     "1: " + recorde.split(",").length//.length()
+////      + calcSimilarity(vector_1, vector_2)
+//    )
+//    println (
+//     "2: " + recorde2.split(",").tail.length//  .length
+//    )
+//    println(calcSimilarity(vector_1, vector_1))
+//    calcMultiSimilarity(mat, 5) foreach println
     
   }
 }

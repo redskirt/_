@@ -48,7 +48,9 @@ object Util {
     writer.close()
   }
      
-    
+  def readTextFile(fileNameWithPath: String): Seq[String] = 
+      scala.io.Source.fromFile(fileNameWithPath).getLines().toSeq
+  
   def main(args: Array[String]): Unit = {
 //    println(Util.prop("kafka.metadata.broker.list"))
 //    println(hasConstants("jdbc.url", "" ))
