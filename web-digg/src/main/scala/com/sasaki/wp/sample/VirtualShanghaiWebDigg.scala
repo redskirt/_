@@ -32,19 +32,19 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 		        /**
 		         * 图片抓取
 		         */
-		        //              val pageExists = Util.listFiles("/Users/sasaki/vsh/sh")
-		        //                .filter(_.getName.contains("dbImage"))
-		        //                .map { o =>
-		        //                  val name = o.getName
-		        //                  println(name)
-		        //                  println(name.substring(11, name.lastIndexOf("_")))
-		        //                  name.substring(11, name.lastIndexOf("_")).toLong
-		        //                }.toSet
-		        //
-		        //              val pages = listPageId("bj").toSet
-		        //              val pages_ = pages -- pageExists
-		        //              for(i <- 0 until pages_.size)
-		        //                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
+              val pageExists = Util.listFiles("/Users/sasaki/vsh/map/BJG")
+                .filter(_.getName.contains("dbImage"))
+                .map { o =>
+                  val name = o.getName
+                  println(name)
+                  println(name.substring(11, name.lastIndexOf("_")))
+                  name.substring(11, name.lastIndexOf("_")).toLong
+                }.toSet
+
+              val pages = listPageId("BJG", "map").toSet
+              val pages_ = pages -- pageExists
+              for(i <- 0 until pages_.size)
+                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
 		  
 		        /**
 		         * 页面抓取
@@ -84,26 +84,26 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 下载指定微信页面所有图片
      * downloadFileFromPageProcess("")
      */
-        downloadFileFromPageProcess("https://mp.weixin.qq.com/s/UDYXMQJi1ZrcDESLKoMR2g")
+//        downloadFileFromPageProcess("https://mp.weixin.qq.com/s/UDYXMQJi1ZrcDESLKoMR2g")
 
     /**
      * 获取列表页面所有Image Id
      */
-    //        for(i <- 3 to 58)
-    //          saveListPageSource(i, "sh_")
+//            for(i <- 1 to 1)
+//              saveListPageSource(i, "TJN", "map")
 
     /**
      * 删除废照片
      *
      */
-    //    Util.listFiles("/Users/sasaki/vsh/sh")
-    //      .filter(_.getName.contains("dbImage"))
-    //      .foreach { o =>
-    //        if (200 > o.length()) {
-    //          println(o.getName)
-    //          o.delete()
-    //        }
-    //      }
+//        Util.listFiles("/Users/sasaki/vsh/map/SHI")
+//          .filter(_.getName.contains("dbImage"))
+//          .foreach { o =>
+//            if (200 > o.length()) {
+//              println(o.getName)
+//              o.delete()
+//            }
+//          }
 
     /**
      * 图片重新编号
@@ -132,14 +132,13 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //    }
   }  
   
-  def saveListPageSource(page: Int, `city`: String) = {
-    val document = Jsoup.parse(new URL(urlLisSh(page)), 30000)
-    val table = document.getElementsContainingText("Estimated date")
+  def saveListPageSource(page: Int, `city`: String, `type`: String) = {
+    val document = Jsoup.parse(new URL(urlLisTj_map(page)), 30000)
+    val table = document.getElementsContainingText("Document ID"/*"Estimated date"*/)
     val trs = table.select("tr")
     println("page: " + page + ", size: " + trs.size()) // 204
 
-    if(trs.size() > 2)
-    {
+    if(trs.size() > 2) {
       for (i <- 1 until trs.size()) yield {
         val td = trs.get(i).select("td")
         if (!td.isEmpty() && null != td && td.size() > 1) {
@@ -149,7 +148,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
           0
       }
     } filter(_ != 0) foreach { o => 
-      saveSource(Source(o, `city`))
+      saveSource(Source(o, city, `type`))
       println(s"saved: $o")
     }
   }
@@ -255,8 +254,7 @@ class File2Base64Process(file: File, `city`: String) extends Runnable with Query
     val name = file.getName
     val id = name.substring(11, name.lastIndexOf("_")).toLong
     val base64 = NetStreamIOHandler.compileBase64Code(file)
-    val source = Source(id, `city`)
-    source.base64Image = base64
+    val source = Source(id, `city`, "")
     updateSource(source)
     println(
     s"""
@@ -278,7 +276,7 @@ class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
     try {
       val pageHtml = parseResponse(response)
 //      println(Source(pageId, pageHtml, "bj"))
-      val source = Source(pageId, "bj")
+      val source = Source(pageId, "bj", "")
       source.content = pageHtml
       updateSource(source) 
       println(
@@ -303,19 +301,19 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
 
   override def run() {
     try {
-      val url = urlImageSh(id)
+      val url = urlImageBj_map(id)
       println(s"Downloading page url: $url")
-      NetStreamIOHandler(url, fileName(id, "sh")).download
+      NetStreamIOHandler(url, fileName_map(id, "BJG")).download
 
       // 仅创建带page_id记录，与照片名page_id一致
-      val source = Source(id, "")
-      source.imageName = imageName(id)
-      saveSource(source)
+//      val source = Source(id, "", "")
+//      source.imageName = imageName_map(id)
+//      saveSource(source)
 
       println(
         s"""
   Done!
-  Request: ${urlImageSh(id)}
+  Request: ${urlImageBj_map(id)}
   Thread name: ${Thread.currentThread().getName}, process id: $id
 """)
     } catch {
@@ -338,14 +336,24 @@ object ProcessUtil {
 
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-2.jpeg"
+  val imageName_map = (id: Long) => s"vcMap_ID-${id}_No-1.jpeg"
+  
   val fileName = (id: Long, `city`: String) => s"/Users/sasaki/vsh/${`city`}/${imageName(id)}"
+  val fileName_map = (id: Long, `city`: String) => s"/Users/sasaki/vsh/map/${`city`}/${imageName(id)}"
   
   val urlImageSh = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName(id)}"
   val urlImageBj = (id: Long) => s"http://beijing.virtualcities.fr/Asset/Preview/${imageName(id)}"
   val urlImageHk = (id: Long) => s"http://hankou.virtualcities.fr/Asset/Preview/${imageName(id)}"
   val urlImageSz = (id: Long) => s"http://suzhou.virtualcities.fr/Asset/Preview/${imageName(id)}"
   val urlImageTj = (id: Long) => s"http://tianjin.virtualcities.fr/Asset/Preview/${imageName(id)}"
+  
+  val urlImageSh_map = (id: Long) => s"http://www.virtualshanghai.net/Asset/Preview/${imageName_map(id)}"
+  val urlImageBj_map = (id: Long) => s"http://beijing.virtualcities.fr/Asset/Preview/${imageName_map(id)}"
+  val urlImageHk_map = (id: Long) => s"http://hankou.virtualcities.fr/Asset/Preview/${imageName_map(id)}"
+  val urlImageSz_map = (id: Long) => s"http://suzhou.virtualcities.fr/Asset/Preview/${imageName_map(id)}"
+  val urlImageTj_map = (id: Long) => s"http://tianjin.virtualcities.fr/Asset/Preview/${imageName_map(id)}"
 
+  
   // 列表页面
   val urlLisSh = (page: Int) => s"http://www.virtualshanghai.net/Photos/Images?pn=$page&rp=100"
   val urlLisBj = (page: Int) => s"http://beijing.virtualcities.fr/Photos/Images?pn=$page&rp=100"
@@ -353,6 +361,13 @@ object ProcessUtil {
   val urlLisSz = (page: Int) => s"http://suzhou.virtualcities.fr/Photos/Images?pn=$page&rp=100"
   val urlLisTj = (page: Int) => s"http://tianjin.virtualcities.fr/Photos/Images?pn=$page&rp=100"
 
+  // 列表页面、地图
+  val urlLisSh_map = (page: Int) => s"http://www.virtualshanghai.net/Maps/Collection?pn=$page&rp=100"
+  val urlLisBj_map = (page: Int) => s"http://beijing.virtualcities.fr/Maps/Collection?pn=$page&rp=100"
+  val urlLisHk_map = (page: Int) => s"http://hankou.virtualcities.fr/Maps/Collection?pn=$page&rp=100"
+  val urlLisSz_map = (page: Int) => s"http://suzhou.virtualcities.fr/Maps/Collection?pn=$page&rp=100"
+  val urlLisTj_map = (page: Int) => s"http://tianjin.virtualcities.fr/Maps/Collection?pn=$page&rp=100"
+  
   /**
    * 解析Response，即Content
    */

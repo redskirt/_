@@ -70,7 +70,7 @@ trait QueryHelper {
     vsh_source.insert(source);
   }
   
-  def listPageId(city: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city) select(o.pageId)).toArray)
+  def listPageId(city: String, `type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city and o.`type` === `type`) select(o.pageId)).toArray)
   
   def listContent(city: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city) select(o.pageId, o.content, o.imageId)).toArray)
   
@@ -121,10 +121,11 @@ object Sample extends QueryHelper with App {
 
 //  listPageId("bj").take(10).foreach(println)
   
-//  var source = Source(11787, "bj")
+  var source = Source(20000, "SHI_", "map")
 //  source.content = "324"
 //  updateSource(source)
   
-  println(listContent("BJG").size)
+//  println(listContent("BJG").size)
+  saveSource(source)
 }
 

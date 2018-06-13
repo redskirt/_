@@ -33,16 +33,13 @@ case class Source(
   @Column("page_id") 
   val pageId:           Long,
   
-  val city: String) extends Bean {
+  val city: String,
+  val `type`: String) extends Bean {
   var content: String = _
-  @Column("source_image_name") 
-  var sourceImageName: String = _
-  @Column("base64_image") 
-  var base64Image: String = _
-  @Column("image_name") 
-  var imageName: String = _
   @Column("image_id") 
   var imageId: String = _
+  @Column("image_name") 
+  var imageName: String = _
   var timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
