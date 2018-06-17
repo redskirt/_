@@ -28,47 +28,47 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * => 多线程任务
      */
-		                  try {
-		        /**
-		         * 图片抓取
-		         */
-              val pageExists = Util.listFiles("/Users/sasaki/vsh/map/BJG")
-                .filter(_.getName.contains("dbImage"))
-                .map { o =>
-                  val name = o.getName
-                  println(name)
-                  println(name.substring(11, name.lastIndexOf("_")))
-                  name.substring(11, name.lastIndexOf("_")).toLong
-                }.toSet
-
-              val pages = listPageId("BJG", "map").toSet
-              val pages_ = pages -- pageExists
-              for(i <- 0 until pages_.size)
-                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
-		  
-		        /**
-		         * 页面抓取
-		         */
-		        /**
-		         * 0 1 2 3 4 5 6 7
-		         * 1 2 3 4 5 7 6 8
-		         */
-//            val pageIds = pages_ // listPageId("sz")
-//            for (i <- 0 until pageIds.size)
-//              threadPool.execute(new ContentFetchProcess(pageIds(i)))
-		  
-		        /**
-		         * @Deprecated
-		         * 更新Base64至Source表
-		         */
-		  //      val files = Util.listFiles("/Users/sasaki/vsh/bj")
-		  //        .filter(_.getName.contains("dbImage"))
-		  //
-		  //      for (i <- 1100 until files.size)
-		  //        threadPool.execute(new File2Base64Process(files(i), "bj"))
-		  
-		                  } finally
-		                    threadPool.shutdown()
+//		                  try {
+//		        /**
+//		         * 图片抓取
+//		         */
+//              val pageExists = Util.listFiles("/Users/sasaki/vsh/map/BJG")
+//                .filter(_.getName.contains("dbImage"))
+//                .map { o =>
+//                  val name = o.getName
+//                  println(name)
+//                  println(name.substring(11, name.lastIndexOf("_")))
+//                  name.substring(11, name.lastIndexOf("_")).toLong
+//                }.toSet
+//
+//              val pages = listPageId("BJG", "map").toSet
+//              val pages_ = pages -- pageExists
+//              for(i <- 0 until pages_.size)
+//                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
+//		  
+//		        /**
+//		         * 页面抓取
+//		         */
+//		        /**
+//		         * 0 1 2 3 4 5 6 7
+//		         * 1 2 3 4 5 7 6 8
+//		         */
+////            val pageIds = pages_ // listPageId("sz")
+////            for (i <- 0 until pageIds.size)
+////              threadPool.execute(new ContentFetchProcess(pageIds(i)))
+//		  
+//		        /**
+//		         * @Deprecated
+//		         * 更新Base64至Source表
+//		         */
+//		  //      val files = Util.listFiles("/Users/sasaki/vsh/bj")
+//		  //        .filter(_.getName.contains("dbImage"))
+//		  //
+//		  //      for (i <- 1100 until files.size)
+//		  //        threadPool.execute(new File2Base64Process(files(i), "bj"))
+//		  
+//		                  } finally
+//		                    threadPool.shutdown()
     /**
      * => 常规任务
      */
@@ -109,9 +109,9 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 图片重新编号
      */
     
-//    val `city` = "SHI"
+//    val `city` = "SZU"
 //    val list = Util.listFiles(s"/Users/sasaki/vsh/${`city`}")
-//      .filter(_.getName.contains("dbImage"))
+//      .filter(_.getName.contains("SZU"))
 //      .map { o =>
 //        val name = o.getName
 //        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
@@ -123,13 +123,21 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //    for (i <- 0 until list.size) {
 //      val imageId = list(i)._1
 //  		  val file = list(i)._2
-//      val imageId_ = "SHI" + String.format("%04d", (i + 1).asInstanceOf[Integer])
-//      val source = Source(imageId, `city`)
-//      source.imageId = imageId_
+////      val imageId_ = "SHI" + String.format("%04d", (i + 1).asInstanceOf[Integer])
+////      val source = Source(imageId, `city`)
+////      source.imageId = imageId_
 ////      updateSource(source)
-//      println((imageId, source.imageId))
-//      file.renameTo(new File(s"/Users/sasaki/vsh/${`city`}_/$imageId_.jpeg"))
+//
+////      file.renameTo(new File(s"/Users/sasaki/vsh/${`city`}_/$imageId_.jpg"))
 //    }
+    
+     Util.listFiles(s"/Users/sasaki/vsh/SZU")
+//     .take(50)
+     .foreach { o =>
+       val name = o.getName.substring(0, 7)
+//       println(name)
+       o.renameTo(new File(s"/Users/sasaki/vsh/SZU/$name.jpg"))
+     }
   }  
   
   def saveListPageSource(page: Int, `city`: String, `type`: String) = {
