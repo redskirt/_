@@ -12,6 +12,9 @@ import org.opencv.imgproc.Imgproc
 import com.sasaki.isp.util.Util
 import scala.io.Source
 import org.opencv.utils.Converters 
+import java.io.ByteArrayInputStream
+import com.sasaki.isp.kit.ImageGui
+
 
 /**
  * @Author Sasaki
@@ -102,11 +105,11 @@ object ImageColorDescriptor {
 
     Imgproc.calcHist(
       List(mat).asJava, // 图像
-      new MatOfInt(0, 1, 2), // 图像通道，数组表示。灰度图：Array(0)，彩色图Array(0, 1)
+      new MatOfInt(0, 1), // 图像通道，数组表示。灰度图：Array(0)，彩色图Array(0, 1)
       mask, // 遮罩，图像参与计算的部分，不用遮罩可传入Mat()空图像
       histogram, // 目标直方图
-      new MatOfInt(10), // 
-      new MatOfFloat(0f, 128f, 0f, 256f, 0f, 256f) // 二维数组，每个区间的范围
+      new MatOfInt(16, 16), //  
+      new MatOfFloat(0f, 32f, 0, 32f) // 二维数组，每个区间的范围
     )
 
     val normalHistogram = new Mat(mat.size(), CvType.CV_8UC1)
@@ -169,6 +172,87 @@ object Sample {
   val BLACK = new Scalar(0)
   
   implicit def doubou2int(double: Double) = double toInt
+  
+  /**
+   * 绘制直方图
+   */
+  def drawHistogram(mat: Mat) = {
+
+    import scala.collection.JavaConverters._
+
+    // 分割成3个单通道图像 ( R, G, B )
+    val images = new java.util.ArrayList[Mat]()
+    Core.split(mat, images)
+
+    // 设定bin数目
+    val histSize = new MatOfInt(10)
+
+    // 设定取值范围(R,G,B)
+    val channels = new MatOfInt(0)
+    val histRange = new MatOfFloat(0f, 10f)
+
+    // 分别计算直方图
+    val hist_b = new Mat()
+    val hist_g = new Mat()
+    val hist_r = new Mat()
+
+    Imgproc.calcHist(images.subList(0, 1), channels, new Mat(), hist_b, histSize, histRange, false)
+    Imgproc.calcHist(images.subList(1, 2), channels, new Mat(), hist_g, histSize, histRange, false)
+    Imgproc.calcHist(images.subList(2, 3), channels, new Mat(), hist_r, histSize, histRange, false)
+
+    // 分别创建直方图画布
+    val hist_w = 400 // width of the histogram image
+    val hist_h = 400 // height of the histogram image
+    val bin_w = Math.round(hist_w / histSize.get(0, 0)(0))
+
+    val histImage = new Mat(hist_h, hist_w, CvType.CV_8UC3, new Scalar(0, 0, 0));
+
+    // 将直方图归一化到范围 [ 0, histImage.rows ]
+    Core.normalize(hist_b, hist_b, 0, histImage.rows(), Core.NORM_MINMAX, -1, new Mat())
+    Core.normalize(hist_g, hist_g, 0, histImage.rows(), Core.NORM_MINMAX, -1, new Mat())
+    Core.normalize(hist_r, hist_r, 0, histImage.rows(), Core.NORM_MINMAX, -1, new Mat())
+
+    // 在直方图画布上画出直方图
+    for (i <- 1 until histSize.get(0, 0)(0)) {
+      // B component or gray image
+      Imgproc.line(
+          histImage, 
+          new Point(bin_w * (i - 1), 
+          hist_h - Math.round(hist_b.get(i - 1, 0)(0))),
+          new Point(bin_w * (i), 
+          hist_h - Math.round(hist_b.get(i, 0)(0))), 
+          new Scalar(255, 0, 0), 2, 8, 0)
+      // G and R components (if the image is not in gray scale)
+      Imgproc.line(
+          histImage, 
+          new Point(bin_w * (i - 1), 
+          hist_h - Math.round(hist_g.get(i - 1, 0)(0))),
+          new Point(bin_w * (i), 
+          hist_h - Math.round(hist_g.get(i, 0)(0))), 
+          new Scalar(0, 255, 0), 2, 8, 0)
+      Imgproc.line(
+          histImage, 
+          new Point(bin_w * (i - 1), 
+          hist_h - Math.round(hist_r.get(i - 1, 0)(0))),
+          new Point(bin_w * (i), 
+          hist_h - Math.round(hist_r.get(i, 0)(0))), 
+          new Scalar(0, 0, 255), 2, 8, 0)
+    }
+
+    histImage
+//    mat2Image(histImage)
+  }
+  
+  def mat2Image(mat: Mat) = {
+    // create a temporary buffer
+    val buffer = new MatOfByte()
+    // encode the frame in the buffer, according to the PNG format
+    Imgcodecs.imencode(".png", mat, buffer)
+    // build and return an Image created from the image encoded in the  buffer
+    import javafx.scene.image.Image
+    new Image(new ByteArrayInputStream(buffer.toArray()))
+  }
+
   
   def main(args: Array[String]): Unit = {
     
@@ -240,34 +324,35 @@ object Sample {
 //    Core.normalize(src, dst, alpha, beta, norm_type, dtype, mask)
 //     Core.normalize(histogram, histogram, 0, 1, Core.NORM_MINMAX, -1, mask)
      
-//    val gui =  new ImageGui(histogram, "show")
-//    gui.imshow()
-//    ImageGui.waitKey(0)
+    val histogram = drawHistogram(mat)
+    val gui =  new ImageGui(histogram, "show")
+    gui.imshow()
+    ImageGui.waitKey(0)
     
     /**
      * 源目标的所有图的特征向量，得源特征向量数据集，输出csv
      */
    import ImageColorDescriptor._
    
-   val srcPath = "/Users/sasaki/Desktop/dataset"
-   val destContent = Util.listFiles(srcPath)
-//    .take(5)
-    .filter { o => 
-      val name = o.getName
-      name.contains(".jpeg") || name.contains(".jpg") || name.contains(".png")
-    }
-    .map { o =>
-      val name = o.getName
-      val srcMat = Imgcodecs.imread(s"$srcPath/$name")
-      val recorder = image2CsvRecorde(srcMat)
-
-      s"$name, $recorder"
-    } 
-//    .foreach(println)
-    .map(_ + "\n")
-    .reduce(_ + _)
-    
-    Util.writeFile(FEATURES_FILE_PATH, destContent)
+//   val srcPath = "/Users/sasaki/Desktop/dataset"
+//   val destContent = Util.listFiles(srcPath)
+////    .take(5)
+//    .filter { o => 
+//      val name = o.getName
+//      name.contains(".jpeg") || name.contains(".jpg") || name.contains(".png")
+//    }
+//    .map { o =>
+//      val name = o.getName
+//      val srcMat = Imgcodecs.imread(s"$srcPath/$name")
+//      val recorder = image2CsvRecorde(srcMat)
+//
+//      s"$name, $recorder"
+//    } 
+////    .foreach(println)
+//    .map(_ + "\n")
+//    .reduce(_ + _)
+//    
+//    Util.writeFile(FEATURES_FILE_PATH, destContent)
     
 //    val recorde = image2CsvRecorde(mat)
 //    val recorde2 = Util.readTextFile(FEATURES_FILE_PATH)
@@ -282,9 +367,11 @@ object Sample {
 //    println(recorde == recorde2_)
 //    println(calcSimilarity(vector_1, vector_2))
    
-    calcMultiSimilarity(mat, 200) foreach println
+//    calcMultiSimilarity(mat, 200) foreach println
     
 //   calcHistogramFeatures(mat)
+   
+   
   }
 }
 
