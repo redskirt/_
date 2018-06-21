@@ -72,16 +72,18 @@ trait QueryHelper {
   
   def listPageId(city: String, `type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city and o.`type` === `type`) select(o.pageId)).toArray)
   
-  def listContent(city: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city) select(o.pageId, o.content, o.imageId)).toArray)
+  def listContent(city: String, `type`: String) = inTransaction(sf)(from(vsh_source)(o => where(o.city === city and o.`type` === `type`) select(o.pageId, o.content, o.imageId)).toArray)
   
   def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
-      where(source.pageId === o.pageId and source.city === o.city)
-        set ( o.content := source.content/*o.imageId := source.imageId,, o.base64Image := source.base64Image*/)
+      where(source.pageId === o.pageId and source.city === o.city and source.`type` === o.`type`)
+        set ( o.content := source.content)
     )
   }
   
   def saveView(view: View) = inTransaction(sf)(vsh_view.insert(view))
+  
+  def saveViewMap(map: ViewMap) = inTransaction(sf)(vsh_view_map.insert(map))
 }
 
 object WebDiggSchema extends Schema {
@@ -92,6 +94,7 @@ object WebDiggSchema extends Schema {
 object VshSchema extends Schema {
   val vsh_source = table[Source]("vsh_source")
   val vsh_view = table[View]("vsh_view")
+  val vsh_view_map = table[ViewMap]("vsh_view_map")
 }
 
 object Sample extends QueryHelper with App {
@@ -121,11 +124,15 @@ object Sample extends QueryHelper with App {
 
 //  listPageId("bj").take(10).foreach(println)
   
-  var source = Source(20000, "SHI_", "map")
-//  source.content = "324"
-//  updateSource(source)
+  var source = Source(100077, "SHI", "map")
+  source.content = "32_____4"
+  updateSource(source)
   
 //  println(listContent("BJG").size)
-  saveSource(source)
+//  saveSource(source)
+  
+//  var viewMap = new ViewMap
+//  viewMap.authors = "123"
+//  saveViewMap(viewMap)
 }
 

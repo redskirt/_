@@ -45,28 +45,28 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //              val pages_ = pages -- pageExists
 //              for(i <- 0 until pages_.size)
 //                threadPool.execute(new ImageFetchProcess(pages_.toList(i).toInt))
+		  
+		        /**
+		         * 页面抓取
+		         */
+		        /**
+		         * 0 1 2 3 4 5 6 7
+		         * 1 2 3 4 5 7 6 8
+		         */
+//            val pageIds =  listPageId("TJN", "map") // pages_ 
+//            for (i <- 0 until Array(1449).size /*pageIds.size*/)
+//              threadPool.execute(new ContentFetchProcess(pageIds(i)))
+		  
+		        /**
+		         * @Deprecated
+		         * 更新Base64至Source表
+		         */
+//		        val files = Util.listFiles("/Users/sasaki/vsh/bj")
+//		          .filter(_.getName.contains("dbImage"))
 //		  
-//		        /**
-//		         * 页面抓取
-//		         */
-//		        /**
-//		         * 0 1 2 3 4 5 6 7
-//		         * 1 2 3 4 5 7 6 8
-//		         */
-////            val pageIds = pages_ // listPageId("sz")
-////            for (i <- 0 until pageIds.size)
-////              threadPool.execute(new ContentFetchProcess(pageIds(i)))
-//		  
-//		        /**
-//		         * @Deprecated
-//		         * 更新Base64至Source表
-//		         */
-//		  //      val files = Util.listFiles("/Users/sasaki/vsh/bj")
-//		  //        .filter(_.getName.contains("dbImage"))
-//		  //
-//		  //      for (i <- 1100 until files.size)
-//		  //        threadPool.execute(new File2Base64Process(files(i), "bj"))
-//		  
+//		        for (i <- 1100 until files.size)
+//		          threadPool.execute(new File2Base64Process(files(i), "bj"))
+		  
 //		                  } finally
 //		                    threadPool.shutdown()
     /**
@@ -76,7 +76,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * 页面清洗
      */
-//          source2ViewProcess("SHI")
+          source2ViewMapProcess("HKU", "map")
 
 //        val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
 
@@ -131,13 +131,13 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 ////      file.renameTo(new File(s"/Users/sasaki/vsh/${`city`}_/$imageId_.jpg"))
 //    }
     
-     Util.listFiles(s"/Users/sasaki/vsh/SZU")
-//     .take(50)
-     .foreach { o =>
-       val name = o.getName.substring(0, 7)
+//     Util.listFiles(s"/Users/sasaki/vsh/city/HKU")
+////     .take(1)
+//     .foreach { o =>
+//       val name = o.getName.substring(0, 7)
 //       println(name)
-       o.renameTo(new File(s"/Users/sasaki/vsh/SZU/$name.jpg"))
-     }
+//       o.renameTo(new File(s"/Users/sasaki/vsh/city/HKU/$name.jpg"))
+//     }
   }  
   
   def saveListPageSource(page: Int, `city`: String, `type`: String) = {
@@ -178,8 +178,85 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     }
   }
 
-  def source2ViewProcess(city: String) = {
-    val contents = listContent(city) //take(10)
+//  def source2ViewProcess(city: String) = {
+//    val contents = listContent(city) //take(10)
+//    contents.foreach { o =>
+//      val pageId = o._1
+//      val html = o._2
+//      val imageId = o._3
+//      val document = Jsoup.parse(html)
+//      val table = document.getElementsByClass("defaultDocTable")
+//      val trs = table.select("tr")
+//
+//      var photographer: String = ""
+//      
+//      val map = {
+//        for (i <- 0 until trs.size()) yield {
+//          val tr = trs.get(i)
+//          val tds = tr.select("td")
+//          val columnName = tds.first().text()
+//          val columnText = tds.last().getElementsByClass("defaultDocTableContent")
+//
+//          if("Photographer" == columnName) {
+//            val href_text = columnText.select("a[href]").first()
+//            val href = ProcessUtil.basePath + href_text.attr("href")
+//            val text = href_text.text()
+//            photographer = s"$text, Reference: $href"
+//          } 
+//            
+//          val ul = columnText.select("ul")
+//          val textOrUl =
+//            if (ul.isEmpty())
+//              columnText.text()
+//            else {
+//              val lis = ul.select("li")
+//              if (!lis.isEmpty()) { //
+//                  for (j <- 0 until lis.size()) yield {
+//                    val li = lis.get(j)
+//                    val href_text = li.selectFirst("a[href]")
+//                    val href = ProcessUtil.basePath + href_text.attr("href")
+//                    val text = href_text.text()
+//                    (text, href)
+//                  }
+//                } map {
+//                  case (text, href) => //
+//                    s"$text, Reference: $href"
+//                } mkString (" | ")
+//              else ""
+//            }
+//          (columnName, textOrUl)
+//        }
+//      } toMap
+//      
+//      val view = new com.sasaki.wp.persistence.poso.View
+//      view.pageId = pageId
+//      view.imageId = imageId
+//      view.city = city
+//      view.title = map.getOrElse("Title", "")
+//      view.collection = map.getOrElse("Collection", "")
+//      view.location = map.getOrElse("Location", "") 
+//      view.extent = map.getOrElse("Extent", "")
+//      view.year = map.getOrElse("Year", "")
+//      view.date = map.getOrElse("Date", "")
+//      view.photographer = photographer
+//      view.estimatedDate = map.getOrElse("Estimated date", "")
+//      view.imageType = map.getOrElse("Image type", "")
+//      view.materialFormOfImage = map.getOrElse("Material form of image", "")
+//      view.privateRepository = map.getOrElse("Private Repository", "")
+//      view.notes = map.getOrElse("Note(s)", "")
+//      view.keywordsEn = map.getOrElse("Keyword(s) [en]", "")
+//      view.keywordsFr = map.getOrElse("Keyword(s) [fr]", "")
+//      view.streetName = map.getOrElse("Street name", "")
+//      view.repository = map.getOrElse("Repository", "")
+//      view.building = map.getOrElse("Building", "")
+//      view.relatedImage = map.getOrElse("Related Image", "")
+//      
+//      saveView(view)
+//    }
+//  }
+  
+  def source2ViewMapProcess(city: String, `type`: String) = {
+    val contents = listContent(city, `type`) //take(10)
     contents.foreach { o =>
       val pageId = o._1
       val html = o._2
@@ -228,30 +305,24 @@ object VirtualShanghaiWebDigg extends QueryHelper {
         }
       } toMap
       
-      val view = new com.sasaki.wp.persistence.poso.View
-      view.pageId = pageId
-      view.imageId = imageId
+      val view = new com.sasaki.wp.persistence.poso.ViewMap
+      view.page_id = pageId
+      view.image_id = imageId
       view.city = city
-      view.title = map.getOrElse("Title", "")
+      view.original_title = map.getOrElse("Original title", "")
+      view.transliteration = map.getOrElse("Transliteration", "") 
+      view.alternative_orivinal_title = map.getOrElse("Alternative original title", "") 
       view.collection = map.getOrElse("Collection", "")
-      view.location = map.getOrElse("Location", "") 
-      view.extent = map.getOrElse("Extent", "")
+      view.digtized_file = map.getOrElse("Digitized file", "")
+      view.map_type = map.getOrElse("Map type", "")
+      view.authors = map.getOrElse("Author(s)", "")
       view.year = map.getOrElse("Year", "")
-      view.date = map.getOrElse("Date", "")
-      view.photographer = photographer
-      view.estimatedDate = map.getOrElse("Estimated date", "")
-      view.imageType = map.getOrElse("Image type", "")
-      view.materialFormOfImage = map.getOrElse("Material form of image", "")
-      view.privateRepository = map.getOrElse("Private Repository", "")
-      view.notes = map.getOrElse("Note(s)", "")
-      view.keywordsEn = map.getOrElse("Keyword(s) [en]", "")
-      view.keywordsFr = map.getOrElse("Keyword(s) [fr]", "")
-      view.streetName = map.getOrElse("Street name", "")
+      view.size = map.getOrElse("Size", "")
+      view.map_support = map.getOrElse("Map support", "")
+      view.place_of_publication = map.getOrElse("Place of publication", "")
       view.repository = map.getOrElse("Repository", "")
-      view.building = map.getOrElse("Building", "")
-      view.relatedImage = map.getOrElse("Related Image", "")
-      
-      saveView(view)
+      view.publishers = map.getOrElse("Publisher(s)", "")
+      saveViewMap(view)
     }
   }
 }
@@ -278,19 +349,19 @@ class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
   import com.sasaki.wp.persistence.poso._
 
   override def run() {
-    val get = new HttpGet(urlContentBj(pageId))
+    val get = new HttpGet(urlContentTj_map(pageId))
     val response = client.execute(get)
 
     try {
       val pageHtml = parseResponse(response)
 //      println(Source(pageId, pageHtml, "bj"))
-      val source = Source(pageId, "bj", "")
+      val source = Source(pageId, "TJN", "map")
       source.content = pageHtml
       updateSource(source) 
       println(
         s"""
   Done!
-  Request: ${urlContentBj(pageId)}
+  Request: ${urlContentHk_map(pageId)}
   Thread name: ${Thread.currentThread().getName}, process id: $pageId
 """)
     } catch {
@@ -342,6 +413,12 @@ object ProcessUtil {
   val urlContentBj = (id: Long) => s"http://beijing.virtualcities.fr/Photos/Images?ID=$id"
   val urlContentSz = (id: Long) => s"http://suzhou.virtualcities.fr/Photos/Images?ID=$id"
 
+  val urlContentSh_map = (id: Long) => s"http://www.virtualshanghai.net/Maps/Collection?ID=$id"
+  val urlContentBj_map = (id: Long) => s"http://beijing.virtualcities.fr/Maps/Collection?ID=$id"
+  val urlContentHk_map = (id: Long) => s"http://hankou.virtualcities.fr/Maps/Collection?ID=$id"
+  val urlContentTj_map = (id: Long) => s"http://tianjin.virtualcities.fr/Maps/Collection?ID=$id"
+  val urlContentSz_map = (id: Long) => s"http://suzhou.virtualcities.fr/Maps/Collection?ID=$id"
+  
   // 部分imageName名称后边为No-01.jpeg，非No-1.jpeg
   val imageName = (id: Long) => s"dbImage_ID-${id}_No-2.jpeg"
   val imageName_map = (id: Long) => s"vcMap_ID-${id}_No-1.jpeg"

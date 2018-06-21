@@ -44,6 +44,7 @@ case class Source(
 }
 
 class View extends Bean {
+      
   @Column("page_id")
   var pageId: Long = _ // 仅VSH来源的照片
   @Column("image_id")
@@ -79,4 +80,29 @@ class View extends Bean {
   var relatedImage: String = _
   val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
+
+class ViewMap extends Bean {
+  
+  
+  var remark: String = _
+  var image_name: String = _
+  var image_id: String = _
+  var city: String = _
+	var page_id: Long = _ // 仅VSH来源的照片
+	var original_title: String = _
+	var transliteration: String = _
+	var alternative_orivinal_title: String = _
+	var collection: String = _
+	var digtized_file: String = _
+	var map_type: String = _
+	var authors: String = _
+	var year: String = _
+	var size: String = _
+	var map_support: String = _
+	var place_of_publication: String = _
+	var repository: String = _
+	var publishers: String = _
+	val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+}
+
 
