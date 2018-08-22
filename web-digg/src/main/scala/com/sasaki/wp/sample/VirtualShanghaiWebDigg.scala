@@ -76,7 +76,7 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     /**
      * 页面清洗
      */
-          source2ViewMapProcess("HKU", "map")
+//          source2ViewMapProcess("HKU", "map")
 
 //        val html = scala.io.Source.fromURL("https://mp.weixin.qq.com/mp/profile_ext?action=getmsg&__biz=MzI2MTM2MTIwOQ==&f=json&offset=20&count=10&is_ok=1&scene=124&uin=777&key=777&pass_ticket=&wxtoken=&appmsg_token=957_aHWsQD3pwQQ84p6thk-KWOHVUraDd4dGbPibaw~~&x5=0&f=json")
 
@@ -109,34 +109,35 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 图片重新编号
      */
     
-//    val `city` = "SZU"
-//    val list = Util.listFiles(s"/Users/sasaki/vsh/${`city`}")
-//      .filter(_.getName.contains("SZU"))
-//      .map { o =>
-//        val name = o.getName
-//        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
-//        (imageId, o)
-//      }.sortBy(o => o._1)
-//      
-//      println(list.size)
-//      
-//    for (i <- 0 until list.size) {
-//      val imageId = list(i)._1
-//  		  val file = list(i)._2
-////      val imageId_ = "SHI" + String.format("%04d", (i + 1).asInstanceOf[Integer])
-////      val source = Source(imageId, `city`)
-////      source.imageId = imageId_
-////      updateSource(source)
-//
-////      file.renameTo(new File(s"/Users/sasaki/vsh/${`city`}_/$imageId_.jpg"))
-//    }
+    val city = "HKU"
+    val list = Util.listFiles(s"/Users/sasaki/vsh/map/$city")
+      .filter(_.getName.contains("dbImage"))
+      .map { o =>
+        val name = o.getName
+        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
+        (imageId, o)
+      }.sortBy(o => o._1)
+      
+      println(list.size)
+      
+    for (i <- 0 until list.size) {
+      val imageId = list(i)._1
+  		  val file = list(i)._2
+      val imageId_ = city + String.format("%04d", (i+1).asInstanceOf[Integer])
+      val source = Source(imageId, `city`, "map")
+      source.imageId = imageId_
+      updateSource(source)
+      println(i)
+//      println(file.renameTo(new File(s"/Users/sasaki/vsh/map/${city}_/$imageId_.jpg")))
+    }
     
-//     Util.listFiles(s"/Users/sasaki/vsh/city/HKU")
+//     Util.listFiles(s"/Users/sasaki/vsh/city/TJN")
 ////     .take(1)
 //     .foreach { o =>
 //       val name = o.getName.substring(0, 7)
+//       val name_ = name.replace("TJG", "TJN")
 //       println(name)
-//       o.renameTo(new File(s"/Users/sasaki/vsh/city/HKU/$name.jpg"))
+//       o.renameTo(new File(s"/Users/sasaki/vsh/city/TJN/$name_.jpg"))
 //     }
   }  
   

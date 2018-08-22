@@ -77,7 +77,7 @@ trait QueryHelper {
   def updateSource(source: Source) = inTransaction(sf) {
     update(vsh_source)(o =>
       where(source.pageId === o.pageId and source.city === o.city and source.`type` === o.`type`)
-        set ( o.content := source.content)
+        set (o.imageId := source.imageId/*o.content := source.content*/)
     )
   }
   

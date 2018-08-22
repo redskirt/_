@@ -102,7 +102,7 @@ object ImageColorDescriptor {
     val histogram = new Mat(mat.size(), CvType.CV_8UC1)
 
     import scala.collection.JavaConverters._
-
+ 
     Imgproc.calcHist(
       List(mat).asJava, // 图像
       new MatOfInt(0, 1), // 图像通道，数组表示。灰度图：Array(0)，彩色图Array(0, 1)
