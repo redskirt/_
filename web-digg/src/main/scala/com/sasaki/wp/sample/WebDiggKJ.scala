@@ -140,11 +140,10 @@ object WebDiggKJ extends QueryHelper {
 //       o.renameTo(new File(s"/Users/sasaki/vsh/city/TJN/$name_.jpg"))
 //     }
     
-//    parseLocalTitleListPageProcess("/Users/sasaki/Desktop/t.html")
+    parseLocalTitleListPageProcess("/Users/sasaki/Desktop/t2.html")
 //      .foreach(o => downloadFileFromPageProcess(o))
-    
-    downloadTextFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzU3MDQzMjQzNQ==&mid=2247490164&idx=1&sn=10e566d27a56f94a793b5d671f939b6d&chksm=fceed4a8cb995dbe7908a208ce66649bb71ccc93da6c4b1e7eff59d46545e3c6355e650a4556&scene=38#wechat_redirect")
-      
+        .foreach(o => downloadTextFromPageProcess(o))      
+        
   }  
   
   def saveListPageSource(page: Int, `city`: String, `type`: String) = {
@@ -191,14 +190,15 @@ object WebDiggKJ extends QueryHelper {
     val document = Jsoup.parse(new URL(url), 10000)
     val content = document.getElementById("js_content")
     val result = fetchImageUrlFromPage(url)
-    val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_')
-    val names = result._2.zipWithIndex.map(_._2 + ".jpg")
+    val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_') + ".txt"
     val listp = content.getElementsByTag("p")
-    for(i <- 0 until listp.size()) {
-      val o = listp.get(i)
-      val text = o.text()  
-      println(text)
-    }
+
+    val output =
+      {
+        for (i <- 0 until listp.size()) yield { listp.get(i).text() }
+      } mkString("\n")
+    
+    Util.writeFile("/Users/sasaki/KJ/wx/wtyx/" + title, output)
   }
   
   /**
@@ -517,7 +517,7 @@ object ProcessUtil {
     try {
       val document = Jsoup.parse(new URL(url), 10000)
       val imgs = document.select("img[data-src]")
-      val response: HttpResponse = ProcessUtil.client.execute(get)
+      val response: HttpResponse = ProcessUtil.client.execute(get)  
       val urls = for (i <- 0 until imgs.size()) yield imgs.get(i).attr("data-src")
       val line = document.html().lines.filter(_.contains("msg_title")).toArray.head
       val title = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""))
