@@ -19,7 +19,7 @@ import com.sasaki.wp.util.Util
  * @Description
  */
 
-object VirtualShanghaiWebDigg extends QueryHelper {
+object WebDiggKJ extends QueryHelper {
   val threadPool = Executors.newFixedThreadPool(5)
   
   import ProcessUtil._
@@ -109,27 +109,27 @@ object VirtualShanghaiWebDigg extends QueryHelper {
      * 图片重新编号
      */
     
-    val city = "HKU"
-    val list = Util.listFiles(s"/Users/sasaki/vsh/map/$city")
-      .filter(_.getName.contains("dbImage"))
-      .map { o =>
-        val name = o.getName
-        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
-        (imageId, o)
-      }.sortBy(o => o._1)
-      
-      println(list.size)
-      
-    for (i <- 0 until list.size) {
-      val imageId = list(i)._1
-  		  val file = list(i)._2
-      val imageId_ = city + String.format("%04d", (i+1).asInstanceOf[Integer])
-      val source = Source(imageId, `city`, "map")
-      source.imageId = imageId_
-      updateSource(source)
-      println(i)
-//      println(file.renameTo(new File(s"/Users/sasaki/vsh/map/${city}_/$imageId_.jpg")))
-    }
+//    val city = "HKU"
+//    val list = Util.listFiles(s"/Users/sasaki/vsh/map/$city")
+//      .filter(_.getName.contains("dbImage"))
+//      .map { o =>
+//        val name = o.getName
+//        val imageId = name.substring(11, name.lastIndexOf("_")).toLong
+//        (imageId, o)
+//      }.sortBy(o => o._1)
+//      
+//      println(list.size)
+//      
+//    for (i <- 0 until list.size) {
+//      val imageId = list(i)._1
+//  		  val file = list(i)._2
+//      val imageId_ = city + String.format("%04d", (i+1).asInstanceOf[Integer])
+//      val source = Source(imageId, `city`, "map")
+//      source.imageId = imageId_
+//      updateSource(source)
+//      println(i)
+////      println(file.renameTo(new File(s"/Users/sasaki/vsh/map/${city}_/$imageId_.jpg")))
+//    }
     
 //     Util.listFiles(s"/Users/sasaki/vsh/city/TJN")
 ////     .take(1)
@@ -139,6 +139,12 @@ object VirtualShanghaiWebDigg extends QueryHelper {
 //       println(name)
 //       o.renameTo(new File(s"/Users/sasaki/vsh/city/TJN/$name_.jpg"))
 //     }
+    
+//    parseLocalTitleListPageProcess("/Users/sasaki/Desktop/t.html")
+//      .foreach(o => downloadFileFromPageProcess(o))
+    
+    downloadTextFromPageProcess("https://mp.weixin.qq.com/s?__biz=MzU3MDQzMjQzNQ==&mid=2247490164&idx=1&sn=10e566d27a56f94a793b5d671f939b6d&chksm=fceed4a8cb995dbe7908a208ce66649bb71ccc93da6c4b1e7eff59d46545e3c6355e650a4556&scene=38#wechat_redirect")
+      
   }  
   
   def saveListPageSource(page: Int, `city`: String, `type`: String) = {
@@ -162,20 +168,53 @@ object VirtualShanghaiWebDigg extends QueryHelper {
     }
   }
   
+  /** 
+   * 解析微信标题列表页面
+   */
+  def parseLocalTitleListPageProcess(url: String): Seq[String] = {
+    val file = new File(url)
+    val document = Jsoup.parse(file, "utf-8")
+    val js_history_list = document.getElementById("js_history_list")
+    val list = js_history_list.getElementsByClass("weui_msg_card")
+    for(i <- 0 until list.size()) yield {
+      val o = list.get(i)
+      val weui_msg_card_bd = o.child(1)
+      val weui_media_box = weui_msg_card_bd.child(0)
+      weui_media_box.attr("hrefs")
+    }
+  }
+  
+  /**
+   * 指定单个微信页面，抓取当前页面文本
+   */
+  def downloadTextFromPageProcess(url: String) = {
+    val document = Jsoup.parse(new URL(url), 10000)
+    val content = document.getElementById("js_content")
+    val result = fetchImageUrlFromPage(url)
+    val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_')
+    val names = result._2.zipWithIndex.map(_._2 + ".jpg")
+    val listp = content.getElementsByTag("p")
+    for(i <- 0 until listp.size()) {
+      val o = listp.get(i)
+      val text = o.text()  
+      println(text)
+    }
+  }
+  
   /**
    * 指定单个微信页面，抓取当前页面所有图片
    */
   def downloadFileFromPageProcess(url: String) = {
     val result = fetchImageUrlFromPage(url)
-    val title = result._1
+    val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_')
     val urls = result._2
-    val dir = s"/Users/sasaki/KJ/wx/$title"
+    val dir = s"/Users/sasaki/KJ/wx/yc/$title"
     val file = new File(dir)
     if(!file.exists())
       file.mkdir()
     for(i <- 0 until urls.size)  {
       println("url: " + i + ", " + urls(i))
-      NetStreamIOHandler(urls(i), s"$dir/$i.jpeg").download
+      NetStreamIOHandler(urls(i), s"$dir/$i.jpg") download
     }
   }
 
