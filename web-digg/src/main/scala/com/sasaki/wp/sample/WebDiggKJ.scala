@@ -140,9 +140,11 @@ object WebDiggKJ extends QueryHelper {
 //       o.renameTo(new File(s"/Users/sasaki/vsh/city/TJN/$name_.jpg"))
 //     }
     
-    parseLocalTitleListPageProcess("/Users/sasaki/Desktop/t2.html")
-//      .foreach(o => downloadFileFromPageProcess(o))
-        .foreach(o => downloadTextFromPageProcess(o))      
+   val a = parseLocalTitleListPageProcess("/Users/sasaki/Desktop/sywt.html")
+   for(i <- 206 until a.size)
+     downloadFileFromPageProcess(a(i), true)
+//      .foreach(o => downloadFileFromPageProcess(o, true))
+//        .foreach(o => downloadTextFromPageProcess(o))      
         
   }  
   
@@ -198,23 +200,34 @@ object WebDiggKJ extends QueryHelper {
         for (i <- 0 until listp.size()) yield { listp.get(i).text() }
       } mkString("\n")
     
-    Util.writeFile("/Users/sasaki/KJ/wx/wtyx/" + title, output)
+    Util.writeFile("/Users/sasaki/KJ/wx/nt/" + title, output)
   }
   
   /**
    * 指定单个微信页面，抓取当前页面所有图片
    */
-  def downloadFileFromPageProcess(url: String) = {
+  def downloadFileFromPageProcess(url: String, fetchText: Boolean = false) = {
+    val rootDir = "/Users/sasaki/git/doc/kj/wx/sywt"
     val result = fetchImageUrlFromPage(url)
     val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_')
     val urls = result._2
-    val dir = s"/Users/sasaki/KJ/wx/yc/$title"
+    val dir = s"$rootDir/$title"
     val file = new File(dir)
     if(!file.exists())
       file.mkdir()
     for(i <- 0 until urls.size)  {
       println("url: " + i + ", " + urls(i))
       NetStreamIOHandler(urls(i), s"$dir/$i.jpg") download
+    }
+    
+    if(fetchText) {
+      val listp = result._3.getElementById("js_content").getElementsByTag("p")
+      val output =
+        {
+          for (i <- 0 until listp.size()) yield { listp.get(i).text() }
+        } mkString("\n")
+      
+      Util.writeFile(s"$rootDir/$title/$title.txt", output)
     }
   }
 
@@ -521,7 +534,7 @@ object ProcessUtil {
       val urls = for (i <- 0 until imgs.size()) yield imgs.get(i).attr("data-src")
       val line = document.html().lines.filter(_.contains("msg_title")).toArray.head
       val title = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""))
-      (title, urls)
+      (title, urls, document)
     } finally {
       if (null != get)
         get.releaseConnection()
