@@ -81,6 +81,18 @@ class View extends Bean {
   val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
+class Bristol extends Bean {
+  var title: String = _
+  var collection: String = _
+  var estimated_date: String = _
+  var notes: String = _
+  var indentifier: String = _
+  var copyright: String = _
+  var media: String = _
+  var tags: String = _
+  val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+}
+
 class ViewMap extends Bean {
   
   
