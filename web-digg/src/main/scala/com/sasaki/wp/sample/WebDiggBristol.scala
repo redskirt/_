@@ -9,6 +9,10 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 import com.sasaki.wp.util.NetStreamIOHandler
 import com.sasaki.wp.util.NetStreamIOHandler
+import com.sasaki.wp.util.HttpDownload
+import com.sasaki.wp.persistence.poso.Bristol
+import com.sasaki.wp.persistence.QueryHelper
+import java.util.concurrent.Executors
 
 /**
  * @Author Sasaki
@@ -16,7 +20,7 @@ import com.sasaki.wp.util.NetStreamIOHandler
  * @Timestamp Aug 25, 2018 8:43:04 PM
  * @Description
  */
-object WebDiggBristol {
+object WebDiggBristol extends QueryHelper {
   
   val client = org.apache.http.impl.client.HttpClients.createDefault()
   val root = "https://www.hpcbristol.net"
@@ -41,7 +45,7 @@ object WebDiggBristol {
      */
     //    val array = new ArrayBuffer[String]
     //    Seq(
-    //    "/collections/anthony-augustus",
+//        "/collections/anthony-augustus",
     //    "/collections/armstrong-william",
     //    "/collections/atchison-george",
     //    "/collections/baggs-ernest",
@@ -172,66 +176,91 @@ object WebDiggBristol {
     /**
      * 抓取照片文件及信息
      */
-    Source.fromFile(file).getLines()
-      .take(1)
-      .foreach { o =>
-        println(o)
-        val document = Jsoup.parse(new URL(o), 5000)
-        val title = document.getElementById("page-title").child(0).text()
-        val notes = document
-          .getElementsByClass("field__note").first()
-          .getElementsByClass("field__item").first()
-          .getElementsByTag("p").text()
-        val collection = {
-          val a = document
-            .getElementsByClass("field__collection").first()
-            .getElementsByClass("field__item").first()
-            .getElementsByTag("a")
+    val threadPool = Executors.newFixedThreadPool(10)
+    val list = Source.fromFile(file).getLines().toArray
+    try {
+      for (i <- 0 until 5/*list.size*/)
+        threadPool.execute(new DownloadImageBristolProcess(list(i)))
+    } finally
+      threadPool.shutdown()
+    
+  }
+}
 
-          a.text() + s"; $root" + a.attr("href")
-        }
-        val identifier = document
-          .getElementsByClass("field__identifier").first()
-          .getElementsByClass("field__item").first()
-          .text()
-        val copyright = {
-          val a = document
-            .getElementsByClass("field__rights").first()
-            .getElementsByClass("field__item").first()
-            .getElementsByTag("a")
+class DownloadImageBristolProcess(url: String) extends Runnable with QueryHelper {
 
-          a.text() + s"; $root" + a.attr("href")
-        }
-        val estimated_date = document
-          .getElementsByClass("field__date-estimate").first()
-          .getElementsByClass("field__item").first()
-          .text()
-        val tag_item = document
-          .getElementsByClass("field__tags").first()
-          .getElementsByClass("field__item")
-        val tag = {
-          for (i <- 0 until tag_item.size()) yield {
-            tag_item.get(i).child(0).text()
-          }
-        } mkString ("|")
-        val media = document
-          .getElementsByClass("field__image-type").first()
-          .getElementsByClass("field__item").first()
-          .text()
+  val root = "https://www.hpcbristol.net"
+ 
+  def run(): Unit = {
+    println(s"url: $url")
+    val document = Jsoup.parse(new URL(url), 50000)
+    val title = document.getElementById("page-title").child(0).text()
+    val note = document
+      .getElementsByClass("field__note").first()
+      .getElementsByClass("field__item").first()
+      .getElementsByTag("p").text()
+    val collection = {
+      val a = document
+        .getElementsByClass("field__collection").first()
+        .getElementsByClass("field__item").first()
+        .getElementsByTag("a")
 
-        val src = root + document
-          //          .getElementsByClass("image-wrapper")
-          //          .first()
-          //          .getElementsByTag("img")
-          //          .first()
-          //          .attr("src")
-          .getElementsByClass("field__download").first()
-          .getElementsByTag("li").first()
-          .getElementsByTag("a").first()
-          .attr("href")
+      a.text() + s"; $root" + a.attr("href")
+    }
+    val identifier = document
+      .getElementsByClass("field__identifier").first()
+      .getElementsByClass("field__item").first()
+      .text()
+    val copyright = {
+      val a = document
+        .getElementsByClass("field__rights").first()
+        .getElementsByClass("field__item").first()
+        .getElementsByTag("a")
 
-        println(src)
-        NetStreamIOHandler(src, "/Users/sasaki/Desktop/a.jpg").download
+      a.text() + s"; $root" + a.attr("href")
+    }
+    val estimated_date = document
+      .getElementsByClass("field__date-estimate").first()
+      .getElementsByClass("field__item").first()
+      .text()
+    val tag_item = document
+      .getElementsByClass("field__tags").first()
+      .getElementsByClass("field__item")
+    val tag = {
+      for (i <- 0 until tag_item.size()) yield {
+        tag_item.get(i).child(0).text()
       }
+    } mkString ("|")
+    val media = document
+      .getElementsByClass("field__image-type").first()
+      .getElementsByClass("field__item").first()
+      .text()
+
+    val src = root + document
+      //          .getElementsByClass("image-wrapper")
+      //          .first()
+      //          .getElementsByTag("img")
+      //          .first()
+      //          .attr("src")
+      .getElementsByClass("field__download").first()
+      .getElementsByTag("li").first()
+      .getElementsByTag("a").first()
+      .attr("href")
+
+    val original_image_name = url.substring(url.lastIndexOf("/") + 1, url.length()) + ".jpg"
+    val bristol = new Bristol
+    bristol.title = title
+    bristol.collection = collection
+    bristol.copyright = copyright
+    bristol.tag = tag
+    bristol.media = media
+    bristol.identifier = identifier
+    bristol.note = note
+    bristol.estimated_date = estimated_date
+    bristol.original_image_name = original_image_name
+    saveBristol(bristol)
+
+    HttpDownload.download(src, s"/Users/sasaki/git/doc/kj/bristol/$original_image_name.jpg")
+    println("download url: " + src + " image_name: " + original_image_name)
   }
 }

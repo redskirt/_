@@ -18,16 +18,16 @@ protected class NetStreamIOHandler(url: String, pathWithFileName: String) {
   def download = {
     var inputStream: InputStream = null
     val get = new org.apache.http.client.methods.HttpGet(url)
-    get.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36")
-    get.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-    get.addHeader("Cookie", "has_js=1; _ga=GA1.2.1240446794.1535084106; _gid=GA1.2.1515941179.1535198952")
-    get.addHeader("Connection", "Keep-Alive")
+//    get.addHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36")
+//    get.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+//    get.addHeader("Cookie", "has_js=1; _ga=GA1.2.1240446794.1535084106; _gid=GA1.2.1515941179.1535198952")
+//    get.addHeader("Connection", "Keep-Alive")
 
     try {
       val response = client.execute(get)
-      response.addHeader("Connection", "Keep-Alive")
-      response.addHeader("Cache-Control", "no-cache, must-revalidate")
-      response.addHeader("Content-Type", "image/jpeg")
+//      response.addHeader("Connection", "Keep-Alive")
+//      response.addHeader("Cache-Control", "no-cache, must-revalidate")
+//      response.addHeader("Content-Type", "image/jpeg")
       
       inputStream = response.getEntity.getContent 
       // 注意，网络传输中避免使用 inputStream.available() 方法获得流的长度
@@ -127,15 +127,27 @@ object TryResource {
   }
   
   def main(args: Array[String]): Unit = {
-//    var inputStream: InputStream = null
-//     val byteArrayOutputStream = new ByteArrayOutputStream()
-//    close(inputStream, byteArrayOutputStream){ o =>
-//      val a:InputStream = o(1).asInstanceOf[InputStream]
-//    }
+    //    var inputStream: InputStream = null
+    //     val byteArrayOutputStream = new ByteArrayOutputStream()
+    //    close(inputStream, byteArrayOutputStream){ o =>
+    //      val a:InputStream = o(1).asInstanceOf[InputStream]
+    //    }
+
+    //    println {
+    //      NetStreamIOHandler.compileBase64Code(new File("/Users/sasaki/vsh/hk/dbImage_ID-15869_No-1.jpeg")).replace("\n", "")
+    //    }
+
+    val client = org.apache.http.impl.client.HttpClients.createDefault()
+    val get = new org.apache.http.client.methods.HttpGet("https://www.hpcbristol.net/download/image/44618")
+    val response = client.execute(get)
+    val inputStream = response.getEntity.getContent
+    val streamLength = response.getEntity.getContentLength.toInt
+    println(response.getEntity.getContentType)
+    println(streamLength)
     
-    println {
-      NetStreamIOHandler.compileBase64Code(new File("/Users/sasaki/vsh/hk/dbImage_ID-15869_No-1.jpeg")).replace("\n", "")
-    }
+//    println {
+//      NetStreamIOHandler("https://www.hpcbristol.net/download/image/44618", "/Users/sasaki/Desktop/a.jpg").download
+//    }
     
   }
 }
