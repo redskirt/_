@@ -176,65 +176,93 @@ object WebDiggBristol extends QueryHelper {
     /**
      * 抓取照片文件及信息
      */
-    val threadPool = Executors.newFixedThreadPool(10)
+    val threadPool = Executors.newFixedThreadPool(15)
     val list = Source.fromFile(file).getLines().toArray
     try {
-      for (i <- 0 until 5/*list.size*/)
-        threadPool.execute(new DownloadImageBristolProcess(list(i)))
+       // 4791 5105 16414 16415 
+      for (i <- 18000 until list.size)
+        threadPool.execute(new DownloadImageBristolProcess(list(i), i + 1))
     } finally
       threadPool.shutdown()
-    
   }
 }
 
-class DownloadImageBristolProcess(url: String) extends Runnable with QueryHelper {
+class DownloadImageBristolProcess(url: String, id: Int) extends Runnable with QueryHelper {
 
   val root = "https://www.hpcbristol.net"
  
   def run(): Unit = {
-    println(s"url: $url")
+    println(s"id: $id, url: $url")
     val document = Jsoup.parse(new URL(url), 50000)
     val title = document.getElementById("page-title").child(0).text()
-    val note = document
+    val note = Option(document
       .getElementsByClass("field__note").first()
       .getElementsByClass("field__item").first()
-      .getElementsByTag("p").text()
-    val collection = {
+      .getElementsByTag("p").text()).getOrElse("")
+    val collection = Option({
       val a = document
         .getElementsByClass("field__collection").first()
         .getElementsByClass("field__item").first()
         .getElementsByTag("a")
 
       a.text() + s"; $root" + a.attr("href")
-    }
-    val identifier = document
+    }).getOrElse("")
+    val identifier = Option(document
       .getElementsByClass("field__identifier").first()
       .getElementsByClass("field__item").first()
-      .text()
+      .text()).getOrElse("")
+      
     val copyright = {
-      val a = document
-        .getElementsByClass("field__rights").first()
-        .getElementsByClass("field__item").first()
-        .getElementsByTag("a")
+      val field__rights = document
+        .getElementsByClass("field__rights")
 
-      a.text() + s"; $root" + a.attr("href")
+      val a = 
+      if (field__rights.isEmpty())
+        null
+      else
+        field__rights.first()
+          .getElementsByClass("field__item").first()
+          .getElementsByTag("a")
+
+      if (null == a)
+        ""
+      else
+        a.text() + s"; $root" + a.attr("href")
     }
-    val estimated_date = document
-      .getElementsByClass("field__date-estimate").first()
-      .getElementsByClass("field__item").first()
-      .text()
-    val tag_item = document
-      .getElementsByClass("field__tags").first()
-      .getElementsByClass("field__item")
-    val tag = {
-      for (i <- 0 until tag_item.size()) yield {
-        tag_item.get(i).child(0).text()
-      }
-    } mkString ("|")
-    val media = document
+    val estimated_date = {
+      val field__date_estimate = document
+        .getElementsByClass("field__date-estimate")
+
+      if (field__date_estimate.isEmpty())
+        ""
+      else
+        Option(field__date_estimate.first()
+          .getElementsByClass("field__item").first()
+          .text()).getOrElse("")
+    }
+      
+    val tag_item =  {
+      val field__tags = document.getElementsByClass("field__tags")
+      if (field__tags.isEmpty())
+        null
+      else
+        field__tags.first().getElementsByClass("field__item")
+    }
+    
+    val tag =
+      if (null == tag_item)
+        ""
+      else
+        Option({
+          for (i <- 0 until tag_item.size()) yield {
+            tag_item.get(i).child(0).text()
+          }
+        } mkString ("|")).getOrElse("")
+        
+    val media = Option(document
       .getElementsByClass("field__image-type").first()
       .getElementsByClass("field__item").first()
-      .text()
+      .text()).getOrElse("")
 
     val src = root + document
       //          .getElementsByClass("image-wrapper")
@@ -249,6 +277,7 @@ class DownloadImageBristolProcess(url: String) extends Runnable with QueryHelper
 
     val original_image_name = url.substring(url.lastIndexOf("/") + 1, url.length()) + ".jpg"
     val bristol = new Bristol
+    bristol.id = id
     bristol.title = title
     bristol.collection = collection
     bristol.copyright = copyright
@@ -258,8 +287,8 @@ class DownloadImageBristolProcess(url: String) extends Runnable with QueryHelper
     bristol.note = note
     bristol.estimated_date = estimated_date
     bristol.original_image_name = original_image_name
+    
     saveBristol(bristol)
-
     HttpDownload.download(src, s"/Users/sasaki/git/doc/kj/bristol/$original_image_name.jpg")
     println("download url: " + src + " image_name: " + original_image_name)
   }
