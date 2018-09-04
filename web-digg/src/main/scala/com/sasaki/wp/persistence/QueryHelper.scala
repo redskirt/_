@@ -86,6 +86,12 @@ trait QueryHelper {
   def saveBristol(view: Bristol) = inTransaction(sf)(attr_bristol.insert(view))
   
   def saveViewMap(map: ViewMap) = inTransaction(sf)(vsh_view_map.insert(map))
+  
+  def saveJoseph(o: Joseph) = inTransaction(sf)(WebDiggJoseph.attr_joseph.insert(o))
+}
+
+object WebDiggJoseph extends Schema {
+  val attr_joseph = table[Joseph]("attr_joseph")
 }
 
 object WebDiggSchema extends Schema {
@@ -98,6 +104,7 @@ object VshSchema extends Schema {
   val vsh_view = table[View]("vsh_view")
   val attr_bristol = table[Bristol]("attr_bristol")
   val vsh_view_map = table[ViewMap]("vsh_view_map")
+  
 }
 
 object Sample extends QueryHelper with App {

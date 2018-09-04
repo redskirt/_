@@ -176,14 +176,23 @@ object WebDiggBristol extends QueryHelper {
     /**
      * 抓取照片文件及信息
      */
-    val threadPool = Executors.newFixedThreadPool(15)
-    val list = Source.fromFile(file).getLines().toArray
-    try {
-       // 4791 5105 16414 16415 
-      for (i <- 18000 until list.size)
-        threadPool.execute(new DownloadImageBristolProcess(list(i), i + 1))
-    } finally
-      threadPool.shutdown()
+//    val threadPool = Executors.newFixedThreadPool(15)
+//    val list = Source.fromFile(file).getLines().toArray
+//    try {
+//      for (i <- 16414 until 16415/*list.size*/)
+//        threadPool.execute(new DownloadImageBristolProcess(list(i), i + 1))
+//    } finally
+//      threadPool.shutdown()
+    
+//    Util.listFiles("/Users/sasaki/git/doc/kj/bristol")
+////    .take(2)
+//    .filter(_.getName.contains(".jpg"))
+//    .foreach { o =>
+//      val name = o.getName
+//      val name_ = name.substring(0, name.lastIndexOf("."))
+//      println(name_)
+//      o.renameTo(new java.io.File(s"/Users/sasaki/git/doc/kj/bristol/$name_"))
+//    }
   }
 }
 
@@ -259,10 +268,16 @@ class DownloadImageBristolProcess(url: String, id: Int) extends Runnable with Qu
           }
         } mkString ("|")).getOrElse("")
         
-    val media = Option(document
-      .getElementsByClass("field__image-type").first()
-      .getElementsByClass("field__item").first()
-      .text()).getOrElse("")
+    val media = {
+      val field__image_type = document.getElementsByClass("field__image-type")
+
+      if (field__image_type.isEmpty())
+        ""
+      else
+        field__image_type.first()
+          .getElementsByClass("field__item").first()
+          .text()
+    }
 
     val src = root + document
       //          .getElementsByClass("image-wrapper")

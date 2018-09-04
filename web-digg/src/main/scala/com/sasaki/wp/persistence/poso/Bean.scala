@@ -117,4 +117,11 @@ class ViewMap extends Bean {
 	val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
-
+class Joseph extends Bean {
+  var title: String = _
+  var location: String = _
+  var date: String = _
+  var original_caption_by_joseph_needham: String = _
+  var photographer: String = _
+  var classmark: String = _
+}
