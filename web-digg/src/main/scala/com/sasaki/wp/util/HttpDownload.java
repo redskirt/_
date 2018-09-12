@@ -11,7 +11,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;  
+import org.apache.http.impl.client.DefaultHttpClient;
   
 public class HttpDownload {  
   
@@ -130,14 +130,10 @@ public class HttpDownload {
             System.out.println(headers[i]);  
         }  
     }  
+    
     public static void main(String[] args) {  
-//      String url = "http://bbs.btwuji.com/job.php?action=download&pid=tpc&tid=320678&aid=216617";  
-//        String url="http://www.dy1000.com/img/20120701/1999311085_150_200.JPG";  
-//      String filepath = "D:\\test\\a.torrent";  
-//        String filepath = "D:\\test\\a.jpg";  
-//        HttpDownload.download(url, filepath); 
     	
-    	HttpDownload.download("https://www.hpcbristol.net/download/image/44618", "/Users/sasaki/Desktop/a.jpg");
+    	HttpDownload.download("https://ids.lib.harvard.edu/ids/view/24113927?height=150&width=150", "/Users/sasaki/Desktop/a.jpg");
     	
         
         
