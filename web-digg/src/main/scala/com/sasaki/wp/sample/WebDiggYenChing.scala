@@ -15,6 +15,7 @@ import org.json4s.jackson.JsonMethods._
 import java.net.URL
 import com.sasaki.wp.util.HttpDownload
 import java.util.concurrent.Executors
+import scala.xml.XML
 
 /**
  * @Author Sasaki
@@ -117,18 +118,24 @@ object WebDiggYenChing extends QueryHelper {
       Source.fromFile(new File(pathFile), "utf-8")
         .getLines()
         .toSeq
+        
 //    println(lines.size) // 5914
         
     // 可直接下载图的单项 => work
-    val linesWork = lines.filter(_.split("\t")(1).equals("work"))
+    val linesWork = lines
+      .filter(_.split("\t")(1).equals("work"))
+//      .filter(_.contains("work89712"))
+//      .foreach(println)
+      
+    println(linesWork.size)
         
-    try {
-      for (i <- 2017 until 2018 /*lines.size*/ ) {
-        threadPool.execute(new DownloadImageProcess(i, linesWork(i)))
-      }
-    } finally
-      threadPool.shutdown()
-
+//    try { //  /*lines.size*/
+//      for (i <- 3500 until linesWork.size ) {
+//        threadPool.execute(new DownloadImageProcess(i, linesWork(i)))
+//      }
+//    } finally
+//      threadPool.shutdown()
+      
   }
   
   def parseFromTargetPage2RedirectPage(url: String) = {
@@ -208,7 +215,24 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
     println(s"thumbnail page: $thumbnail")
 
     // content page
-    val fhclId = thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
+    //    val fhclId = "8151"// thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
+
+    // <work> <image xmlns:xlink=\"http://www.w3.org/TR/xlink\" altComponentID=\"4176736\" componentID=\"W89712_1\" restrictedImage=\"false\" xlink:href=\"http://nrs.harvard.edu/urn-3:FHCL:8151\"> <thumbnail xlink:href=\"http://nrs.harvard.edu/urn-3:FHCL:196422\"/> </image> <title> <textElement>Daughter of Lu, a colleague of Morrison's from Hartung's Photo Shop</textElement> </title> <workType>photographs</workType> <creator> <nameElement>Morrison, Hedda</nameElement> <dates>1908-1991, German</dates> <role>photographer</role> <namedates>Morrison, Hedda 1908-1991, German</namedates> </creator> <structuredDate> <beginDate>1933</beginDate> <endDate>1946</endDate> </structuredDate> <freeDate>ca. 1933-1946</freeDate> <dimensions>16.5 x 10 cm.</dimensions> <topic> <term>girls</term> </topic> <topic> <term>portraits</term> </topic> <culture> <term>Chinese</term> </culture> <materials>gelatin silver process</materials> <location> <type>site</type> <place>Beijing, Beijing Municipality, China</place> </location> <useRestrictions>Harvard-Yenching Library: Access to original photographs, negatives, and albums in the Hedda Morrison photograph collection is restricted. Photographs in the Hedda Morrison photograph collection: Copyright various dates, President and Fellows of Harvard College; all rights reserved. Digital images made from photographs in the Hedda Morrison photograph collection: Copyright 2000, President and Fellows of Harvard College; all rights reserved. Photographs and images from the collection may be reproduced only with written permission. Contact the Harvard-Yenching Library for permissions and fees.</useRestrictions> <repository> <repositoryName>Harvard-Yenching Library</repositoryName> <number>HM06.4783</number> </repository> </work>
+    val xml = (jsonObject \ "pnx" \ "addata" \ "mis1")(0)
+      .extract[String]
+      .trim
+      .replace("\\\"", "\"")
+      .replace("&", ",") // & 字符引起xml转换异常
+      .replace("xlink:href", "xlink-href")
+//      println(xml)
+    val fhclIdStr = (XML.loadString(xml) \ "image" \ "@xlink-href").toString
+    
+    println("fhclIdStr: " + fhclIdStr)
+    val fhclId = 
+      if("" != fhclIdStr)
+        fhclIdStr.substring(fhclIdStr.lastIndexOf("FHCL:") + 5, fhclIdStr.length)
+      else
+        thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
     println(s"fhclId: $fhclId")
 
     // target page
@@ -228,8 +252,8 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
     val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
     println(s"default page: $urlDefaultPage")
 
-    HttpDownload.download(thumbnail, s"$pathThumbnail/$page-${index + 1}-$workId-$redirectId-$fhclId.jpg")
-    HttpDownload.download(urlDefaultPage, s"$pathDefault/$page-${index + 1}-$workId-$redirectId.jpg")
+        HttpDownload.download(thumbnail, s"$pathThumbnail/$page-${index + 1}-$workId-$redirectId-$fhclId.jpg")
+        HttpDownload.download(urlDefaultPage, s"$pathDefault/$page-${index + 1}-$workId-$redirectId.jpg")
     println(s">> ========================== ${index + 1} DOWN! =================================")
   }
 }
