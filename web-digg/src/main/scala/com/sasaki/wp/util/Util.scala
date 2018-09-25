@@ -41,12 +41,12 @@ object Util {
     })
   
   
-  def listFiles(url: String) = {
+  def listFiles(url: String, recurse: Boolean = false) = {
     import java.io.File
 
     val t = new File(url)
     if (t.isDirectory())
-      t.listFiles().filterNot(_.isDirectory())
+      t.listFiles().filter(recurse || !_.isDirectory)
     else
       Array(t)
   }

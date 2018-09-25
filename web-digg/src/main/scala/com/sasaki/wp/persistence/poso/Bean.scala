@@ -166,3 +166,19 @@ class Yenching extends Bean {
   var permalink: String = _
   
 }
+
+class WeiChat extends Bean {
+
+  @BeanProperty
+  var original_title: String = _
+  
+  @BeanProperty
+  var image_name: String = _
+  
+  @BeanProperty
+  var source: String = _
+  
+  @BeanProperty
+  var remark: String = _
+  
+}

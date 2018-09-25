@@ -63,6 +63,8 @@ trait QueryHelper {
   
   def saveYenching(yenching: Yenching) = inTransaction(sf)(WebDiggYenChing.attr_harvard_yenching.insert(yenching))
   
+  def saveWeiChat(o: WeiChat) = inTransaction(sf)(WebDiggWeiChat.attr_weichat.insert(o))
+  
   
   // --------------------------------------  以上是WebDigg项目的查询接口，以下为VirtualSH  -------------------------------
   
@@ -92,8 +94,12 @@ trait QueryHelper {
   def saveJoseph(o: Joseph) = inTransaction(sf)(WebDiggJoseph.attr_joseph.insert(o))
 }
 
+object WebDiggWeiChat extends Schema {
+  val attr_weichat = table[WeiChat]("attr_weichat")
+}
+
 object WebDiggYenChing extends Schema {
-  val attr_harvard_yenching = table[Yenching]("attr_harvard_yenching")
+	val attr_harvard_yenching = table[Yenching]("attr_harvard_yenching")
 }
 
 object WebDiggJoseph extends Schema {
