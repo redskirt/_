@@ -20,7 +20,7 @@ import com.sasaki.wp.util.Util
  */
 
 object WebDiggKJ extends QueryHelper {
-  val threadPool = Executors.newFixedThreadPool(5)
+  val threadPool = Executors.newFixedThreadPool(1)
   
   import ProcessUtil._
   
@@ -66,7 +66,6 @@ object WebDiggKJ extends QueryHelper {
 //		  
 //		        for (i <- 1100 until files.size)
 //		          threadPool.execute(new File2Base64Process(files(i), "bj"))
-		  
 //		                  } finally
 //		                    threadPool.shutdown()
     /**
@@ -140,9 +139,12 @@ object WebDiggKJ extends QueryHelper {
 //       o.renameTo(new File(s"/Users/sasaki/vsh/city/TJN/$name_.jpg"))
 //     }
     
-   val a = parseLocalTitleListPageProcess("/Users/sasaki/Desktop/sywt.html")
-   for(i <- 206 until a.size)
-     downloadFileFromPageProcess(a(i), true)
+   val urls = parseLocalTitleListPageProcess("/Users/sasaki/Desktop/tc.html")
+   for(i <- 155 until urls.size)  {
+     threadPool.execute(new DownloadResourcesFromWXProcess(i, urls(i), true))
+	   
+//     downloadFileFromPageProcess(urls(i), true)
+     }
 //      .foreach(o => downloadFileFromPageProcess(o, true))
 //        .foreach(o => downloadTextFromPageProcess(o))      
         
@@ -207,7 +209,7 @@ object WebDiggKJ extends QueryHelper {
    * 指定单个微信页面，抓取当前页面所有图片
    */
   def downloadFileFromPageProcess(url: String, fetchText: Boolean = false) = {
-    val rootDir = "/Users/sasaki/git/doc/kj/wx/sywt"
+    val rootDir = "/Users/sasaki/git/doc/kj/wx/tc"
     val result = fetchImageUrlFromPage(url)
     val title = result._1.replace(' ', '_').replace('/', '_').replace('\\', '_')
     val urls = result._2
@@ -424,7 +426,6 @@ class ContentFetchProcess(pageId: Long) extends Runnable with QueryHelper {
         get.releaseConnection()
     }
   }
-
 }
 
 class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
@@ -453,6 +454,14 @@ class ImageFetchProcess(id: Int) extends Runnable with QueryHelper {
     } finally {
       println(s"process $id get finally.\n ----------------------------------------------------")
     }
+  }
+}
+
+class DownloadResourcesFromWXProcess(i:Int, url: String, fetchText: Boolean) extends Runnable {
+  
+  override def run(): Unit = {
+    WebDiggKJ.downloadFileFromPageProcess(url, fetchText)
+    println(s"i: $i")
   }
 }
 
@@ -532,7 +541,7 @@ object ProcessUtil {
       val imgs = document.select("img[data-src]")
       val response: HttpResponse = ProcessUtil.client.execute(get)  
       val urls = for (i <- 0 until imgs.size()) yield imgs.get(i).attr("data-src")
-      val line = document.html().lines.filter(_.contains("msg_title")).toArray.head
+      val line = document.html().lines.filter(_.contains("msg_title")).toArray.headOption.getOrElse("\"no have title\"")
       val title = line.substring(line.indexOf("\"") + 1, line.lastIndexOf("\""))
       (title, urls, document)
     } finally {

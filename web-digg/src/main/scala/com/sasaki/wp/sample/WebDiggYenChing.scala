@@ -16,6 +16,8 @@ import java.net.URL
 import com.sasaki.wp.util.HttpDownload
 import java.util.concurrent.Executors
 import scala.xml.XML
+import com.sasaki.wp.persistence.poso.Yenching
+import com.sun.security.sasl.CramMD5Base
 
 /**
  * @Author Sasaki
@@ -122,12 +124,12 @@ object WebDiggYenChing extends QueryHelper {
 //    println(lines.size) // 5914
         
     // 可直接下载图的单项 => work
-    val linesWork = lines
-      .filter(_.split("\t")(1).equals("work"))
-//      .filter(_.contains("work89712"))
-//      .foreach(println)
+//    val linesWork = lines
+//      .filter(_.split("\t")(1).equals("work"))
+//      .filter(_.contains("85432"))
+//      .foreach(println) 
       
-    println(linesWork.size)
+//    println(linesWork.size)
         
 //    try { //  /*lines.size*/
 //      for (i <- 3500 until linesWork.size ) {
@@ -136,6 +138,65 @@ object WebDiggYenChing extends QueryHelper {
 //    } finally
 //      threadPool.shutdown()
       
+     // 数据库
+    val images = 
+      Util.listFiles("/Users/sasaki/git/doc/kj/harvard-yenching/default")
+//        .take(10)
+        .filter(_.getName.contains(".jpg"))
+        .foreach { o =>
+          val name = o.getName
+          val array = name.split("-")
+          val id = array(1) toInt
+          val page = array(0) toInt
+          val work_id = array(2) toInt
+          val source_id = array(3).substring(0, array(3).lastIndexOf(".")) toInt
+          val image_name = name
+          val line = lines
+            .filter(o => o.split("\t")(1).equals("work") && o.contains(s"work$work_id"))(0)
+            .split("\t")
+          val json = line(2)
+          val jsonO = parse(json)
+          val xml_ = (jsonO \ "pnx" \ "addata" \ "mis1")(0)
+            .extract[String]
+            .trim
+            .replace("\\\"", "\"")
+            .replace("&", ",") // & 字符引起xml转换异常
+          val xml =  XML.loadString(xml_)
+          val title = xml.\("title").\("textElement").text 
+          val author_or_creator = 
+            (xml \ "creator" \ "nameElement").text + ", " +
+            (xml \ "creator" \ "dates").text + ", " + 
+            (xml \ "creator" \ "namedates").text
+          val description = xml \ "description" text
+          val dimensions = xml \ "dimensions" text
+          val notes = xml \ "notes" text
+          val creation_date = xml \ "freeDate" text
+          val repository = 
+            (xml \ "repository" \ "repositoryName").text + " " +
+            (xml \ "repository" \ "number").take(0).text + " " + 
+            (xml \ "repository" \ "number").take(1).text 
+          val permalink =  s"http://id.lib.harvard.edu/images/olvwork$work_id/catalog"
+          val y = new Yenching
+          
+          y.id = id
+          y.setPage(page)
+          y.setWork_id(work_id)
+          y.setSource_id(source_id)
+          y.setImage_name(name)
+          y.setTitle(title)
+          y.setAuthor_or_creator(author_or_creator)
+          y.setDescription(description)
+          y.setDimensions(dimensions)
+          y.setNotes(notes)
+          y.setCreation_date(creation_date)
+          y.setRepository(repository)
+          y.setPermalink(permalink)
+          
+//          println(y.repository + " | " + y.title + " | " + y.author_or_creator)
+          saveYenching(y)
+          
+        }  
+        
   }
   
   def parseFromTargetPage2RedirectPage(url: String) = {

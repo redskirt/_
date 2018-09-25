@@ -61,6 +61,8 @@ trait QueryHelper {
   def listAccount = inTransaction(sf)(from(t_account)(select(_)).toList)
   def listMetadata = inTransaction(sf)(from(t_metadata)(select(_)).toList)
   
+  def saveYenching(yenching: Yenching) = inTransaction(sf)(WebDiggYenChing.attr_harvard_yenching.insert(yenching))
+  
   
   // --------------------------------------  以上是WebDigg项目的查询接口，以下为VirtualSH  -------------------------------
   
@@ -88,6 +90,10 @@ trait QueryHelper {
   def saveViewMap(map: ViewMap) = inTransaction(sf)(vsh_view_map.insert(map))
   
   def saveJoseph(o: Joseph) = inTransaction(sf)(WebDiggJoseph.attr_joseph.insert(o))
+}
+
+object WebDiggYenChing extends Schema {
+  val attr_harvard_yenching = table[Yenching]("attr_harvard_yenching")
 }
 
 object WebDiggJoseph extends Schema {

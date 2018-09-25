@@ -2,6 +2,7 @@ package com.sasaki.wp.persistence.poso
 
 import java.sql.Timestamp
 import org.squeryl.annotations.Column
+import scala.beans.BeanProperty
 
 /**
  * @Author Sasaki
@@ -124,4 +125,44 @@ class Joseph extends Bean {
   var original_caption_by_joseph_needham: String = _
   var photographer: String = _
   var classmark: String = _
+}
+
+class Yenching extends Bean {
+  
+  @BeanProperty
+  var page: Int = _
+  
+  @BeanProperty
+  var work_id: Int = _
+  
+  @BeanProperty
+  var source_id: Int = _
+  
+  @BeanProperty
+  var image_name: String = _
+  
+  @BeanProperty
+  var title: String = _
+  
+  @BeanProperty
+  var author_or_creator: String = _
+  
+  @BeanProperty
+  var description: String = _
+  
+  @BeanProperty
+  var dimensions: String = _
+  
+  @BeanProperty
+  var notes: String = _
+  
+  @BeanProperty
+  var creation_date: String = _
+  
+  @BeanProperty
+  var repository: String = _
+  
+  @BeanProperty
+  var permalink: String = _
+  
 }
