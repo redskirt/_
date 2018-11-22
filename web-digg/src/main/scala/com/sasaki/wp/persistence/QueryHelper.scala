@@ -86,6 +86,8 @@ trait QueryHelper {
   }
   
   def saveView(view: View) = inTransaction(sf)(vsh_view.insert(view))
+		  
+  def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
   def saveBristol(view: Bristol) = inTransaction(sf)(attr_bristol.insert(view))
   
@@ -96,6 +98,10 @@ trait QueryHelper {
 
 object WebDiggWeiChat extends Schema {
   val attr_weichat = table[WeiChat]("attr_weichat")
+}
+
+object TableBook extends Schema {
+	val attr_book = table[Book]("attr_book")
 }
 
 object WebDiggYenChing extends Schema {

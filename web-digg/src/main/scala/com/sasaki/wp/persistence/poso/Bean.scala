@@ -182,3 +182,97 @@ class WeiChat extends Bean {
   var remark: String = _
   
 }
+
+class Book extends Bean {
+
+  @BeanProperty
+  var id_item: String = _
+  
+  @BeanProperty
+  var id_storekeeper: String = _
+  
+  @BeanProperty
+  var id_store: String = _
+  
+  @BeanProperty
+  var isbn: String = _
+
+  @BeanProperty
+  var title: String = _
+
+  @BeanProperty
+  var standard_title: String = _
+
+  @BeanProperty
+  var author: String = _
+
+  @BeanProperty
+  var publisher: String = _
+
+  @BeanProperty
+  var publish_date: String = _ // 年代 / 出版时间
+  
+  @BeanProperty
+  var print_date: String = _ // 印刷时间
+
+  @BeanProperty
+  var cover: String = _ // 装帧
+
+  @BeanProperty
+  var size: String = _ // 开本
+
+  @BeanProperty
+  var edition: String = _ // 版次
+  
+  @BeanProperty
+  var print_times: String = _ // 印次
+
+  @BeanProperty
+  var quality: String = _
+
+  @BeanProperty
+  var price: Int = _
+
+  @BeanProperty
+  var putaway_or_deal_date: String = _ // 上架日期
+  
+  @BeanProperty
+  var deal_type: String = _ // 交易状态：上书 / 已售
+
+  @BeanProperty
+  var data_source: String = _ // kfz / by / dd / 
+
+  @BeanProperty
+  var bookstore: String = _
+  
+  @BeanProperty
+  var location: String = _
+
+  @BeanProperty
+  var url: String = _
+  
+  @BeanProperty
+  var url_store: String = _
+  
+  @BeanProperty
+  var url_storekeeper: String = _
+  
+  @BeanProperty
+  var batch: Int = _
+
+  @BeanProperty
+  var status: String = _ // normal 正常deleted 删除 
+
+  @BeanProperty
+  var `type`: String = _ // old 旧书 new 新书（有条码）
+  
+  @BeanProperty
+  var orderby: String = _ // default 默认 putaway 上架时间
+  
+  @BeanProperty
+  var keyword: String = _ 
+
+  @BeanProperty
+  val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+
+}
