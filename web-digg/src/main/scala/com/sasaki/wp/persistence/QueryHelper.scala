@@ -89,6 +89,18 @@ trait QueryHelper {
 		  
   def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
+  def getMaxBookId: Long = inTransaction(sf) {
+    from(TableBook.attr_book)(o =>
+      compute(max(o.id)) //
+    ).get.toLong
+  }
+  
+  def getMaxBatch: Int = inTransaction(sf) {
+    from(TableBook.attr_book)(o =>
+      compute(max(o.batch)) //
+    ).get.toInt
+  }
+  
   def saveBristol(view: Bristol) = inTransaction(sf)(attr_bristol.insert(view))
   
   def saveViewMap(map: ViewMap) = inTransaction(sf)(vsh_view_map.insert(map))

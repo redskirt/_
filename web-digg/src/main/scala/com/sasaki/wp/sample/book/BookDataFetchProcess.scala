@@ -7,6 +7,16 @@ import java.net.URL
 import com.sasaki.wp.persistence.poso.Book
 import java.util.concurrent.Executors
 import org.jsoup.nodes.Document
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.backoff.FixedBackOffPolicy
+import org.springframework.retry.support.RetryTemplate
+import scala.util.Random
+import org.springframework.retry.RetryCallback
+import org.springframework.retry.RetryContext
+import org.springframework.retry.RecoveryCallback
+import com.yunpian.sdk.YunpianClient
+import com.yunpian.sdk.constant.YunpianConstant
+import java.net.URLEncoder
 
 /**
  * @Author Sasaki
@@ -19,18 +29,19 @@ class BookDataFetchProcess(
     pageNum: Int,
     _status: String,
     _order: String,
-    page: Document
+    page: Document,
+    count: Long,
+    lastBatch: Int
     ) extends QueryHelper with Runnable {
 
   import BookDataFetchProcess._
 
   def run(): Unit = {
-    val id = (pageNum - 1) * 50 + i + 1 + 315000 /*追加*/
+    val id = (pageNum - 1) * 50 + i + 1 + count /*追加*/
     println(id)
     
     val listBox = page.getElementById("listBox")
     val items = listBox.getElementsByClass("item")
-
     val item = items.get(i)
     val shopid = item.attr("shopid")
     val itemid = item.attr("itemid")
@@ -75,6 +86,7 @@ class BookDataFetchProcess(
     val url_storekeeper = s"$root_shop/$userid"
     val status = "normal"
     val `type` = "old"
+    val location = item.getElementsByClass("user-place").text()
 
     val book = new Book
     book.id = id
@@ -101,6 +113,8 @@ class BookDataFetchProcess(
     book.setUrl_storekeeper(url_storekeeper)
     book.setStatus(status)
     book.setType(`type`)
+    book.setKeyword("网格本")
+    book.setLocation(location)
     book.setOrderby({
       if ("".equals(_order))
         "default"
@@ -108,13 +122,13 @@ class BookDataFetchProcess(
         "putaway"
     })
     
-    book.setBatch(16)
+    book.setBatch(lastBatch + 1)
 
-    saveBook(book)
+//    saveBook(book)
   }
 }
 
-object BookDataFetchProcess {
+object BookDataFetchProcess extends QueryHelper {
 
   import com.sasaki.wp.enums.E._
 
@@ -131,7 +145,7 @@ object BookDataFetchProcess {
 
   def main(args: Array[String]): Unit = {
 
-//    val page_1 = Jsoup.parse(new URL(buildUrl_sale_putaway(1)), 5000)
+    //    val page_1 = Jsoup.parse(new URL(buildUrl_sale_putaway(1)), 5000)
     //    val count = page_1
     //      .getElementById("crumbsBar")
     //      .getElementsByClass("crumbs-nav-start")
@@ -140,36 +154,114 @@ object BookDataFetchProcess {
     //      .get(0)
     //      .text()
     //      .toInt
-//    val listBox = page_1.getElementById("listBox")
-//    val items = listBox.getElementsByClass("item")
+    //    val listBox = page_1.getElementById("listBox")
+    //    val items = listBox.getElementsByClass("item")
 
-    try { //  /*lines.size*/
-      for (pageNum <- 1 to 100) {
-        println("page: " + pageNum)
+    // 构建重试模板实例
+    val retry = new RetryTemplate
+    //设置重试策略，主要设置重试次数
+    val retryPolicy = new SimpleRetryPolicy
+    retryPolicy.setMaxAttempts(10)
+    //设置重试回退操作策略，主要设置重试间隔时间
+    val fixedBackOffPolicy = new FixedBackOffPolicy
+    fixedBackOffPolicy.setBackOffPeriod(3000)
+    retry.setRetryPolicy(retryPolicy)
+    retry.setBackOffPolicy(fixedBackOffPolicy)
+
+    val lastBatch = getMaxBatch
+    val params = Seq(
+         // status  order  keyword
+          Tuple3("0",  "",           "网格本"),
+          Tuple3("0",  "&order=6",   "网格本"),
+          Tuple3("1",  "",           "网格本"),
+          Tuple3("1",  "&order=6",   "网格本")
+        //
+        )
         
-        /**
-         * 参数配对 
-         * status	order 
-         * "0"			""
-         * "0"			"&order=6"
-         * "1"			""
-         * "1"			"&order=6"
-         * 
-         * NOTE!
-         * 执行三步曲：
-         * 1. 改运行参数
-         * 2. 改batch数
-         * 3. 改ID累加器
-         */
-        val url = buildUrl(pageNum, "1", "&order=6")
-        println(url)
-        val page = Jsoup.parse(new URL(url), 5000)
-        
-        for (i <- 0 until 50/*items.size()*/) {
-          threadPool.execute(new BookDataFetchProcess(i, pageNum, "1", "&order=6", page))
-        }
-        
-        Thread.sleep(3000)// 防止请求频繁 
+    try {
+
+      //初始化clnt,使用单例方式
+      val client = new YunpianClient("47b97b332b9e3448821d0c8bf226c885").init
+      val ENCODING = "UTF-8"
+      val tpl_value = //
+                URLEncoder.encode("#number#", ENCODING) + "=" +
+                URLEncoder.encode("000000", ENCODING)
+      
+      //发送短信API
+      val param = client.newParam(3)
+      param.put(YunpianConstant.MOBILE, "17091920677")
+      param.put(YunpianConstant.TEXT, "【葡萄酒溯源管理系统】您所查询的编号2342143的产品不存在，请谨防假冒！如有疑问，敬请联系刘巍 17091920677")
+      
+      //模板发送的调用示例
+      val result = client.sms().single_send(param)
+      println("code: " + result.getCode + "\nmessage: " + result.getMsg + "\ndata: " + result.getData + "\ndetail: " + result.getDetail)
+      client.close
+
+      params.foreach {
+        case (status, order, keyword) =>
+          val count = getMaxBookId
+          println("count " + count)
+          for (pageNum <- 1 to 100) {
+            println("page: " + pageNum)
+
+            /**
+             * 参数配对
+             * status	order
+             * "0"			""
+             * "0"			"&order=6"
+             * "1"			""
+             * "1"			"&order=6"
+             *
+             * NOTE!
+             * 执行三步曲：
+             * 1. 改运行参数
+             * 2. 改batch数
+             * 3. 改ID累加器
+             */
+            import scala.util.{ Try, Success, Failure }
+
+            val url = buildUrl(pageNum, status, order)
+            println(url)
+
+            // 使用Retry方式请求page
+            // 重试器，成功后返回true
+            val recallPage = new RetryCallback[Document, Exception] {
+              override def doWithRetry(context: RetryContext): Document = {
+
+                val page_ = Try {
+                  Jsoup.parse(new URL(url), 5000)
+                }
+
+                val page = page_ match {
+                  case Success(o) => page_.get
+                  case Failure(o) =>
+                    println(">> retring ... ")
+                    throw new RuntimeException // 抛出异常触发重试
+                }
+
+                page
+              }
+            }
+
+            // 重试失败后执行
+            val recovery = new RecoveryCallback[Document] {
+              override def recover(context: RetryContext): Document = {
+                // 所有 retry 均失败后，程序中止
+                threadPool.shutdown()
+                null
+              }
+            }
+
+            // 调用重试机制
+            val page = retry.execute(recallPage, recovery)
+
+            // 多线程仅负责提交数据库写入效率
+            for (i <- 0 until 50 /*items.size()*/ ) {
+              threadPool.execute(new BookDataFetchProcess(i, pageNum, status, order, page, count, lastBatch))
+            }
+
+            Thread.sleep(3000) // 防止请求频繁
+          }
       }
     } finally
       threadPool.shutdown()

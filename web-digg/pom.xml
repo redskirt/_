@@ -48,6 +48,19 @@
 			<version>${scala.version}.8</version>
 		</dependency> 
 
+		<dependency>
+		    <groupId>com.yunpian.sdk</groupId>
+		    <artifactId>yunpian-java-sdk</artifactId>
+		    <version>1.2.7</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.springframework.retry/spring-retry -->
+		<dependency>
+		    <groupId>org.springframework.retry</groupId>
+		    <artifactId>spring-retry</artifactId>
+		    <version>1.2.2.RELEASE</version>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
