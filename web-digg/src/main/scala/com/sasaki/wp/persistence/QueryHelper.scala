@@ -89,13 +89,17 @@ trait QueryHelper {
 		  
   def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
-  def getMaxBookId: Long = inTransaction(sf) {
+  def countBook = inTransaction(sf) {
+    from(TableBook.attr_book)(o => compute(count)).toLong
+  }
+  
+  def queryMaxBookId: Long = inTransaction(sf) {
     from(TableBook.attr_book)(o =>
       compute(max(o.id)) //
     ).get.toLong
   }
   
-  def getMaxBatch: Int = inTransaction(sf) {
+  def queryMaxBatch: Int = inTransaction(sf) {
     from(TableBook.attr_book)(o =>
       compute(max(o.batch)) //
     ).get.toInt

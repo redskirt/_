@@ -17,6 +17,7 @@ import org.springframework.retry.RecoveryCallback
 import com.yunpian.sdk.YunpianClient
 import com.yunpian.sdk.constant.YunpianConstant
 import java.net.URLEncoder
+import com.yunpian.sdk.api.SmsApi
 
 /**
  * @Author Sasaki
@@ -124,7 +125,7 @@ class BookDataFetchProcess(
     
     book.setBatch(lastBatch + 1)
 
-//    saveBook(book)
+    saveBook(book)
   }
 }
 
@@ -168,7 +169,7 @@ object BookDataFetchProcess extends QueryHelper {
     retry.setRetryPolicy(retryPolicy)
     retry.setBackOffPolicy(fixedBackOffPolicy)
 
-    val lastBatch = getMaxBatch
+    val lastBatch = queryMaxBatch
     val params = Seq(
          // status  order  keyword
           Tuple3("0",  "",           "网格本"),
@@ -180,89 +181,82 @@ object BookDataFetchProcess extends QueryHelper {
         
     try {
 
-      //初始化clnt,使用单例方式
-      val client = new YunpianClient("47b97b332b9e3448821d0c8bf226c885").init
+      val client = new YunpianClient("47b97b332b9e3448821d0c8bf226c885").init()
+      
       val ENCODING = "UTF-8"
-      val tpl_value = //
-                URLEncoder.encode("#number#", ENCODING) + "=" +
-                URLEncoder.encode("000000", ENCODING)
-      
-      //发送短信API
       val param = client.newParam(3)
-      param.put(YunpianConstant.MOBILE, "17091920677")
-      param.put(YunpianConstant.TEXT, "【葡萄酒溯源管理系统】您所查询的编号2342143的产品不存在，请谨防假冒！如有疑问，敬请联系刘巍 17091920677")
+      param.put(YunpianConstant.MOBILE, "17091920677,18101823205")
+     
+//      params.foreach {
+//        case (status, order, keyword) =>
+//          val count = getMaxBookId
+//          println("count " + count)
+//          for (pageNum <- 1 to 100) {
+//            println("page: " + pageNum)
+//
+//            /**
+//             * 参数配对
+//             * status	order
+//             * "0"			""
+//             * "0"			"&order=6"
+//             * "1"			""
+//             * "1"			"&order=6"
+//             *
+//             * NOTE!
+//             * 执行三步曲：
+//             * 1. 改运行参数
+//             * 2. 改batch数
+//             * 3. 改ID累加器
+//             */
+//            import scala.util.{ Try, Success, Failure }
+//
+//            val url = buildUrl(pageNum, status, order)
+//            println(url)
+//
+//            // 使用Retry方式请求page
+//            val recallPage = new RetryCallback[Document, Exception] {
+//              override def doWithRetry(context: RetryContext): Document = {
+//
+//                val page_ = Try {
+//                  Jsoup.parse(new URL(url), 5000)
+//                }
+//
+//                val page = page_ match {
+//                  case Success(o) => page_.get
+//                  case Failure(o) =>
+//                    println(">> retring ... ")
+//                    throw new RuntimeException // 抛出异常触发重试
+//                }
+//
+//                page
+//              }
+//            }
+//
+//            // 重试失败后执行
+//            val recovery = new RecoveryCallback[Document] {
+//              override def recover(context: RetryContext): Document = {
+//                // 所有 retry 均失败后，程序中止
+//                threadPool.shutdown
+//                null
+//              }
+//            }
+//
+//            // 调用重试机制
+//            val page = retry.execute(recallPage, recovery)
+//
+//            // 多线程仅负责提交数据库写入效率
+//            for (i <- 0 until 50 /*items.size()*/ ) {
+//              threadPool.execute(new BookDataFetchProcess(i, pageNum, status, order, page, count, lastBatch))
+//            }
+//
+//            Thread.sleep(3000) // 防止请求频繁
+//          }
+//      }
       
-      //模板发送的调用示例
-      val result = client.sms().single_send(param)
+      param.put(YunpianConstant.TEXT, s"【刘巍的数据平台】${com.sasaki.packages.independent.TODAY}新增数据20000，数据总量${ countBook }。")
+      val result = client.sms().batch_send(param)
       println("code: " + result.getCode + "\nmessage: " + result.getMsg + "\ndata: " + result.getData + "\ndetail: " + result.getDetail)
       client.close
-
-      params.foreach {
-        case (status, order, keyword) =>
-          val count = getMaxBookId
-          println("count " + count)
-          for (pageNum <- 1 to 100) {
-            println("page: " + pageNum)
-
-            /**
-             * 参数配对
-             * status	order
-             * "0"			""
-             * "0"			"&order=6"
-             * "1"			""
-             * "1"			"&order=6"
-             *
-             * NOTE!
-             * 执行三步曲：
-             * 1. 改运行参数
-             * 2. 改batch数
-             * 3. 改ID累加器
-             */
-            import scala.util.{ Try, Success, Failure }
-
-            val url = buildUrl(pageNum, status, order)
-            println(url)
-
-            // 使用Retry方式请求page
-            // 重试器，成功后返回true
-            val recallPage = new RetryCallback[Document, Exception] {
-              override def doWithRetry(context: RetryContext): Document = {
-
-                val page_ = Try {
-                  Jsoup.parse(new URL(url), 5000)
-                }
-
-                val page = page_ match {
-                  case Success(o) => page_.get
-                  case Failure(o) =>
-                    println(">> retring ... ")
-                    throw new RuntimeException // 抛出异常触发重试
-                }
-
-                page
-              }
-            }
-
-            // 重试失败后执行
-            val recovery = new RecoveryCallback[Document] {
-              override def recover(context: RetryContext): Document = {
-                // 所有 retry 均失败后，程序中止
-                threadPool.shutdown()
-                null
-              }
-            }
-
-            // 调用重试机制
-            val page = retry.execute(recallPage, recovery)
-
-            // 多线程仅负责提交数据库写入效率
-            for (i <- 0 until 50 /*items.size()*/ ) {
-              threadPool.execute(new BookDataFetchProcess(i, pageNum, status, order, page, count, lastBatch))
-            }
-
-            Thread.sleep(3000) // 防止请求频繁
-          }
-      }
     } finally
       threadPool.shutdown()
   }
