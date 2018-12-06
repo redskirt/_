@@ -18,7 +18,6 @@ import java.util.concurrent.Executors
 import scala.xml.XML
 import com.sasaki.wp.persistence.poso.Yenching
 import com.sun.security.sasl.CramMD5Base
-
 /**
  * @Author Sasaki
  * @Mail redskirt@outlook.com
@@ -29,10 +28,10 @@ object WebDiggYenChing extends QueryHelper {
 
   val root = "https://images.hollis.harvard.edu"
   val client = HttpClients.createDefault()
-  val threadPool = Executors.newFixedThreadPool(25)
+  val threadPool = Executors.newFixedThreadPool(1)
 
   val pathPageFile = "/Users/sasaki/git/_/web-digg/src/main/resources/harvard-yenching-pages2.txt"
-  val pathFile = "/Users/sasaki/git/_/web-digg/src/main/resources/harvard-yenching-json-results.txt"
+  val pathFile = "/Users/sasaki/git/_/web-digg/src/main/resources/harvard-yenching-json-results2.txt"
   val pathThumbnail = "/Users/sasaki/git/doc/kj/harvard-yenching/thumbnail"
   val pathDefault = "/Users/sasaki/git/doc/kj/harvard-yenching/default"
   val pathSh = "/Users/sasaki/git/doc/kj/harvard-yenching/sh"
@@ -46,8 +45,9 @@ object WebDiggYenChing extends QueryHelper {
   /**
    * 带关键字 上海
    */
-  // https://images.hollis.harvard.edu/primo-explore/search?query=any,contains,shanghai&tab=default_tab&search_scope=default_scope&vid=HVD_IMAGES&lang=en_US&offset=0&sortby=rank#searchResultList
-  val buildOriginalJsonPage = (offset: Int) => s"https://images.hollis.harvard.edu/primo-explore/search?query=any,contains,shanghai&tab=default_tab&search_scope=default_scope&vid=HVD_IMAGES&lang=en_US&offset=$offset&sortby=rank#searchResultList"
+  // https://images.hollis.harvard.edu/primo_library/libweb/webservices/rest/primo-explore/v1/pnxs?getMore=0&inst=01HVD&lang=en_US&limit=50&multiFacets=&offset=100&pcAvailability=true&q=any,contains,shanghai&qExclude=&qInclude=&rtaLinks=true&scope=default_scope&searchString=shanghai&sort=rank&tab=default_tab&vid=HVD_IMAGES
+  // https://images.hollis.harvard.edu/primo_library/libweb/webservices/rest/primo-explore/v1/pnxs?getMore=0&inst=01HVD&lang=en_US&limit=50&multiFacets=&offset=0&pcAvailability=true&q=any,contains,shanghai&qExclude=&qInclude=&rtaLinks=true&scope=default_scope&searchString=shanghai&sort=rank&tab=default_tab&vid=HVD_IMAGES
+  val buildOriginalJsonPage = (offset: Int) => s"https://images.hollis.harvard.edu/primo_library/libweb/webservices/rest/primo-explore/v1/pnxs?getMore=0&inst=01HVD&lang=en_US&limit=50&multiFacets=&offset=$offset&pcAvailability=true&q=any,contains,shanghai&qExclude=&qInclude=&rtaLinks=true&scope=default_scope&searchString=shanghai&sort=rank&tab=default_tab&vid=HVD_IMAGES"
   
   val buildTargetPage = (id: String) => s"https://nrs.harvard.edu/urn-3:FHCL:$id?buttons=Y"
   val buildRedirectJson = (id: String) => s"https://ids.lib.harvard.edu/ids/iiif/$id/info.json"
@@ -58,93 +58,91 @@ object WebDiggYenChing extends QueryHelper {
   def main(args: Array[String]): Unit = {
 
     // 获取页面的Json，一条Json对应多个结果集（图片+内容）
-      val jsonFile =
-        {
-          for (i <- 0 until 1 ) yield {
-            val offset = i * 50 // 0 ~ 5900
-            val get = new HttpGet(buildOriginalJsonPage(offset))
-            get.setHeader("Host", "images.hollis.harvard.edu")
-            get.setHeader("Connection", "keep-alive")
-            get.setHeader("Cache-Control", "max-age=0")
-            get.setHeader("Upgrade-Insecure-Requests", "1")
-            get.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 get.setHeader(Safari/537.36")
-            get.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
-            get.setHeader("Accept-Encoding", "gzip, deflate, br")
-            get.setHeader("Accept-Language", "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6")
-            get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTUzNzI1NDQyMCwiaWF0IjoxNTM3MTY4MDIwLCJ1c2VyIjoiYW5vbnltb3VzLTA5MTdfMDcwNzAwIiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiNTguMzcuOTkuNDUiLCJwZHNSZW1vdGVJbnN0IjpudWxsLCJvbkNhbXB1cyI6ImZhbHNlIiwibGFuZ3VhZ2UiOiJlbl9VUyIsImF1dGhlbnRpY2F0aW9uUHJvZmlsZSI6IiIsInZpZXdJZCI6IkhWRF9JTUFHRVMiLCJpbHNBcGlJZCI6bnVsbCwic2FtbFNlc3Npb25JbmRleCI6IiJ9.LgdPXycyQSWJi8abNQaefgsSmY5DUtBTfDNTvzJNAKb2FgS552Aw6RF5x2WX6Xbhaxu5i4_sBgvprMmPltH69g")
-            get.setHeader("Cookie", "JSESSIONID=A6A67C783C30182920156F6F9D14EBCE; _ga=GA1.2.522930930.1536053308; sto-id-%3FDir-A_prod%3F01ORBIS.Prod.Primo.1701-sg=EIFIBMAK; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LGFIBMAK; _gid=GA1.2.210371207.1537074884; JSESSIONID=51EC124B97289FB86842D343D681C894")
-
-            val response = client.execute(get)
-
-            val result = parseContent(response.getEntity.getContent)
-//              println(result)
-            println(i)
-
-            if(null != response)
-              response.close()
-            if(null != get)
-              get.completed()
-
-            i + "\t" + result
-          }
-        } mkString ""
-              Util.writeFile(pathPageFile, jsonFile)
+    //      val jsonFile =
+    //        {
+    //          for (i <- 16 until 17 ) yield {
+    //            val offset = i * 50 // 0 ~ 5900
+    //            val get = new HttpGet(buildOriginalJsonPage(offset))
+    //            get.setHeader("Host", "images.hollis.harvard.edu")
+    //            get.setHeader("Connection", "keep-alive")
+    //            get.setHeader("Cache-Control", "max-age=0")
+    //            get.setHeader("Upgrade-Insecure-Requests", "1")
+    //            get.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36")
+    //            get.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+    //            get.setHeader("Accept-Encoding", "gzip, deflate, br")
+    //            get.setHeader("Accept-Language", "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6")
+    //            get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTU0NDEwNjA4NywiaWF0IjoxNTQ0MDE5Njg3LCJ1c2VyIjoiYW5vbnltb3VzLTEyMDVfMTQyMTI3IiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiMTgzLjEzNC41Mi40NyIsInBkc1JlbW90ZUluc3QiOm51bGwsIm9uQ2FtcHVzIjoiZmFsc2UiLCJsYW5ndWFnZSI6ImVuX1VTIiwiYXV0aGVudGljYXRpb25Qcm9maWxlIjoiIiwidmlld0lkIjoiSFZEX0lNQUdFUyIsImlsc0FwaUlkIjpudWxsLCJzYW1sU2Vzc2lvbkluZGV4IjoiIn0.qLQP-H8OLtR3JE7lUEblPac4sH1p8crbEXLuJm9IS7j2AYxMaQo3Dq9yeWwZSwwjZlJ78pc2joRhIZfz0i4HSw")
+    //            get.setHeader("Cookie", "JSESSIONID=F222C681CF1475DCAA1FFCC94EF121E7; _ga=GA1.2.1225141926.1543930452; _gid=GA1.2.406731059.1543930452; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LHFIBMAK; JSESSIONID=1180D7D3177E2028A9CA686A5E472077")
+    //
+    //            val response = client.execute(get)
+    //
+    //            val result = parseContent(response.getEntity.getContent)
+    //              println(result)
+    //            println(i)
+    //
+    //            if(null != response)
+    //              response.close()
+    //            if(null != get)
+    //              get.completed()
+    //
+    //            i + "\t" + result
+    //          }
+    //        } mkString ""
+    //        Util.writeFile(pathPageFile, jsonFile)
 
     // 解析JSON子串，得出每个项的单一结果集
-    //    val lines =
-    //      Source.fromFile(new File(pathFile_), "utf-8")
-    //        .getLines()
-    //        .toSeq
-    //
-    //    val result =
-    //      lines
-    ////                .take(4)
-    ////      {
-    ////        for(i <- 15 until 17) yield lines(i)
-    ////      }
-    //      .map { o =>
-    //          val array = o.split("\t")
-    //          val json = array(1).replace("\n", "")
-    //          //          println(json)
-    //          val jsons = (parse(json, false) \ "docs")
-    //          val listJsonStr = jsons
-    //            .children
-    //            .map { o =>
-    //              val `type` = //
-    //                o \ "@id" match {
-    //                  case t: JValue if (t.extract[String].contains("group")) => "group"
-    //                  case t: JValue if (t.extract[String].contains("work")) => "work"
-    //                  case _ => "_"
-    //                }
-    //              //              println(`type`)
-    //              array(0) + "\t" + `type` + "\t" + compact(render(o))
-    //            }
-    //          listJsonStr
-    //        }
-    //        .flatMap(identity)
-    //        .sortBy(_.split("\t")(0).toInt)
-    ////        .foreach(println)
-    //        .mkString("\n")
-    //    Util.writeFile(pathFile, result)
-
-    // 从单项结果集文件执行任务
     val lines =
-      Source.fromFile(new File(pathFile), "utf-8")
-        .getLines()
+      Source.fromFile(new File(pathPageFile), "utf-8")
+        .getLines
         .toSeq
 
-    //    println(lines.size) // 5914
+    val result =
+      lines
+//        .take(4)
+        .map { o =>
+          val array = o.split("\t")
+          val json = array(1).replace("\n", "")
+          //          println(json)
+          val jsons = (parse(json, false) \ "docs")
+          val listJsonStr = jsons
+            .children
+            .map { o =>
+              val `type` = //
+                o \ "@id" match {
+                  case t: JValue if (t.extract[String].contains("group")) => "group"
+                  case t: JValue if (t.extract[String].contains("work")) => "work"
+                  case _ => "_"
+                }
+              //              println(`type`)
+              array(0) + "\t" + `type` + "\t" + compact(render(o))
+            }
+          listJsonStr
+        }
+        .flatMap(identity)
+        .sortBy(_.split("\t")(0).toInt)
+        .zipWithIndex
+        .map(o => (o._2 + 1) + "\t" + o._1)
+        //            .foreach(o => println(o))
+        .mkString("\n")
+        Util.writeFile(pathFile, result)
+            
+
+    // 从单项结果集文件执行任务
+//    val lines =
+//      Source.fromFile(new File(pathFile), "utf-8")
+//        .getLines
+//        .toSeq
+//        println(lines.size) // 799
 
     // 可直接下载图的单项 => work
     val linesWork = lines
-      .filter(_.split("\t")(1).equals("work"))
-    //      .filter(_.contains("85432"))
-    //      .foreach(println)
-
-    //    println(linesWork.size)
+      .filter(_.split("\t")(2).equals("work"))
+//          .filter(_.contains("85432"))
+//          .foreach(println)
+        println(linesWork.size) // 660
 
 //    try { //  /*lines.size*/
-//      for (i <- 4058 until 4059 /*linesWork.size*/ ) {
+//      for (i <- 0 until 10/*linesWork.size*/ ) {
 //        threadPool.execute(new DownloadImageProcess(i, linesWork(i)))
 //      }
 //    } finally
@@ -278,6 +276,8 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
 
     val jsonObject = parse(json)
     val id_ = (jsonObject \ "@id").extract[String]
+    
+    println(s">>index: $index\n>>line: $line")
 
     val workId = id_.substring(id_.lastIndexOf("work") + 4)
     println(s"workId: $workId")
@@ -323,10 +323,16 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
     val urlInfoJson = buildRedirectJson(redirectId)
     val maxWidth = parseMaxWidthFromInfoJson(urlInfoJson)
     val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
+    val imageName = s"$pathThumbnail/$page-${index + 1}-$workId-$redirectId-$fhclId.jpg"
+    val file = new File(imageName)
     println(s"default page: $urlDefaultPage")
 
-    HttpDownload.download(thumbnail, s"$pathThumbnail/$page-${index + 1}-$workId-$redirectId-$fhclId.jpg")
-    HttpDownload.download(urlDefaultPage, s"$pathDefault/$page-${index + 1}-$workId-$redirectId.jpg")
+//    HttpDownload.download(thumbnail, imageName)
+    if(!file.exists) {
+      println(s"imageName: $imageName")
+      HttpDownload.download(urlDefaultPage, imageName)
+    }
+      
     println(s">> ========================== ${index + 1} DOWN! =================================")
   }
 }

@@ -285,6 +285,33 @@ class Book extends Bean {
 
 }
 
+class BookGrid extends Bean {
+
+  @BeanProperty
+  var title: String = _
+  
+  @BeanProperty
+  var year: String = _
+  
+  @BeanProperty
+  var publisher: String = _
+  
+  @BeanProperty
+  var author: String = _
+  
+  @BeanProperty
+  var translator: String = _
+  
+  @BeanProperty
+  var rating_nums: String = _
+  
+  @BeanProperty
+  var comment_nums: String = _
+  
+  @BeanProperty
+  val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+}
+
 object Test extends App {
   
       val retry = new RetryTemplate()

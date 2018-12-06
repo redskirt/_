@@ -89,9 +89,11 @@ trait QueryHelper {
 		  
   def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
+  def saveBookGrid(o: BookGrid) = inTransaction(sf)(TableBook.attr_book_grid.insert(o))
+  
   def countBook = inTransaction(sf) {
     from(TableBook.attr_book)(o => compute(count)).toLong
-  }
+  } 
   
   def queryMaxBookId: Long = inTransaction(sf) {
     from(TableBook.attr_book)(o =>
@@ -118,6 +120,8 @@ object WebDiggWeiChat extends Schema {
 
 object TableBook extends Schema {
 	val attr_book = table[Book]("attr_book")
+	val attr_book_grid = table[BookGrid]("attr_book_grid")
+	
 }
 
 object WebDiggYenChing extends Schema {
@@ -179,4 +183,3 @@ object Sample extends QueryHelper with App {
 //  viewMap.authors = "123"
 //  saveViewMap(viewMap)
 }
-
