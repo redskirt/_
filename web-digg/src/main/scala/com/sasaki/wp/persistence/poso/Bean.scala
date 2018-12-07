@@ -309,6 +309,9 @@ class BookGrid extends Bean {
   var comment_nums: String = _
   
   @BeanProperty
+  var image: String = _
+  
+  @BeanProperty
   val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
 
