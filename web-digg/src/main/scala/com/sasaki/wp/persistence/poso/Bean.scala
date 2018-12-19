@@ -317,53 +317,5 @@ class BookGrid extends Bean {
 
 object Test extends App {
   
-      val retry = new RetryTemplate()
-    //设置重试策略，主要设置重试次数
-    val retryPolicy = new SimpleRetryPolicy()
-    retryPolicy.setMaxAttempts(3)
-    //设置重试回退操作策略，主要设置重试间隔时间
-    val fixedBackOffPolicy = new FixedBackOffPolicy()
-    fixedBackOffPolicy.setBackOffPeriod(3000)
-    retry.setRetryPolicy(retryPolicy)
-    retry.setBackOffPolicy(fixedBackOffPolicy)
-    
-    import scala.util.{Try, Success, Failure}
-
-    var a : Try[org.jsoup.nodes.Document] = null
-  var page_ : String = null
-  println("enter")
-
-  val recallPage = new RetryCallback[String, Exception] {
-    override def doWithRetry(context: RetryContext): String = {
-
-      a = Try(Jsoup.parse(new URL("http://search.kongfz.com/"), 1000))
-      println("aaweras")
-      println(a)
-//      page_ = "123"
-      // 该状态下发生异常，才会进行重试
-//      if (null == a) {
-//        println(">> retring ... ")
-//        throw new RuntimeException // 抛出异常会触发重试
-//      }
-      a match {
-        case Success(o) => println("ok")
-        case Failure(o) =>
-          println(">> retring ... ")
-        throw new RuntimeException // 抛出异常会触发重试
-      }
-      page_
-    }
-  }
-
-  // 重试失败后执行
-  val recovery = new RecoveryCallback[String] {
-    override def recover(context: RetryContext): String = {
-      // 所有 retry 均失败后，程序中止
-      println("stop...")
-      null
-    }
-  }
-
-  // 调用重试机制
-  val page = retry.execute(recallPage, recovery)
+  println("123")
 }

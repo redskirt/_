@@ -91,48 +91,48 @@ object WebDiggYenChing extends QueryHelper {
     //        Util.writeFile(pathPageFile, jsonFile)
 
     // 解析JSON子串，得出每个项的单一结果集
-    val lines =
-      Source.fromFile(new File(pathPageFile), "utf-8")
-        .getLines
-        .toSeq
+//    val lines =
+//      Source.fromFile(new File(pathPageFile), "utf-8")
+//        .getLines
+//        .toSeq
 
-    val result =
-      lines
-//        .take(4)
-        .map { o =>
-          val array = o.split("\t")
-          val json = array(1).replace("\n", "")
-          //          println(json)
-          val jsons = (parse(json, false) \ "docs")
-          val listJsonStr = jsons
-            .children
-            .map { o =>
-              val `type` = //
-                o \ "@id" match {
-                  case t: JValue if (t.extract[String].contains("group")) => "group"
-                  case t: JValue if (t.extract[String].contains("work")) => "work"
-                  case _ => "_"
-                }
-              //              println(`type`)
-              array(0) + "\t" + `type` + "\t" + compact(render(o))
-            }
-          listJsonStr
-        }
-        .flatMap(identity)
-        .sortBy(_.split("\t")(0).toInt)
-        .zipWithIndex
-        .map(o => (o._2 + 1) + "\t" + o._1)
-        //            .foreach(o => println(o))
-        .mkString("\n")
-        Util.writeFile(pathFile, result)
+//    val result =
+//      lines
+////        .take(4)
+//        .map { o =>
+//          val array = o.split("\t")
+//          val json = array(1).replace("\n", "")
+//          //          println(json)
+//          val jsons = (parse(json, false) \ "docs")
+//          val listJsonStr = jsons
+//            .children
+//            .map { o =>
+//              val `type` = //
+//                o \ "@id" match {
+//                  case t: JValue if (t.extract[String].contains("group")) => "group"
+//                  case t: JValue if (t.extract[String].contains("work")) => "work"
+//                  case _ => "_"
+//                }
+//              //              println(`type`)
+//              array(0) + "\t" + `type` + "\t" + compact(render(o))
+//            }
+//          listJsonStr
+//        }
+//        .flatMap(identity)
+//        .sortBy(_.split("\t")(0).toInt)
+//        .zipWithIndex
+//        .map(o => (o._2 + 1) + "\t" + o._1)
+//        //            .foreach(o => println(o))
+//        .mkString("\n")
+//        Util.writeFile(pathFile, result)
             
 
     // 从单项结果集文件执行任务
-//    val lines =
-//      Source.fromFile(new File(pathFile), "utf-8")
-//        .getLines
-//        .toSeq
-//        println(lines.size) // 799
+    val lines =
+      Source.fromFile(new File(pathFile), "utf-8")
+        .getLines
+        .toSeq
+        println(lines.size) // 799
 
     // 可直接下载图的单项 => work
     val linesWork = lines
@@ -141,12 +141,12 @@ object WebDiggYenChing extends QueryHelper {
 //          .foreach(println)
         println(linesWork.size) // 660
 
-//    try { //  /*lines.size*/
-//      for (i <- 0 until 10/*linesWork.size*/ ) {
-//        threadPool.execute(new DownloadImageProcess(i, linesWork(i)))
-//      }
-//    } finally
-//      threadPool.shutdown()
+    try { //  /*lines.size*/
+      for (i <- 100 until 120/*linesWork.size*/ ) {
+        threadPool.execute(new DownloadImageProcess(i, linesWork(i)))
+      }
+    } finally
+      threadPool.shutdown()
 
     // 数据库
     //    val images =
@@ -220,8 +220,8 @@ object WebDiggYenChing extends QueryHelper {
     get.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
     get.setHeader("Accept-Encoding", "gzip, deflate, br")
     get.setHeader("Accept-Language", "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6")
-    get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTUzNzE2MTYyMSwiaWF0IjoxNTM3MDc1MjIxLCJ1c2VyIjoiYW5vbnltb3VzLTA5MTZfMDUyMDIxIiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiNTguMzcuOTkuNDUiLCJwZHNSZW1vdGVJbnN0IjpudWxsLCJvbkNhbXB1cyI6ImZhbHNlIiwibGFuZ3VhZ2UiOiJlbl9VUyIsImF1dGhlbnRpY2F0aW9uUHJvZmlsZSI6IiIsInZpZXdJZCI6IkhWRF9JTUFHRVMiLCJpbHNBcGlJZCI6bnVsbCwic2FtbFNlc3Npb25JbmRleCI6IiJ9.hhc3SsXT-Lw2M9qXrI5GYyj9W4klNlDqY56jncQsac5NCfGeqOF3SnmwoCKK0o4sDmKWMkwFtkVDf6myipbNXQ")
-    get.setHeader("Cookie", "JSESSIONID=D2674469246BD07C29428914F4B1779E; _ga=GA1.2.522930930.1536053308; sto-id-%3FDir-A_prod%3F01ORBIS.Prod.Primo.1701-sg=EIFIBMAK; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LGFIBMAK; _gid=GA1.2.210371207.1537074884; JSESSIONID=51EC124B97289FB86842D343D681C894")
+    get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTU0NDM2NjM3MSwiaWF0IjoxNTQ0Mjc5OTcxLCJ1c2VyIjoiYW5vbnltb3VzLTEyMDhfMTQzOTMxIiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiMTgzLjEzNC41Mi40NyIsInBkc1JlbW90ZUluc3QiOm51bGwsIm9uQ2FtcHVzIjoiZmFsc2UiLCJsYW5ndWFnZSI6ImVuX1VTIiwiYXV0aGVudGljYXRpb25Qcm9maWxlIjoiIiwidmlld0lkIjoiSFZEX0lNQUdFUyIsImlsc0FwaUlkIjpudWxsLCJzYW1sU2Vzc2lvbkluZGV4IjoiIn0.lu2WkonQpIT2qWp5ZcbgUBJWNWPwvWaVbZAhDmFEoM9WSR_LRf6_E53ChY2_z4239kwG0GB_5mgZO_gaazUJ-Q")
+    get.setHeader("Cookie", "JSESSIONID=5F4BF05B4EF9981455F1916BCD584557; _ga=GA1.2.1225141926.1543930452; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LHFIBMAK")
     //    get.setHeader("If-None-Match", """W/"4636-1520771879000"""")
     //    get.setHeader("If-Modified-Since", "Sun, 11 Mar 2018 12:37:59 GMT")
 
@@ -234,10 +234,10 @@ object WebDiggYenChing extends QueryHelper {
     //    println(result)
     val strContain_manifestUri = result
       .split("\n")
-      .filter(_.contains("manifestUri"))(0)
+      .filter(_ contains "manifestUri")(0)
 
     if (response != null)
-      response.close()
+      response close
 
     val manifestUri = (parse(strContain_manifestUri) \ "manifestUri").extract[String]
     manifestUri
@@ -270,22 +270,24 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
 
     implicit val formats = DefaultFormats
 
+    val __ = "_"
     val array = line.split("\t")
-    val page = array(0).toInt + 1
-    val json = array(2)
+    val index_ = array(0).toInt
+    val page = array(1).toInt + 1
+    val json = array(3)
 
     val jsonObject = parse(json)
     val id_ = (jsonObject \ "@id").extract[String]
     
-    println(s">>index: $index\n>>line: $line")
+    println(s">>index: $index_\n>>line: $line")
 
     val workId = id_.substring(id_.lastIndexOf("work") + 4)
     println(s"workId: $workId")
 
     // thumbnail page
-    val thumbnail_ = (jsonObject \ "pnx" \ "links" \ "thumbnail")(0).extract[String]
-    val thumbnail = thumbnail_.substring(3)
-    println(s"thumbnail page: $thumbnail")
+//    val thumbnail_ = (jsonObject \ "pnx" \ "links" \ "thumbnail")(0).extract[String]
+//    val thumbnail = thumbnail_.substring(3)
+//    println(s"thumbnail page: $thumbnail")
 
     // content page
     //    val fhclId = "8151"// thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
@@ -304,35 +306,40 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
     val fhclId =
       if ("" != fhclIdStr)
         fhclIdStr.substring(fhclIdStr.lastIndexOf("FHCL:") + 5, fhclIdStr.length)
-      else
-        thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
+      else {
+        __
+        //        thumbnail.substring(thumbnail.indexOf("FHCL:") + 5, thumbnail.indexOf("?"))
+      }
     println(s"fhclId: $fhclId")
 
-    // target page
-    // https://nrs.harvard.edu/urn-3:FHCL:5011700?buttons=Y
-    val targetPage = buildTargetPage(fhclId)
-    // val targetPage = "https://nrs.harvard.edu/urn-3:FHCL:5011700?buttons=Y"
-    println(s"target page: $targetPage")
+    if(__ != fhclId) {
+      // target page
+      // https://nrs.harvard.edu/urn-3:FHCL:5011700?buttons=Y
+      val targetPage = buildTargetPage(fhclId)
+      // val targetPage = "https://nrs.harvard.edu/urn-3:FHCL:5011700?buttons=Y"
+      println(s"target page: $targetPage")
 
-    val redirectPage = parseFromTargetPage2RedirectPage(targetPage)
-    println(s"redirect page: $redirectPage")
+      val redirectPage = parseFromTargetPage2RedirectPage(targetPage)
+      println(s"redirect page: $redirectPage")
 
-    val redirectId = redirectPage.substring(redirectPage.indexOf("ids:") + 4, redirectPage.length())
-    println(s"redirect id: $redirectId")
+      val redirectId = redirectPage.substring(redirectPage.indexOf("ids:") + 4, redirectPage.length())
+      println(s"redirect id: $redirectId")
 
-    val urlInfoJson = buildRedirectJson(redirectId)
-    val maxWidth = parseMaxWidthFromInfoJson(urlInfoJson)
-    val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
-    val imageName = s"$pathThumbnail/$page-${index + 1}-$workId-$redirectId-$fhclId.jpg"
-    val file = new File(imageName)
-    println(s"default page: $urlDefaultPage")
+      val urlInfoJson = buildRedirectJson(redirectId)
+      val maxWidth = parseMaxWidthFromInfoJson(urlInfoJson)
+      val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
+//      val imageName = s"$pathThumbnail/$page-${index_ + 1}-$workId-$redirectId-$fhclId.jpg"
+      val imageName = s"$pathSh/$page-$index_-$workId-$redirectId-$fhclId.jpg"
+      val file = new File(imageName)
+      println(s"default page: $urlDefaultPage")
 
-//    HttpDownload.download(thumbnail, imageName)
-    if(!file.exists) {
-      println(s"imageName: $imageName")
-      HttpDownload.download(urlDefaultPage, imageName)
+      //    HttpDownload.download(thumbnail, imageName)
+      if (!file.exists) {
+        println(s"imageName: $imageName")
+        HttpDownload.download(urlDefaultPage, imageName)
+        println(s">> ========================== $index_ DOWN! =================================")
+      }
     }
       
-    println(s">> ========================== ${index + 1} DOWN! =================================")
   }
 }

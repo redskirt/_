@@ -23,13 +23,13 @@ object BookGridProcess extends QueryHelper {
 
     val document = Jsoup.parse(new File("/Users/sasaki/git/_/web-digg/src/main/resources/book-grid.txt"), "utf-8")
     val results = document.getElementsByClass("result")
-    for (i <- 146 until results.size) {
+    for (i <- 0 until results.size) {
       val id = i + 1
       val result = results.get(i)
       val img = result.getElementsByTag("img").first().attr("src")
-            println(img)
+//            println(img)
       val imageName = s"/Users/sasaki/bigbook/grid/grid-$id.jpg"
-      HttpDownload.download(img, imageName)
+//      HttpDownload.download(img, imageName)
       val title = result
         .getElementsByClass("title")
         .first()
@@ -37,7 +37,15 @@ object BookGridProcess extends QueryHelper {
         .first()
         .text()
       val rating_nums = result.getElementsByClass("rating_nums").text()
-      val comment_nums = result.getElementsByTag("span").get(2).text()
+      val comment_nums_ = {
+        val span = result.getElementsByTag("span")
+        if(span.size() == 5)
+          span.get(3).text()
+        else
+          "(0人)"
+      }
+      val comment_nums = comment_nums_.substring(1, comment_nums_.lastIndexOf('人'))
+      println(comment_nums)
       val subject_cast = result
         .getElementsByClass("subject-cast")
         .first()

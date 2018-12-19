@@ -98,13 +98,13 @@ trait QueryHelper {
   def queryMaxBookId: Long = inTransaction(sf) {
     from(TableBook.attr_book)(o =>
       compute(max(o.id)) //
-    ).get.toLong
+    ).getOrElse(0L).toLong
   }
   
   def queryMaxBatch: Int = inTransaction(sf) {
     from(TableBook.attr_book)(o =>
       compute(max(o.batch)) //
-    ).get.toInt
+    ).getOrElse(0).toInt
   }
   
   def saveBristol(view: Bristol) = inTransaction(sf)(attr_bristol.insert(view))

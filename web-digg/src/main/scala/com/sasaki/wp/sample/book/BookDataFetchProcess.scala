@@ -1,23 +1,22 @@
 package com.sasaki.wp.sample.book
 
-import org.json4s.DefaultFormats
-import com.sasaki.wp.persistence.QueryHelper
-import org.jsoup.Jsoup
 import java.net.URL
-import com.sasaki.wp.persistence.poso.Book
 import java.util.concurrent.Executors
+
+import org.json4s.DefaultFormats
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.springframework.retry.policy.SimpleRetryPolicy
-import org.springframework.retry.backoff.FixedBackOffPolicy
-import org.springframework.retry.support.RetryTemplate
-import scala.util.Random
+import org.springframework.retry.RecoveryCallback
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
-import org.springframework.retry.RecoveryCallback
+import org.springframework.retry.backoff.FixedBackOffPolicy
+import org.springframework.retry.policy.SimpleRetryPolicy
+import org.springframework.retry.support.RetryTemplate
+
+import com.sasaki.wp.persistence.QueryHelper
+import com.sasaki.wp.persistence.poso.Book
 import com.yunpian.sdk.YunpianClient
 import com.yunpian.sdk.constant.YunpianConstant
-import java.net.URLEncoder
-import com.yunpian.sdk.api.SmsApi
 
 /**
  * @Author Sasaki
@@ -28,8 +27,7 @@ import com.yunpian.sdk.api.SmsApi
 class BookDataFetchProcess(
     i: Int, 
     pageNum: Int,
-    _status: String,
-    _order: String,
+    param: (String, String, String, String), 
     page: Document,
     count: Long,
     lastBatch: Int
@@ -62,7 +60,7 @@ class BookDataFetchProcess(
           yield (normal_title.get(j).text(), normal_text.get(j).text())
       }
     val __ = ("", "")
-    val author = title_text.find(_._1 .contains("作者")).getOrElse(__)._2
+    val author = title_text.find(_._1.contains("作者")).getOrElse(__)._2
     val publisher = title_text.find(_._1.contains("出版社")).getOrElse(__)._2
     val publish_date = title_text.find(_._1.contains("出版时间")).getOrElse(__)._2
     val print_date = title_text.find(_._1.contains("印刷时间")).getOrElse(__)._2
@@ -72,7 +70,7 @@ class BookDataFetchProcess(
     val print_times = title_text.find(_._1.contains("印次")).getOrElse(__)._2
     val quality = item.getElementsByClass("quality").get(0).text()
     val putaway_date = item.getElementsByClass({
-      if("0".equals(_status))
+      if("0".equals(param._1))
         "add-time-box"
       else
         "ship-fee-box"
@@ -114,10 +112,10 @@ class BookDataFetchProcess(
     book.setUrl_storekeeper(url_storekeeper)
     book.setStatus(status)
     book.setType(`type`)
-    book.setKeyword("网格本")
+    book.setKeyword(param._4)
     book.setLocation(location)
     book.setOrderby({
-      if ("".equals(_order))
+      if ("".equals(param._2))
         "default"
       else
         "putaway"
@@ -131,16 +129,14 @@ class BookDataFetchProcess(
 
 object BookDataFetchProcess extends QueryHelper {
 
-  import com.sasaki.wp.enums.E._
-
   implicit val formats = DefaultFormats
 
   val root = "http://search.kongfz.com"
   val root_book = "http://book.kongfz.com"
   val root_shop = "http://shop.kongfz.com"
   
-  def buildUrl(page: Int, status: String/* 0 在售 1 已售 */, order: String/* &order=6 */) = 
-    s"$root/product_result/?key=%E7%BD%91%E6%A0%BC%E6%9C%AC&itemfilter=0&status=$status$order&pagenum=$page"
+  def buildUrl(page: Int,  param: (String, String, String, String)) = 
+    s"$root/product_result/?key=${param._3}&itemfilter=0&status=${param._1}${param._2}&pagenum=$page"
   
   val threadPool = Executors.newFixedThreadPool(25)
 
@@ -170,17 +166,22 @@ object BookDataFetchProcess extends QueryHelper {
     retry.setBackOffPolicy(fixedBackOffPolicy)
 
     val lastBatch = queryMaxBatch
+    val 网格本 = "%E7%BD%91%E6%A0%BC%E6%9C%AC"
+    val 二月河文集 = "%E4%BA%8C%E6%9C%88%E6%B2%B3%E6%96%87%E9%9B%86"
     val params = Seq(
-         // status  order  keyword
-          Tuple3("0",  "",           "网格本"),
-          Tuple3("0",  "&order=6",   "网格本"),
-          Tuple3("1",  "",           "网格本"),
-          Tuple3("1",  "&order=6",   "网格本")
-        //
-        )
+      // status /* 0 在售 1 已售 */  order  keyword
+      //        %E7%BD%91%E6%A0%BC%E6%9C%AC
+//                Tuple4("0",  "",           网格本,    "网格本"),
+//                Tuple4("0",  "&order=6",   网格本,    "网格本"),
+//                Tuple4("1",  "",           网格本,    "网格本"),
+//                Tuple4("1",  "&order=6",   网格本,    "网格本"),
+//
+//      //
+//      Tuple4("0", "&order=6", 二月河文集, "二月河文集"),
+      Tuple4("1", "&order=6", 二月河文集, "二月河文集")
+    )
         
     try {
-
       val client = new YunpianClient("47b97b332b9e3448821d0c8bf226c885").init()
       
       val ENCODING = "UTF-8"
@@ -188,10 +189,20 @@ object BookDataFetchProcess extends QueryHelper {
       param.put(YunpianConstant.MOBILE, "17091920677,18101823205")
      
       params.foreach {
-        case (status, order, keyword) =>
+        o =>
+          val status = o._1
+          val order = o._2
           val count = queryMaxBookId
+          val tryPage = Jsoup.parse(new URL(buildUrl(1, o)), 5000)
+          val pageCount = tryPage
+            .getElementById("pageTop")
+            .getElementsByTag("span")
+            .get(3)
+            .text
+            .toInt
+          
           println("count " + count)
-          for (pageNum <- 1 to 100) {
+          for (pageNum <- 1 to pageCount) {
             println("page: " + pageNum)
 
             /**
@@ -210,7 +221,7 @@ object BookDataFetchProcess extends QueryHelper {
              */
             import scala.util.{ Try, Success, Failure }
 
-            val url = buildUrl(pageNum, status, order)
+            val url = buildUrl(pageNum, o)
             println(url)
 
             // 使用Retry方式请求page
@@ -246,7 +257,7 @@ object BookDataFetchProcess extends QueryHelper {
 
             // 多线程仅负责提交数据库写入效率
             for (i <- 0 until 50 /*items.size()*/ ) {
-              threadPool.execute(new BookDataFetchProcess(i, pageNum, status, order, page, count, lastBatch))
+              threadPool.execute(new BookDataFetchProcess(i, pageNum, o, page, count, lastBatch))
             }
 
             Thread.sleep(3000) // 防止请求频繁
