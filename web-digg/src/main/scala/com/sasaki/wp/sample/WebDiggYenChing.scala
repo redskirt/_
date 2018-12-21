@@ -1,23 +1,25 @@
 package com.sasaki.wp.sample
 
-import com.sasaki.wp.persistence.QueryHelper
-import org.jsoup.Jsoup
-import scala.collection.mutable.ArrayBuffer
-import org.apache.http.client.HttpClient
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.client.methods.HttpGet
-import java.io.InputStream
-import com.sasaki.wp.util.Util
-import scala.io.Source
 import java.io.File
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
-import java.net.URL
-import com.sasaki.wp.util.HttpDownload
 import java.util.concurrent.Executors
+
+import scala.io.Source
 import scala.xml.XML
-import com.sasaki.wp.persistence.poso.Yenching
-import com.sun.security.sasl.CramMD5Base
+
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClients
+import org.json4s.DefaultFormats
+import org.json4s.jackson.JsonMethods.parse
+import org.json4s.jvalue2extractable
+import org.json4s.jvalue2monadic
+import org.json4s.string2JsonInput
+
+import com.sasaki.wp.persistence.QueryHelper
+import com.sasaki.wp.util.HttpDownload
+import scala.util.Try
+import scala.util.Failure
+import scala.util.Success
+
 /**
  * @Author Sasaki
  * @Mail redskirt@outlook.com
@@ -25,6 +27,8 @@ import com.sun.security.sasl.CramMD5Base
  * @Description
  */
 object WebDiggYenChing extends QueryHelper {
+  
+  val __ = "_"
 
   val root = "https://images.hollis.harvard.edu"
   val client = HttpClients.createDefault()
@@ -220,8 +224,8 @@ object WebDiggYenChing extends QueryHelper {
     get.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
     get.setHeader("Accept-Encoding", "gzip, deflate, br")
     get.setHeader("Accept-Language", "ja,en-US;q=0.9,en;q=0.8,zh-CN;q=0.7,zh;q=0.6")
-    get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTU0NDM2NjM3MSwiaWF0IjoxNTQ0Mjc5OTcxLCJ1c2VyIjoiYW5vbnltb3VzLTEyMDhfMTQzOTMxIiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiMTgzLjEzNC41Mi40NyIsInBkc1JlbW90ZUluc3QiOm51bGwsIm9uQ2FtcHVzIjoiZmFsc2UiLCJsYW5ndWFnZSI6ImVuX1VTIiwiYXV0aGVudGljYXRpb25Qcm9maWxlIjoiIiwidmlld0lkIjoiSFZEX0lNQUdFUyIsImlsc0FwaUlkIjpudWxsLCJzYW1sU2Vzc2lvbkluZGV4IjoiIn0.lu2WkonQpIT2qWp5ZcbgUBJWNWPwvWaVbZAhDmFEoM9WSR_LRf6_E53ChY2_z4239kwG0GB_5mgZO_gaazUJ-Q")
-    get.setHeader("Cookie", "JSESSIONID=5F4BF05B4EF9981455F1916BCD584557; _ga=GA1.2.1225141926.1543930452; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LHFIBMAK")
+    get.setHeader("Authorization", "Bearer eyJraWQiOiJwcmltb0V4cGxvcmVQcml2YXRlS2V5LTAxSFZEIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJQcmltbyIsImp0aSI6IiIsImV4cCI6MTU0NTQ4NzYyMSwiaWF0IjoxNTQ1NDAxMjIxLCJ1c2VyIjoiYW5vbnltb3VzLTEyMjFfMTQwNzAxIiwidXNlck5hbWUiOm51bGwsInVzZXJHcm91cCI6IkdVRVNUIiwiYm9yR3JvdXBJZCI6bnVsbCwidWJpZCI6bnVsbCwiaW5zdGl0dXRpb24iOiIwMUhWRCIsInZpZXdJbnN0aXR1dGlvbkNvZGUiOiIwMUhWRCIsImlwIjoiMjE4Ljk4LjI2LjUzIiwicGRzUmVtb3RlSW5zdCI6bnVsbCwib25DYW1wdXMiOiJmYWxzZSIsImxhbmd1YWdlIjoiZW5fVVMiLCJhdXRoZW50aWNhdGlvblByb2ZpbGUiOiIiLCJ2aWV3SWQiOiJIVkRfSU1BR0VTIiwiaWxzQXBpSWQiOm51bGwsInNhbWxTZXNzaW9uSW5kZXgiOiIifQ.f13oiNnSVBArl_0t2KeendcqeRx6DiYmHkjFFIYXuJu2haeEXUA3IqP0dTPRLWbMWPOJcpzLZvRGnCnkPxkSwg")
+    get.setHeader("Cookie", "JSESSIONID=FEFA01618C587B24AB7E1ACF76AA4CD1; _ga=GA1.2.1225141926.1543930452; sto-id-%3FDir-A_prod%3F01HVD.primo.for.alma.prod.1701-sg=LHFIBMAK")
     //    get.setHeader("If-None-Match", """W/"4636-1520771879000"""")
     //    get.setHeader("If-Modified-Since", "Sun, 11 Mar 2018 12:37:59 GMT")
 
@@ -232,15 +236,26 @@ object WebDiggYenChing extends QueryHelper {
 
     val result = parseContent(response.getEntity.getContent)
     //    println(result)
-    val strContain_manifestUri = result
-      .split("\n")
-      .filter(_ contains "manifestUri")(0)
+    val strContain_manifestUri_ =
+      Try {
+        result
+          .split("\n")
+          .filter(_ contains "manifestUri")(0)
+      }
+
+    val strContain_manifestUri =
+      strContain_manifestUri_ match {
+        case Success(o) => strContain_manifestUri_.get
+        case Failure(o) => __
+      }
 
     if (response != null)
       response close
 
-    val manifestUri = (parse(strContain_manifestUri) \ "manifestUri").extract[String]
-    manifestUri
+    if (__ != strContain_manifestUri)
+      (parse(strContain_manifestUri) \ "manifestUri").extract[String]
+    else
+      __
   }
 
   def parseMaxWidthFromInfoJson(url: String) = {
@@ -254,7 +269,6 @@ object WebDiggYenChing extends QueryHelper {
   }
 
   def parseContent(input: java.io.InputStream): String = {
-    import scala.io.Source
     val builder = StringBuilder.newBuilder
     Source.fromInputStream(input, "UTF-8").getLines().foreach(__ => builder.append(__).append("\n"))
     builder toString
@@ -279,7 +293,7 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
     val jsonObject = parse(json)
     val id_ = (jsonObject \ "@id").extract[String]
     
-    println(s">>index: $index_\n>>line: $line")
+    println(s">>page: $page, index: $index_\n>>line: $line")
 
     val workId = id_.substring(id_.lastIndexOf("work") + 4)
     println(s"workId: $workId")
@@ -322,22 +336,24 @@ class DownloadImageProcess(index: Int, line: String) extends Runnable {
       val redirectPage = parseFromTargetPage2RedirectPage(targetPage)
       println(s"redirect page: $redirectPage")
 
-      val redirectId = redirectPage.substring(redirectPage.indexOf("ids:") + 4, redirectPage.length())
-      println(s"redirect id: $redirectId")
+      if (__ != redirectPage) {
+        val redirectId = redirectPage.substring(redirectPage.indexOf("ids:") + 4, redirectPage.length())
+        println(s"redirect id: $redirectId")
 
-      val urlInfoJson = buildRedirectJson(redirectId)
-      val maxWidth = parseMaxWidthFromInfoJson(urlInfoJson)
-      val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
-//      val imageName = s"$pathThumbnail/$page-${index_ + 1}-$workId-$redirectId-$fhclId.jpg"
-      val imageName = s"$pathSh/$page-$index_-$workId-$redirectId-$fhclId.jpg"
-      val file = new File(imageName)
-      println(s"default page: $urlDefaultPage")
+        val urlInfoJson = buildRedirectJson(redirectId)
+        val maxWidth = parseMaxWidthFromInfoJson(urlInfoJson)
+        val urlDefaultPage = buildDefaultJpgPage(redirectId, maxWidth)
+        //      val imageName = s"$pathThumbnail/$page-${index_ + 1}-$workId-$redirectId-$fhclId.jpg"
+        val imageName = s"$pathSh/$page-$index_-$workId-$redirectId-$fhclId.jpg"
+        val file = new File(imageName)
+        println(s"default page: $urlDefaultPage")
 
-      //    HttpDownload.download(thumbnail, imageName)
-      if (!file.exists) {
-        println(s"imageName: $imageName")
-        HttpDownload.download(urlDefaultPage, imageName)
-        println(s">> ========================== $index_ DOWN! =================================")
+        //    HttpDownload.download(thumbnail, imageName)
+        if (!file.exists) {
+          println(s"imageName: $imageName")
+          HttpDownload.download(urlDefaultPage, imageName)
+          println(s">> ========================== $index_ DOWN! =================================")
+        }
       }
     }
       
