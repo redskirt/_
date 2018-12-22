@@ -317,5 +317,6 @@ class BookGrid extends Bean {
 
 object Test extends App {
   
-  println("123")
+  import com.sasaki.packages.independent._
+  runShell("/Users/sasaki/a.sh")
 }

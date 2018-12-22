@@ -13,9 +13,9 @@ import scala.reflect.runtime.universe._
  */
 package object independent {
 
-  import reflect._
-  import constant._
-  import constant.original._
+  import com.sasaki.packages.constant._
+  import com.sasaki.packages.constant.original._
+  import com.sasaki.packages.reflect._
 
   def isNull(o: A) = null == o
 
@@ -207,7 +207,7 @@ package object independent {
    * @param content
    */
   def writeFile(fileNameWithPath: String, content: String) = {
-    import java.io.{ File, FileWriter, BufferedWriter }
+    import java.io.{ BufferedWriter, File, FileWriter }
 
     val writer = new BufferedWriter(new FileWriter(new File(fileNameWithPath)))
     writer.write(content)
@@ -269,6 +269,28 @@ package object independent {
     invokeVerify(() => r.size == s.size, "Seq[R] and Seq[S] must have equal size!") { () =>
       for (i <- 0 until r.size) yield f_x(r(i), s(i))
     }
+
+  def runShell(fullPath: String): Boolean = {
+    val process = Runtime.getRuntime().exec(fullPath)
+    process.waitFor()
+
+    if (0 == process.exitValue()) {
+      val reader = new BufferedReader(new InputStreamReader(process.getInputStream()))
+      val buffer = new StringBuffer()
+      var line: String = null
+      
+      while ({
+        line = reader.readLine()
+        line != null
+      }) {
+        buffer.append(line).append("\n")
+      }
+      val result = buffer.toString()
+      println(result)
+      true
+    } else
+      false
+  }
 }
 
 /**
@@ -276,8 +298,8 @@ package object independent {
  */
 package object reflect {
 
-  import constant._
-  import constant.original._
+  import com.sasaki.packages.constant._
+  import com.sasaki.packages.constant.original._
 
   /**
    * 示例：
@@ -561,7 +583,7 @@ package object constant {
   val $u = "_"      // underline
 
   // --------------------------- Java Type -------------------------------
-  import java.{ lang => Java, util => JUtil, sql => JSql }
+  import java.{ lang => Java, sql => JSql, util => JUtil }
 
   //  type JObject             = Java.Object
   type JInt              = Java.Integer
