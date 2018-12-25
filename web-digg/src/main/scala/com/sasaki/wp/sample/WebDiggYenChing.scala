@@ -162,7 +162,7 @@ object WebDiggYenChing extends QueryHelper {
         .foreach { o =>
           val name = o.getName
           val array = name.split("-")
-          val id = (array(1).toInt) + 5872
+          val id = (array(1).toInt)
           val page = array(0) toInt
           val work_id = array(2) toInt
           val source_id = array(4) substring(0, array(4).lastIndexOf(".")) toInt
