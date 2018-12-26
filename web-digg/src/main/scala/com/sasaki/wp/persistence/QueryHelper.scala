@@ -89,6 +89,8 @@ trait QueryHelper {
 		  
   def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
+  def saveBookDangDangBestseller(o: BookDangDangBestseller) = inTransaction(sf)(TableBook.attr_book_dangdang_bestseller.insert(o))
+  
   def saveBookGrid(o: BookGrid) = inTransaction(sf)(TableBook.attr_book_grid.insert(o))
   
   def countBook = inTransaction(sf) {
@@ -121,6 +123,7 @@ object WebDiggWeiChat extends Schema {
 object TableBook extends Schema {
 	val attr_book = table[Book]("attr_book")
 	val attr_book_grid = table[BookGrid]("attr_book_grid")
+	val attr_book_dangdang_bestseller = table[BookDangDangBestseller]("attr_book_dangdang_bestseller")
 	
 }
 

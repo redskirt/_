@@ -314,6 +314,53 @@ class BookGrid extends Bean {
   @BeanProperty
   val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
+class BookDangDangBestseller extends Bean {
+	
+	@BeanProperty
+	var year: String = _
+	
+	@BeanProperty
+	var month: String = _
+		
+	@BeanProperty
+	var title: String = _
+	
+	@BeanProperty
+	var url_item: String = _
+	
+	@BeanProperty
+	var author_andor_translator: String = _
+	
+	@BeanProperty
+	var publishing_date: String = _
+	
+	@BeanProperty
+	var publisher: String = _
+	
+	@BeanProperty
+	var num_star: String = _
+	
+	@BeanProperty
+	var num_comment: Int = _
+	
+	@BeanProperty
+	var num_recommend: String = _
+	
+	@BeanProperty
+	var price_original: Double = _
+	
+	@BeanProperty
+	var price_current: Double = _
+	
+	@BeanProperty
+	var discount: Double = _
+	
+	@BeanProperty
+	var image: String = _
+	
+	@BeanProperty
+	val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
+}
 
 object Test extends App {
   
