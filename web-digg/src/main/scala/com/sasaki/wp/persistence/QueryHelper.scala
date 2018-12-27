@@ -89,7 +89,20 @@ trait QueryHelper {
 		  
   def saveBook(o: Book) = inTransaction(sf)(TableBook.attr_book.insert(o))
   
-  def saveBookDangDangBestseller(o: BookDangDangBestseller) = inTransaction(sf)(TableBook.attr_book_dangdang_bestseller.insert(o))
+  def saveBookDangDangBestseller(o: BookBestseller) = inTransaction(sf)(TableBook.attr_book_bestseller.insert(o))
+  
+  def updateBookInfo(book: BookBestseller) = inTransaction(sf) {
+    update(TableBook.attr_book_bestseller)(o =>
+      where(o.id === book.id)
+        set (o.isbn := book.isbn, o.category := book.category))
+  }
+
+  def listBookInfo = inTransaction(sf) {
+    from(TableBook.attr_book_bestseller) (o =>
+      where(o.source === "dd" and o.isbn.isNull) //
+      select(o.id, o.url_item)
+    ).toArray
+  }
   
   def saveBookGrid(o: BookGrid) = inTransaction(sf)(TableBook.attr_book_grid.insert(o))
   
@@ -123,7 +136,7 @@ object WebDiggWeiChat extends Schema {
 object TableBook extends Schema {
 	val attr_book = table[Book]("attr_book")
 	val attr_book_grid = table[BookGrid]("attr_book_grid")
-	val attr_book_dangdang_bestseller = table[BookDangDangBestseller]("attr_book_dangdang_bestseller")
+	val attr_book_bestseller = table[BookBestseller]("attr_book_bestseller")
 	
 }
 

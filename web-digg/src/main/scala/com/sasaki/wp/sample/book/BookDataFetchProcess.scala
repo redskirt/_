@@ -170,7 +170,7 @@ object BookDataFetchProcess extends QueryHelper {
     val 二月河文集 = "%E4%BA%8C%E6%9C%88%E6%B2%B3%E6%96%87%E9%9B%86"
     val params = Seq(
       // status /* 0 在售 1 已售 */  order  keyword
-//                Tuple4("0",  "",           网格本,    "网格本"),
+                Tuple4("0",  "",           网格本,    "网格本"),
                 Tuple4("0",  "&order=6",   网格本,    "网格本"),
                 Tuple4("1",  "",           网格本,    "网格本"),
                 Tuple4("1",  "&order=6",   网格本,    "网格本")//,

@@ -314,7 +314,13 @@ class BookGrid extends Bean {
   @BeanProperty
   val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
 }
-class BookDangDangBestseller extends Bean {
+class BookBestseller extends Bean {
+	
+	@BeanProperty
+	var isbn: String = _
+	
+	@BeanProperty
+	var category: String = _
 	
 	@BeanProperty
 	var year: String = _
@@ -357,6 +363,9 @@ class BookDangDangBestseller extends Bean {
 	
 	@BeanProperty
 	var image: String = _
+	
+	@BeanProperty
+	var source: String = _
 	
 	@BeanProperty
 	val timestamp: Timestamp = new Timestamp(System.currentTimeMillis())
