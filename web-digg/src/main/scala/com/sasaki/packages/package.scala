@@ -291,6 +291,16 @@ package object independent {
     } else
       false
   }
+
+  /**
+   * 解析 http request 返回流
+   */
+  def parseRequestContent(input: java.io.InputStream): String = {
+    val builder = StringBuilder.newBuilder
+    scala.io.Source.fromInputStream(input, "UTF-8").getLines().foreach(__ => builder.append(__).append("\n"))
+    builder toString
+  }
+  
 }
 
 /**

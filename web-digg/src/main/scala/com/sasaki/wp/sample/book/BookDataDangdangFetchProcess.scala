@@ -1,16 +1,24 @@
 package com.sasaki.wp.sample.book
 
-import java.net.URL
 import java.util.concurrent.Executors
 
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.HttpClientBuilder
 import org.json4s.DefaultFormats
-import org.jsoup.Jsoup
 
+import com.sasaki.packages.independent
 import com.sasaki.wp.persistence.QueryHelper
 import com.sasaki.wp.persistence.poso.BookBestseller
-import com.sasaki.wp.util.HttpDownload
-import com.sasaki.wp.persistence.poso.BookBestseller
 
+ import org.json4s.DefaultFormats
+        import org.json4s.JsonMethods
+        import org.json4s.jackson.JsonMethods
+        import org.json4s.jvalue2extractable
+        import org.json4s.jvalue2monadic
+        import org.json4s.string2JsonInput
+        import com.sasaki.wp.persistence.QueryHelper
+        import org.apache.http.impl.client.CloseableHttpClient
+        
 /**
  * @Author Sasaki
  * @Mail redskirt@outlook.com
@@ -21,13 +29,26 @@ object BookDataDangdangFetchProcess extends QueryHelper {
 
   implicit val formats = DefaultFormats
 
-  val root = "http://bang.dangdang.com"
+  /**
+   * dangdang
+   */
+  //  val root = "http://bang.dangdang.com"
+  //  def buildUrl(year: Int, month: Int, page: Int) =
+  //    s"$root/books/bestsellers/01.00.00.00.00.00-month-$year-$month-2-$page"
+  //  def buildUrlPreYear(year: Int, page: Int) =
+  //    s"$root/books/bestsellers/01.00.00.00.00.00-year-$year-0-2-$page"
 
-  def buildUrl(year: Int, month: Int, page: Int) =
-    s"$root/books/bestsellers/01.00.00.00.00.00-month-$year-$month-2-$page"
-
-  def buildUrlPreYear(year: Int, page: Int) =
-    s"$root/books/bestsellers/01.00.00.00.00.00-year-$year-0-2-$page"
+  /**
+   * jingdong
+   */
+  val root = "https://book.jd.com"
+  // 2018年历月
+  def buildUrl(month: Int, page: Int) =
+    s"https://book.jd.com/booktop/0-0-0.html?category=1713-0-0-0-$month-$page#comfort"
+  // 历年
+  val jd_2018 = s"https://book.jd.com/booktop/0-0-0.html?category=1713-0-0-0-10001-1#comfort"
+  val jd_2017 = s"https://book.jd.com/booktop/0-0-0.html?category=1713-0-0-0-10005-1#comfort"
+  val jd_2016 = s"https://book.jd.com/booktop/0-0-0.html?category=1713-0-0-0-10006-1#comfort"
 
   val threadPool = Executors.newFixedThreadPool(1)
 
@@ -158,49 +179,189 @@ object BookDataDangdangFetchProcess extends QueryHelper {
     //          }
     //      }
 
-    val list = listBookInfo
-    println(list.size)
+    /**
+     * dang dang detail isbn & category
+     */
+    //    val list = listBookInfo
+    //    println(list.size)
+    //    for (i <- 1 until list.size) {
+    //      val id = list(i)._1
+    //      val url_item = list(i)._2
+    //
+    //      try {
+    //        val page = Jsoup.parse(new URL(url_item), 15000)
+    //
+    //        val li_isbn =
+    //          page
+    //            .getElementsContainingOwnText("国际标准书号ISBN")
+    //            .get(0)
+    //            .text()
+    //        val isbn = li_isbn.substring(li_isbn.lastIndexOf("：") + 1)
+    //        val list_span_lie =
+    //          page.getElementById("detail-category-path")
+    //            .getElementsByClass("lie")
+    //
+    //        val category = {
+    //          for (i <- 0 until list_span_lie.size()) yield {
+    //            list_span_lie
+    //              .get(i)
+    //              .text
+    //              .split(">")
+    //              .map(_ trim)
+    //              .mkString("|")
+    //          }
+    //        }.mkString(";")
+    //
+    //        val book = new BookBestseller
+    //        book.id = id
+    //        book.setCategory(category)
+    //        book.setIsbn(isbn)
+    //
+    //        println(id + " " + url_item + " " + category)
+    //        updateBookInfo(book)
+    //      } catch {
+    //        case t: Throwable =>
+    //          println("error: "+ url_item)
+    //          t.printStackTrace()
+    //      }
+    //    }
+
+    /**
+     * list from jd
+     */
+
+    //    var id = 7561
+    //    {
+    //      for {
+    //        month <- 1 to 11
+    //        countPage <- 1 to 5
+    //      } yield (month, countPage)
+    //    }.foreach {
+    //      case (month, countPage) =>
+    //        val year = 2018
+    //        //        val url = jd_2016
+    //        val url = buildUrl(month, countPage)
+    //        println(s"requested page >>>>>>>>>>>>>>> $month, $countPage, $url")
+    //        val page = Jsoup.parse(new URL(url), 15000)
+    //        val list = page.getElementsByClass("clearfix").get(0).getElementsByTag("li")
+    //
+    //        for (i <- 0 until list.size()) {
+    //          val li = list.get(i)
+    //          val div_detail = li.getElementsByClass("p-detail").get(0)
+    //          val title = div_detail.getElementsByTag("a").get(0).text()
+    //          val url_item_ = div_detail.getElementsByTag("a").get(0).attr("href")
+    //          val url_item = "https:/" + url_item_.substring(1)
+    //          val list_dl = div_detail.getElementsByTag("dl")
+    //          val author_andor_translator = list_dl.get(0).getElementsByTag("dd").text()
+    //          val publisher = list_dl.get(1).getElementsByTag("dd").text()
+    //
+    //          val page_item = Jsoup.parse(new URL(url_item), 15000)
+    //          val isbn_ = page_item.getElementsContainingOwnText("ISBN").text()
+    //          val isbn = isbn_.substring(isbn_.lastIndexOf("：") + 1)
+    //          val publishing_date_ = page_item.getElementsContainingOwnText("出版时间").get(0).text()
+    //          val publishing_date = publishing_date_.substring(publishing_date_.lastIndexOf("：") + 1)
+    //          val img = "https:" + page_item
+    //            .getElementById("spec-n1")
+    //            .getElementsByTag("img")
+    //            .get(0)
+    //            .attr("src")
+    //          val imageName = s"jingdong_bestseller-$id.jpg"
+    //          HttpDownload.download(img, s"/Users/sasaki/bigbook/bestseller/jingdong/2018/$month/" + imageName)
+    //          val category = page_item
+    //            .getElementsByClass("crumb")
+    //            .get(0)
+    //            .text()
+    //            .split(">")
+    //            .map(_ trim)
+    //            .mkString("|")
+    //
+    //          // 京东价格使用包装，不能直接抓取，需解析JSON
+    //          //get  https://p.3.cn/prices/mgets?type=1&skuIds=J_12182560&callback=jQuery9492951&_=1545964109414
+    //          //          val price_original = page_item
+    //          ////            .getElementsByClass("pricing").get(0)
+    //          //          .getElementById("summary-price")
+    //          //          .text()
+    //          //          println(price_original)
+    //          //          val price_current = page_item
+    //          //            .getElementById("jd-price")
+    //          //            .text()
+    //          //            val discount =
+    //          //              page_item.getElementsByClass("p-discount").text()
+    //
+    //          val book = new BookBestseller
+    //          book.id = id
+    //          book.setIsbn(isbn)
+    //          book.setTitle(title)
+    //          book.setYear(year + "")
+    //          book.setMonth(month + "")
+    //          book.setAuthor_andor_translator(author_andor_translator)
+    //          book.setUrl_item(url_item)
+    //          book.setPublishing_date(publishing_date)
+    //          book.setCategory(category)
+    //          //                book.setNum_star(star)
+    //          //                book.setNum_comment(num_comment)
+    //          //                book.setNum_recommend(num_recommend)
+    //          //                book.setPrice_original(price_original)
+    //          //                book.setPrice_current(price_current)
+    //          //                book.setDiscount(discount)
+    //          book.setImage(imageName)
+    //          book.setPublisher(publisher)
+    //          book.setSource("jd")
+    //
+    //          saveBookDangDangBestseller(book)
+    //          id = id + 1
+    //        }
+    //    }
+
+    /**
+     * price from jd
+     */
     
-    for (i <- 1 until list.size) {
-      val id = list(i)._1
-      val url_item = list(i)._2
-      
-      try {
-        val page = Jsoup.parse(new URL(url_item), 15000)
-
-        val li_isbn =
-          page
-            .getElementsContainingOwnText("国际标准书号ISBN")
-            .get(0)
-            .text()
-        val isbn = li_isbn.substring(li_isbn.lastIndexOf("：") + 1)
-        val list_span_lie =
-          page.getElementById("detail-category-path")
-            .getElementsByClass("lie")
-
-        val category = {
-          for (i <- 0 until list_span_lie.size()) yield {
-            list_span_lie
-              .get(i)
-              .text
-              .split(">")
-              .map(_ trim)
-              .mkString("|")
-          }
-        }.mkString(";")
-
-        val book = new BookBestseller
-        book.id = id
-        book.setCategory(category)
-        book.setIsbn(isbn)
-
-        println(id + " " + url_item + " " + category)
-        updateBookInfo(book)
-      } catch {
-        case t: Throwable => 
-          println("error: "+ url_item)
-          t.printStackTrace() 
+    val threadPool = Executors.newFixedThreadPool(20)
+    
+    val items = listBookJDItem
+    
+    try {
+      for (i <- 8 until items.size) {
+        val id = items(i)._1
+        val url_item = items(i)._2
+        threadPool.execute(new JDPriceProcess(id, url_item))
       }
+    } finally {
+      threadPool.shutdown()
     }
   }
+}
+
+class JDPriceProcess(id: Long, url_item: String) extends Runnable with QueryHelper {
+  
+  implicit val formats = DefaultFormats
+
+  def run(): Unit = {
+    
+    val client = HttpClientBuilder.create().build()
+    val id_item = url_item.substring(url_item.lastIndexOf("/") + 1, url_item.lastIndexOf("."))
+    val url_request = s"https://p.3.cn/prices/mgets?type=1&skuIds=J_$id_item&callback=jQuery9492951&_=1545964109414"
+    println(id + " " + url_request)
+    val get = new HttpGet(url_request)
+    val response = client.execute(get).getEntity.getContent
+    val data = independent.parseRequestContent(response)
+    val data_json = data.substring(data.lastIndexOf("{"), data.lastIndexOf("}") + 1)
+    val jsonObj = JsonMethods.parse(data_json)
+    import org.json4s.JsonAST._
+    val price_original = (jsonObj \ "m").extract[String].toDouble
+    val price_current = (jsonObj \ "op").extract[String].toDouble
+    val discount = price_current / price_original * 10
+    val book = new BookBestseller
+    book.id = id
+    book.setPrice_original(price_original)
+    book.setPrice_current(price_current)
+    book.setDiscount(discount)
+
+    updateBookInfoJD(book)
+    println(s"DONE! >>>>>> $id")
+    
+    client.close()
+  }
+
 }

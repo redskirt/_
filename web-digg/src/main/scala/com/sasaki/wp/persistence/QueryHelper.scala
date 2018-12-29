@@ -96,6 +96,12 @@ trait QueryHelper {
       where(o.id === book.id)
         set (o.isbn := book.isbn, o.category := book.category))
   }
+  
+  def updateBookInfoJD(book: BookBestseller) = inTransaction(sf) {
+	  update(TableBook.attr_book_bestseller)(o =>
+	  where(o.id === book.id)
+	  set (o.price_current := book.price_current, o.price_original := book.price_original, o.discount := book.discount))
+  }
 
   def listBookInfo = inTransaction(sf) {
     from(TableBook.attr_book_bestseller) (o =>
@@ -103,6 +109,14 @@ trait QueryHelper {
       select(o.id, o.url_item)
     ).toArray
   }
+  
+  def listBookJDItem = inTransaction(sf) {
+    from(TableBook.attr_book_bestseller)(o =>
+      where(o.source === "jd") //
+        select (o.id, o.url_item)).toList
+  }
+  
+  
   
   def saveBookGrid(o: BookGrid) = inTransaction(sf)(TableBook.attr_book_grid.insert(o))
   
