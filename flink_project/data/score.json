@@ -1,0 +1,9 @@
+{"user":"zhangsan","course":"math","score":100}
+{"user":"lisi","course":"math","score":80}
+{"user":"wangwu","course":"math","score":50}
+{"user":"zhangsan","course":"chinese","score":90}
+{"user":"lisi","course":"chinese","score":90}
+{"user":"wangwu","course":"chinese","score":80}
+{"user":"zhangsan","course":"english","score":70}
+{"user":"lisi","course":"english","score":80}
+{"user":"wangwu","course":"english","score":60}
